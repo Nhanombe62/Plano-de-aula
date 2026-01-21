@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <!-- PWA Meta Tags -->
   <meta name="theme-color" content="#2196f3">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -9,7 +8,6 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
 
-  <!-- Manifest -->
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icon-192x192.png">
   <link rel="apple-touch-icon" href="icon-192x192.png">
@@ -27,14 +25,11 @@
       --cor-perigo: #e74c3c;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: var(--cor-fundo);
       color: var(--cor-texto);
-      transition: background-color 0.3s, color 0.3s;
-      overflow-x: hidden;
-      min-height: 100vh;
     }
 
     .navbar {
@@ -48,7 +43,6 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-      height: 60px;
     }
     .navbar h1 { font-size: 1.3rem; font-weight: 600; }
     .menu-toggle, .btn-phone {
@@ -62,10 +56,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 50%;
-      transition: background 0.2s;
     }
-    .menu-toggle:hover, .btn-phone:hover { background: rgba(255,255,255,0.1); }
 
     .sidebar {
       position: fixed;
@@ -97,7 +88,6 @@
       text-decoration: none;
       color: #333;
       border-bottom: 1px solid #f0f0f0;
-      transition: background 0.2s;
     }
     .sidebar-item:hover { background: #f8f9fa; }
     .sidebar-footer { margin-top: auto; padding: 15px; text-align: center; font-size: 0.8rem; color: #777; }
@@ -116,19 +106,19 @@
 
     .botoes-principais {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 16px;
-      padding: 20px;
-      max-width: 900px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 15px;
+      max-width: 600px;
       margin: 20px auto;
     }
     .btn, .btn-sorte-link {
-      padding: 18px;
+      padding: 16px;
       border: none;
       border-radius: 12px;
       color: white;
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       cursor: pointer;
       display: flex;
       flex-direction: column;
@@ -136,22 +126,20 @@
       justify-content: center;
       gap: 8px;
       box-shadow: var(--sombra);
-      transition: transform 0.2s, box-shadow 0.2s;
       text-decoration: none;
-      min-height: 100px;
+      min-height: 110px;
     }
-    .btn:hover, .btn-sorte-link:hover { 
-      transform: translateY(-3px); 
-      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    }
-    .btn:active, .btn-sorte-link:active { transform: translateY(-1px); }
     .btn-vip      { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); }
     .btn-gratis   { background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); }
     .btn-ingles   { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); }
     .btn-quinzenal{ background: #3498db; }
     .btn-doacoes  { background: #e74c3c; }
     .btn-historico{ background: #2ecc71; }
-    .btn-sorte-link{ background: #9b59b6; display: flex; align-items: center; justify-content: center; }
+    .btn-sorte-link{ 
+      background: #9b59b6; 
+      grid-column: span 2;
+      min-height: 80px;
+    }
 
     .modal {
       display: none;
@@ -164,38 +152,27 @@
       z-index: 3000;
       justify-content: center;
       align-items: center;
-      animation: fadeIn 0.3s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
     }
     .modal-content {
       background: white;
       width: 90%;
-      max-width: 450px;
-      padding: 25px;
-      border-radius: 16px;
+      max-width: 400px;
+      padding: 20px;
+      border-radius: 12px;
       text-align: left;
       position: relative;
-      animation: slideUp 0.3s ease;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    @keyframes slideUp {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
     }
     .modal-content h3 { 
-      margin-bottom: 16px; 
+      margin-bottom: 15px; 
       color: var(--cor-primaria);
       text-align: center;
+      font-size: 1.1rem;
     }
     .modal-content a, .modal-content button {
       display: block;
       width: 100%;
-      margin: 8px 0;
-      padding: 14px;
+      margin: 6px 0;
+      padding: 12px;
       text-decoration: none;
       color: white;
       border: none;
@@ -203,49 +180,44 @@
       font-weight: bold;
       cursor: pointer;
       text-align: center;
-      transition: opacity 0.2s;
+      font-size: 0.9rem;
     }
-    .modal-content a:hover, .modal-content button:hover { opacity: 0.9; }
     .ligar { background: #1976d2; }
     .whatsapp { background: #25d366; }
     .email { background: #e74c3c; }
-    .doar { background: #e67e22; }
     .copiar { 
       background: #95a5a6; 
-      font-size: 0.9rem;
-      padding: 10px;
+      font-size: 0.8rem;
+      padding: 8px;
       margin-top: 5px;
     }
 
     ul.historico-lista { 
       list-style: none; 
-      max-height: 300px; 
+      max-height: 250px; 
       overflow-y: auto; 
       padding: 0; 
-      margin-top: 15px;
+      margin-top: 10px;
     }
     ul.historico-lista li { 
-      padding: 12px 15px; 
+      padding: 10px 12px; 
       border-bottom: 1px solid #eee; 
       display: flex; 
       align-items: center;
       justify-content: space-between;
-      transition: background 0.2s;
+      font-size: 0.9rem;
     }
-    ul.historico-lista li:hover { background: #f8f9fa; }
-    ul.historico-lista li i { color: var(--cor-sucesso); }
+    ul.historico-lista li i { color: var(--cor-sucesso); font-size: 0.9rem; }
 
-    /* Estatísticas */
     .stats {
       background: #f8f9fa;
       border-radius: 8px;
-      padding: 15px;
-      margin: 12px 0;
-      font-size: 0.9rem;
+      padding: 12px;
+      margin: 10px 0;
+      font-size: 0.85rem;
     }
-    .stats p { margin: 8px 0; }
+    .stats p { margin: 6px 0; }
 
-    /* Modo escuro */
     body.dark {
       --cor-fundo: #121212;
       --cor-texto: #e0e0e0;
@@ -261,108 +233,21 @@
       border-color: #444; 
       background: #2d2d2d;
     }
-    body.dark ul.historico-lista li:hover { background: #3d3d3d; }
 
-    /* Instalação PWA */
-    .pwa-install-prompt {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--cor-primaria);
-      color: white;
-      padding: 12px 16px;
-      border-radius: 8px;
-      box-shadow: var(--sombra);
-      z-index: 10000;
-      display: none;
-      animation: slideIn 0.3s ease;
-    }
-    @keyframes slideIn {
-      from { transform: translateX(100%); }
-      to { transform: translateX(0); }
-    }
-    .pwa-install-prompt button {
-      background: white;
-      color: var(--cor-primaria);
-      border: none;
-      padding: 8px 12px;
-      border-radius: 4px;
-      margin-left: 10px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.2s;
-    }
-    .pwa-install-prompt button:hover { background: #f0f0f0; }
-
-    /* Responsividade */
-    @media (max-width: 600px) {
+    @media (min-width: 768px) {
       .botoes-principais {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-        padding: 15px;
-      }
-      .btn, .btn-sorte-link {
-        padding: 14px;
-        min-height: 90px;
-        font-size: 0.85rem;
-      }
-      .navbar h1 { font-size: 1.1rem; }
-      .modal-content {
-        width: 95%;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
         padding: 20px;
+        max-width: 800px;
       }
-    }
-
-    @media (max-width: 400px) {
-      .botoes-principais {
-        grid-template-columns: 1fr;
+      .btn-sorte-link { 
+        grid-column: span 3;
       }
-    }
-
-    /* Indicador de atividade */
-    .loading {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      z-index: 4000;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      color: white;
-    }
-    .loading.active { display: flex; }
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 5px solid rgba(255,255,255,0.3);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spin 1s ease-in-out infinite;
-      margin-bottom: 15px;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
-
-  <!-- Prompt de Instalação PWA -->
-  <div class="pwa-install-prompt" id="pwaInstallPrompt">
-    <span>Instalar App Plano de Aula?</span>
-    <button onclick="installPWA()">Instalar</button>
-    <button onclick="dismissPWA()" style="background: transparent; color: white; margin-left: 5px;">×</button>
-  </div>
-
-  <!-- Loading -->
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <p>Carregando...</p>
-  </div>
 
   <nav class="navbar">
     <h1>Plano de Aula MZ</h1>
@@ -406,13 +291,13 @@
   <div class="overlay" id="overlay"></div>
 
   <div class="botoes-principais">
-    <button class="btn btn-vip" onclick="navegarPara('planovip.html')">
+    <button class="btn btn-vip" onclick="window.location.href='planovip.html'">
       <i class="fas fa-crown"></i> Plano VIP
     </button>
-    <button class="btn btn-gratis" onclick="navegarPara('planogratis.html')">
+    <button class="btn btn-gratis" onclick="window.location.href='planogratis.html'">
       <i class="fas fa-ad"></i> Plano Gratuito
     </button>
-    <button class="btn btn-ingles" onclick="navegarPara('ingles.html')">
+    <button class="btn btn-ingles" onclick="window.location.href='ingles.html'">
       <i class="fas fa-language"></i> Plano de Inglês
     </button>
     <button class="btn btn-quinzenal" onclick="window.open('https://profbenjanuario-4d854.web.app/plano_quinzenal.html', '_blank')">
@@ -424,7 +309,6 @@
     <button class="btn btn-historico" onclick="mostrarHistorico()">
       <i class="fas fa-history"></i> Histórico
     </button>
-    <!-- ✅ Abano da Sorte agora é link para página externa -->
     <a href="abano.html" class="btn-sorte-link">
       <i class="fas fa-dice"></i> Abano da Sorte
     </a>
@@ -452,19 +336,19 @@
       <h3>💰 Apoie o Plano de Aula MZ</h3>
       <p>Escolha o serviço e copie o número para doar:</p>
 
-      <div style="margin:15px 0;">
+      <div style="margin:12px 0;">
         <strong>📱 Emola</strong><br>
         <code id="numEmola">876393961</code>
         <button class="copiar" onclick="copiarNumero('876393961')">Copiar</button>
       </div>
 
-      <div style="margin:15px 0;">
+      <div style="margin:12px 0;">
         <strong>📲 m-Kesh</strong><br>
         <code id="numMKesh">834890828</code>
         <button class="copiar" onclick="copiarNumero('834890828')">Copiar</button>
       </div>
 
-      <div style="margin:15px 0;">
+      <div style="margin:12px 0;">
         <strong>💳 m-Pesa</strong><br>
         <code id="numMPesa">846393962</code>
         <button class="copiar" onclick="copiarNumero('846393962')">Copiar</button>
@@ -483,8 +367,8 @@
       <ul class="historico-lista" id="listaHistorico">
         <!-- preenchido dinamicamente -->
       </ul>
-      <div style="text-align:center; margin-top:15px;">
-        <button onclick="limparHistoricoCompleto()" style="background:#e74c3c; color:white; border:none; padding:10px 15px; border-radius:8px; cursor:pointer;">
+      <div style="text-align:center; margin-top:12px;">
+        <button onclick="limparHistoricoCompleto()" style="background:#e74c3c; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">
           <i class="fas fa-trash"></i> Limpar Todo Histórico
         </button>
       </div>
@@ -501,54 +385,118 @@
         <p><strong>📥 PDFs baixados:</strong> 842</p>
         <p><small>Atualizado em: 23/12</small></p>
       </div>
-      <button class="ligar" onclick="fecharModal('modalEstatisticas')">
-        Fechar
-      </button>
     </div>
   </div>
 
   <script>
-    // ✅ Geração de ID anônimo e persistente por usuário
+    // ✅ Histórico simples por usuário
     function getUsuarioID() {
       let id = localStorage.getItem('usuario_id');
       if (!id) {
-        // Gera UUID v4 simplificado com crypto (seguro e anônimo)
-        id = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-          (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-        );
+        id = 'user_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('usuario_id', id);
       }
       return id;
     }
+    
     const USUARIO_ATUAL = getUsuarioID();
 
-    // Sistema para gerenciar modais abertos
+    // ✅ Sistema para controlar modais/sidebar abertos
     let modalAberto = null;
     let sidebarAberta = false;
 
-    // ✅ Função para navegar com loading
-    function navegarPara(url) {
-      mostrarLoading();
-      setTimeout(() => {
-        window.location.href = url;
-      }, 300);
+    // ✅ Funções básicas
+    function mostrarContatoAdmin() { 
+      fecharSidebar(); // Fecha sidebar se aberta
+      abrirModal('modalAdmin');
+    }
+    
+    function mostrarDoacoes() { 
+      fecharSidebar(); // Fecha sidebar se aberta
+      abrirModal('modalDoacoes');
+    }
+    
+    function mostrarEstatisticas() { 
+      fecharSidebar(); // Fecha sidebar se aberta
+      abrirModal('modalEstatisticas');
+    }
+    
+    function abrirModal(id) {
+      // Fecha modal anterior se existir
+      if (modalAberto) {
+        document.getElementById(modalAberto).style.display = 'none';
+      }
+      
+      document.getElementById(id).style.display = 'flex';
+      modalAberto = id;
+    }
+    
+    function fecharModal() { 
+      if (modalAberto) {
+        document.getElementById(modalAberto).style.display = 'none';
+        modalAberto = null;
+      }
     }
 
-    // ✅ Função para mostrar/ocultar loading
-    function mostrarLoading() {
-      document.getElementById('loading').classList.add('active');
+    function abrirSidebar() {
+      fecharModal(); // Fecha modal se aberto
+      document.getElementById('sidebar').classList.add('active');
+      document.getElementById('overlay').classList.add('active');
+      sidebarAberta = true;
     }
-    function esconderLoading() {
-      document.getElementById('loading').classList.remove('active');
+    
+    function fecharSidebar() { 
+      document.getElementById('sidebar').classList.remove('active');
+      document.getElementById('overlay').classList.remove('active');
+      sidebarAberta = false;
     }
 
-    // ✅ Função para limpar histórico antigo (acima de 15 dias)
+    // ✅ Histórico funcional
+    function mostrarHistorico() {
+      fecharSidebar(); // Fecha sidebar se aberta
+      abrirModal('modalHistorico');
+      carregarHistorico();
+    }
+
+    function carregarHistorico() {
+      // Limpa itens com mais de 15 dias
+      limparHistoricoAntigo();
+      
+      const historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
+      const lista = document.getElementById('listaHistorico');
+      
+      if (historico.length === 0) {
+        lista.innerHTML = '<li style="text-align:center; color:#888; padding:12px; font-size:0.85rem;">Nenhum plano gerado ainda.</li>';
+        return;
+      }
+      
+      // Ordena do mais recente para o mais antigo
+      historico.sort((a, b) => new Date(b.data) - new Date(a.data));
+      
+      lista.innerHTML = historico.map((item, i) => {
+        const data = new Date(item.data);
+        const dataFormatada = `${data.getDate().toString().padStart(2, '0')}/${(data.getMonth() + 1).toString().padStart(2, '0')}`;
+        
+        return `
+          <li>
+            <i class="fas fa-file-pdf"></i> 
+            <span style="flex-grow:1; margin-left:8px; font-size:0.85rem;">${item.nome}</span>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <button onclick="baixarPDF('${item.nome}', ${i})" style="background:#3498db; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.75rem;">
+                Baixar
+              </button>
+              <small style="color:#888; font-size:0.75rem;">${dataFormatada}</small>
+            </div>
+          </li>
+        `;
+      }).join('');
+    }
+
     function limparHistoricoAntigo() {
       let historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
       const agora = new Date();
       const quinzeDiasAtras = new Date(agora.getTime() - (15 * 24 * 60 * 60 * 1000));
       
-      // Filtrar apenas os itens com data maior que quinzeDiasAtras
       historico = historico.filter(item => {
         const dataItem = new Date(item.data);
         return dataItem > quinzeDiasAtras;
@@ -557,108 +505,35 @@
       localStorage.setItem(`historico_${USUARIO_ATUAL}`, JSON.stringify(historico));
     }
 
-    // ✅ Funções para abrir modais com controle de estado
-    function mostrarContatoAdmin() { 
-      abrirModal('modalAdmin');
-    }
-    
-    function mostrarDoacoes() { 
-      abrirModal('modalDoacoes');
-    }
-    
-    function mostrarEstatisticas() { 
-      abrirModal('modalEstatisticas');
-    }
-    
-    function abrirModal(id) {
-      // Fecha modal anterior se existir
-      if (modalAberto) {
-        fecharModal(modalAberto);
-      }
-      
-      document.getElementById(id).style.display = 'flex';
-      modalAberto = id;
-      
-      // Adiciona estado ao histórico para o botão voltar funcionar
-      history.pushState({ modal: id, sidebar: false }, '');
-    }
-    
-    function fecharModal(id) { 
-      if (id) {
-        document.getElementById(id).style.display = 'none';
-      } else if (modalAberto) {
-        document.getElementById(modalAberto).style.display = 'none';
-      }
-      modalAberto = null;
-    }
-
-    // ✅ Histórico: carrega ao abrir
-    function mostrarHistorico() {
-      abrirModal('modalHistorico');
-      carregarHistorico();
-    }
-
-    function carregarHistorico() {
-      // Primeiro limpa itens antigos
-      limparHistoricoAntigo();
-      
+    function baixarPDF(nome, index) {
       const historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
-      const lista = document.getElementById('listaHistorico');
+      const item = historico[index];
       
-      // Ordenar por data (do mais recente para o mais antigo)
-      historico.sort((a, b) => new Date(b.data) - new Date(a.data));
+      if (!item) return;
       
-      if (historico.length === 0) {
-        lista.innerHTML = '<li style="text-align:center; color:#888; padding:20px;">Nenhum plano gerado nos últimos 15 dias.</li>';
-        return;
-      }
+      // Simula download do PDF
+      const link = document.createElement('a');
+      link.href = '#';
+      link.download = nome;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       
-      lista.innerHTML = historico.map((item, i) => {
-        const dataObj = new Date(item.data);
-        // Formato: DD/MM (sem ano)
-        const dataFormatada = `${dataObj.getDate().toString().padStart(2, '0')}/${(dataObj.getMonth() + 1).toString().padStart(2, '0')}`;
-        
-        // Verificar se o item expirará em breve (menos de 3 dias)
-        const dataItem = new Date(item.data);
-        const agora = new Date();
-        const tresDias = 3 * 24 * 60 * 60 * 1000;
-        const expiraEm = new Date(dataItem.getTime() + (15 * 24 * 60 * 60 * 1000));
-        const tempoRestante = expiraEm - agora;
-        const diasRestantes = Math.ceil(tempoRestante / (24 * 60 * 60 * 1000));
-        const aviso = diasRestantes < 3 && diasRestantes > 0 ? 
-          `<small style="color:#e74c3c; font-size:0.7rem;">(Expira em ${diasRestantes} dias)</small>` : '';
-        
-        return `
-          <li>
-            <i class="fas fa-file-pdf"></i> 
-            <div style="flex-grow:1; margin-left:10px;">
-              <div style="font-weight:500;">${item.nome}</div>
-              <small style="color:#888; display:block;">${dataFormatada} ${aviso}</small>
-            </div>
-            <div style="display:flex; gap:5px;">
-              <a href="#" onclick="baixarPDF('${item.nome}', ${i}); return false;" style="background:#3498db; color:white; padding:6px 12px; border-radius:4px; text-decoration:none; font-size:0.8rem;">
-                Baixar
-              </a>
-              <button onclick="removerDoHistorico(${i})" style="background:#e74c3c; color:white; border:none; border-radius:4px; padding:6px 10px; cursor:pointer; font-size:0.8rem;" title="Remover">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </li>
-        `;
-      }).join('');
+      alert(`PDF "${nome}" baixado com sucesso!`);
     }
 
-    // ✅ Função para remover item específico do histórico
-    function removerDoHistorico(index) {
-      if (confirm('Tem certeza que deseja remover este item do histórico?')) {
-        let historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
-        historico.splice(index, 1);
-        localStorage.setItem(`historico_${USUARIO_ATUAL}`, JSON.stringify(historico));
-        carregarHistorico();
-      }
+    // ✅ Esta função deve ser chamada nas outras páginas quando um PDF é gerado
+    function salvarNoHistorico(nomeDoPlano) {
+      let historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
+      
+      historico.push({
+        nome: nomeDoPlano,
+        data: new Date().toISOString()
+      });
+      
+      localStorage.setItem(`historico_${USUARIO_ATUAL}`, JSON.stringify(historico));
     }
 
-    // ✅ Limpar todo o histórico
     function limparHistoricoCompleto() {
       if (confirm('Tem certeza que deseja limpar todo o histórico? Esta ação não pode ser desfeita.')) {
         localStorage.removeItem(`historico_${USUARIO_ATUAL}`);
@@ -666,75 +541,23 @@
       }
     }
 
-    // ✅ Baixar PDF
-    function baixarPDF(nome, index) {
-      const historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
-      const item = historico[index];
-      if (!item) return;
-
-      const blob = new Blob([
-        `Plano de Aula Moçambicano — ${nome}\n`,
-        `Gerado em: ${new Date(item.data).toLocaleString('pt-MZ')}\n`,
-        `\nConteúdo gerado por: Plano de Aula MZ\n`,
-        `Usuário ID: ${USUARIO_ATUAL.substring(0,8)}...`
-      ], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = nome.replace(/[^a-z0-9]/gi, '_') + '.pdf';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      alert(`📥 ${nome} baixado com sucesso.`);
-    }
-
-    // ✅ Função para salvar no histórico
-    function salvarNoHistorico(nome) {
-      let historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
-      historico.push({ 
-        nome, 
-        data: new Date().toISOString(),
-        usuario: USUARIO_ATUAL.substring(0,8) + '...'
-      });
-      localStorage.setItem(`historico_${USUARIO_ATUAL}`, JSON.stringify(historico));
-      
-      // Limpar automaticamente itens antigos
-      limparHistoricoAntigo();
-    }
-
     // ✅ Dark Mode
     document.getElementById('toggleDarkMode').addEventListener('change', function() {
       document.body.classList.toggle('dark', this.checked);
       localStorage.setItem('temaEscuro', this.checked);
     });
+    
     if (localStorage.getItem('temaEscuro') === 'true') {
       document.body.classList.add('dark');
       document.getElementById('toggleDarkMode').checked = true;
     }
 
     // ✅ Menu Lateral
-    function abrirSidebar() {
-      document.getElementById('sidebar').classList.add('active');
-      document.getElementById('overlay').classList.add('active');
-      sidebarAberta = true;
-      
-      // Adiciona estado ao histórico para o botão voltar funcionar
-      history.pushState({ modal: null, sidebar: true }, '');
-    }
-    
-    function fecharSidebar() {
-      document.getElementById('sidebar').classList.remove('active');
-      document.getElementById('overlay').classList.remove('active');
-      sidebarAberta = false;
-    }
-    
     document.getElementById('menuToggle').addEventListener('click', abrirSidebar);
+    
     document.getElementById('overlay').addEventListener('click', () => {
       fecharSidebar();
-      if (modalAberto) {
-        fecharModal(modalAberto);
-      }
+      fecharModal();
     });
 
     // ✅ Fechar modais ao clicar fora
@@ -746,117 +569,66 @@
       });
     });
 
-    // ✅ Gerenciar botão voltar do navegador/celular
-    window.addEventListener('popstate', (e) => {
-      // Se tem um modal aberto, fecha ele
-      if (modalAberto) {
-        fecharModal(modalAberto);
-      }
-      
-      // Se a sidebar está aberta, fecha ela
-      if (sidebarAberta) {
-        fecharSidebar();
-      }
+    // ✅ Sistema de botão voltar do celular
+    // Impede que o botão voltar feche o app
+    window.addEventListener('popstate', function(event) {
+      // Não faz nada - impede comportamento padrão de fechar app
     });
 
-    // ✅ Também fecha modais com Escape
+    // Adiciona estado inicial para impedir que o primeiro back feche o app
+    if (window.history && window.history.pushState) {
+      window.history.pushState({page: 'main'}, '', '');
+      
+      window.addEventListener('popstate', function(e) {
+        // Se tem modal aberto, fecha ele
+        if (modalAberto) {
+          fecharModal();
+          e.preventDefault();
+          return;
+        }
+        
+        // Se tem sidebar aberta, fecha ela
+        if (sidebarAberta) {
+          fecharSidebar();
+          e.preventDefault();
+          return;
+        }
+        
+        // Se não tem nada aberto, adiciona estado novamente para impedir fechar app
+        window.history.pushState({page: 'main'}, '', '');
+      });
+    }
+
+    // ✅ Copiar número
+    function copiarNumero(numero) {
+      navigator.clipboard.writeText(numero).then(() => {
+        alert(`✅ Número ${numero} copiado!`);
+      }).catch(() => {
+        // Fallback para navegadores antigos
+        const input = document.createElement('input');
+        input.value = numero;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        alert(`✅ Número ${numero} copiado!`);
+      });
+    }
+
+    // ✅ Fechar com ESC
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (modalAberto) {
-          fecharModal(modalAberto);
-        }
-        if (sidebarAberta) {
+          fecharModal();
+        } else if (sidebarAberta) {
           fecharSidebar();
         }
       }
     });
 
-    // ✅ Copiar número
-    function copiarNumero(numero) {
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(numero).then(() => {
-          alert(`✅ ${numero} copiado!`);
-        }).catch(() => fallbackCopiar(numero));
-      } else {
-        fallbackCopiar(numero);
-      }
-    }
-    
-    function fallbackCopiar(numero) {
-      const el = document.createElement('textarea');
-      el.value = numero;
-      el.style.position = 'absolute';
-      el.style.opacity = '0';
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
-      alert(`✅ ${numero} copiado!`);
-    }
-
-    // ✅ PWA
-    let deferredPrompt;
-    const pwaInstallPrompt = document.getElementById('pwaInstallPrompt');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      setTimeout(() => {
-        if (deferredPrompt && !isAppInstalled()) {
-          pwaInstallPrompt.style.display = 'block';
-        }
-      }, 5000);
-    });
-
-    window.addEventListener('appinstalled', () => {
-      deferredPrompt = null;
-      pwaInstallPrompt.style.display = 'none';
-    });
-
-    function installPWA() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-          deferredPrompt = null;
-          pwaInstallPrompt.style.display = 'none';
-        });
-      }
-    }
-
-    function dismissPWA() {
-      pwaInstallPrompt.style.display = 'none';
-    }
-
-    function isAppInstalled() {
-      return window.matchMedia('(display-mode: standalone)').matches || 
-             navigator.standalone ||
-             document.referrer.includes('android-app://');
-    }
-
-    // ✅ Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(registration => {
-            console.log('Service Worker registrado com sucesso:', registration.scope);
-          })
-          .catch(err => {
-            console.warn('Falha ao registrar Service Worker:', err);
-          });
-      });
-      
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        window.location.reload();
-      });
-    }
-
     // ✅ Inicialização
     window.addEventListener('load', () => {
-      esconderLoading();
       limparHistoricoAntigo();
-      
-      // Adiciona estado inicial ao histórico
-      history.replaceState({ modal: null, sidebar: false }, '');
     });
   </script>
 </body>
