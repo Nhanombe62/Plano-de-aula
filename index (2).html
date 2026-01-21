@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#2196f3">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Plano de Aula">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  <!-- Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192x192.png">
+  <link rel="apple-touch-icon" href="icon-192x192.png">
+  
+  <meta charset="UTF-8" />
+  <title>Plano de Aula Moçambicano</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css " />
+  <style>
+    :root {
+      --cor-primaria: #2b5dab;
+      --cor-fundo: #f8f9fa;
+      --cor-texto: #333;
+      --sombra: 0 4px 12px rgba(0,0,0,0.1);
+      --cor-sucesso: #2ecc71;
+      --cor-perigo: #e74c3c;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--cor-fundo);
+      color: var(--cor-texto);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: var(--cor-primaria);
+      color: white;
+      box-shadow: var(--sombra);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .navbar h1 { font-size: 1.3rem; font-weight: 600; }
+    .menu-toggle, .btn-phone {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -300px;
+      width: 280px;
+      height: 100vh;
+      background: white;
+      box-shadow: var(--sombra);
+      padding: 20px 0;
+      transition: left 0.3s ease;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar.active { left: 0; }
+    .sidebar-header {
+      padding: 15px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: var(--cor-primaria);
+      font-size: 0.9rem;
+    }
+    .sidebar-item {
+      display: block;
+      padding: 12px 20px;
+      text-decoration: none;
+      color: #333;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .sidebar-item:hover { background: #f8f9fa; }
+    .sidebar-footer { margin-top: auto; padding: 15px; text-align: center; font-size: 0.8rem; color: #777; }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1500;
+    }
+    .overlay.active { display: block; }
+
+    .botoes-principais {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+      padding: 20px;
+      max-width: 900px;
+      margin: 20px auto;
+    }
+    .btn, .btn-sorte-link {
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: var(--sombra);
+      transition: transform 0.2s;
+      text-decoration: none;
+    }
+    .btn:hover, .btn-sorte-link:hover { transform: translateY(-3px); }
+    .btn-vip      { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); }
+    .btn-gratis   { background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); }
+    .btn-caderno  { background: #ff9f43; }
+    .btn-quinzenal{ background: #3498db; }
+    .btn-doacoes  { background: #e74c3c; }
+    .btn-historico{ background: #2ecc71; }
+    .btn-sorte-link{ background: #9b59b6; display: flex; align-items: center; justify-content: center; }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 3000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      width: 90%;
+      max-width: 450px;
+      padding: 25px;
+      border-radius: 16px;
+      text-align: left;
+      position: relative;
+    }
+    .close-modal {
+      position: absolute;
+      top: 12px;
+      right: 15px;
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: #888;
+    }
+    .modal-content h3 { margin-bottom: 16px; color: var(--cor-primaria); }
+    .modal-content a, .modal-content button {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 12px;
+      text-decoration: none;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+    }
+    .ligar { background: #1976d2; }
+    .whatsapp { background: #25d366; }
+    .email { background: #e74c3c; }
+    .doar { background: #e67e22; }
+    .copiar { background: #95a5a6; font-size: 0.9rem; }
+
+    ul.historico-lista { list-style: none; max-height: 200px; overflow-y: auto; padding: 0; }
+    ul.historico-lista li { padding: 8px 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    ul.historico-lista li i { color: var(--cor-sucesso); }
+
+    /* Estatísticas */
+    .stats {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 12px 0;
+      font-size: 0.9rem;
+    }
+    .stats p { margin: 6px 0; }
+
+    /* Modo escuro */
+    body.dark {
+      --cor-fundo: #121212;
+      --cor-texto: #e0e0e0;
+      background-color: var(--cor-fundo);
+      color: var(--cor-texto);
+    }
+    body.dark .navbar { background: #1a1a1a; }
+    body.dark .sidebar,
+    body.dark .modal-content { background: #1e1e1e; color: #e0e0e0; }
+    body.dark .sidebar-item,
+    body.dark .stats { color: #e0e0e0; background: #2d2d2d; }
+    body.dark ul.historico-lista li { border-color: #444; }
+
+    /* Instalação PWA */
+    .pwa-install-prompt {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--cor-primaria);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      box-shadow: var(--sombra);
+      z-index: 10000;
+      display: none;
+    }
+    .pwa-install-prompt button {
+      background: white;
+      color: var(--cor-primaria);
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin-left: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Prompt de Instalação PWA -->
+  <div class="pwa-install-prompt" id="pwaInstallPrompt">
+    <span>Instalar App Plano de Aula?</span>
+    <button onclick="installPWA()">Instalar</button>
+    <button onclick="dismissPWA()" style="background: transparent; color: white; margin-left: 5px;">×</button>
+  </div>
+
+  <nav class="navbar">
+    <h1>Plano de Aula MZ</h1>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button class="btn-phone" onclick="mostrarContatoAdmin()" title="Falar com Equipa Técnica">
+        <i class="fas fa-phone"></i>
+      </button>
+      <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </nav>
+
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      Desenvolvido pelo Prof: Edmilson
+    </div>
+    <a href="#" class="sidebar-item" onclick="mostrarEstatisticas()">
+      <i class="fas fa-cog"></i> Definições
+    </a>
+    <div class="sidebar-item" style="display:flex; align-items:center; justify-content:space-between;">
+      <span style="display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-moon"></i> Modo Escuro
+      </span>
+      <label style="position:relative; display:inline-block; width:40px; height:20px; background:#ccc; border-radius:10px; cursor:pointer;">
+        <input type="checkbox" id="toggleDarkMode" style="opacity:0; width:0; height:0;">
+        <span style="position:absolute; top:2px; left:2px; width:16px; height:16px; background:white; border-radius:50%; transition:0.3s;"></span>
+      </label>
+    </div>
+    <a href="termos.html" class="sidebar-item">
+      <i class="fas fa-shield-alt"></i> Termos e Políticas
+    </a>
+    <a href="sobre.html" class="sidebar-item">
+      <i class="fas fa-info-circle"></i> Sobre
+    </a>
+    <div class="sidebar-footer">
+      © 2025 | EB 4 de Outubro
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="botoes-principais">
+    <button class="btn btn-vip" onclick="window.location.href='planovip.html'">
+      <i class="fas fa-crown"></i> Plano VIP
+    </button>
+    <button class="btn btn-gratis" onclick="window.location.href='planogratis.html'">
+      <i class="fas fa-ad"></i> Plano Gratuito
+    </button>
+    <button class="btn btn-caderno" onclick="mostrarOpcoesConta()">
+      <i class="fas fa-book"></i> Caderno
+    </button>
+    <button class="btn btn-quinzenal" onclick="window.open('https://profbenjanuario-4d854.web.app/plano_quinzenal.html  ', '_blank')">
+      <i class="fas fa-calendar-alt"></i> Plano Quinzenal
+    </button>
+    <button class="btn btn-doacoes" onclick="mostrarDoacoes()">
+      <i class="fas fa-heart"></i> Doações
+    </button>
+    <button class="btn btn-historico" onclick="mostrarHistorico()">
+      <i class="fas fa-history"></i> Histórico
+    </button>
+    <!-- ✅ Abano da Sorte agora é link para página externa -->
+    <a href="abano.html" class="btn-sorte-link">
+      <i class="fas fa-dice"></i> Abano da Sorte
+    </a>
+  </div>
+
+  <!-- Modal: Contato Admin -->
+  <div class="modal" id="modalAdmin">
+    <div class="modal-content">
+      <button class="close-modal" onclick="fecharModal('modalAdmin')">&times;</button>
+      <h3>Falar com a Equipa Técnica</h3>
+      <a href="tel:+258876393961" class="ligar">
+        <i class="fas fa-phone"></i> Ligar (87 639 3961)
+      </a>
+      <a href="https://wa.me/258876393961 " target="_blank" class="whatsapp">
+        <i class="fab fa-whatsapp"></i> WhatsApp
+      </a>
+      <a href="mailto:edmilsonnhanombe62@gmail.com" class="email">
+        <i class="fas fa-envelope"></i> Email
+      </a>
+    </div>
+  </div>
+
+  <!-- Modal: Caderno -->
+  <div class="modal" id="modalConta">
+    <div class="modal-content">
+      <button class="close-modal" onclick="fecharModal('modalConta')">&times;</button>
+      <h3>Caderno de Notas</h3>
+      <button class="doar" onclick="alert('🔐 Criar conta em breve!')">
+        <i class="fas fa-user-plus"></i> Criar Conta
+      </button>
+      <button class="ligar" onclick="alert('🔐 Login institucional em preparação.')">
+        <i class="fas fa-sign-in-alt"></i> Fazer Login
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal: Doações -->
+  <div class="modal" id="modalDoacoes">
+    <div class="modal-content">
+      <button class="close-modal" onclick="fecharModal('modalDoacoes')">&times;</button>
+      <h3>💰 Apoie o Plano de Aula MZ</h3>
+      <p>Escolha o serviço e copie o número para doar:</p>
+
+      <div style="margin:15px 0;">
+        <strong>📱 Emola</strong><br>
+        <code id="numEmola">876393961</code>
+        <button class="copiar" onclick="copiarNumero('876393961')">Copiar</button>
+      </div>
+
+      <div style="margin:15px 0;">
+        <strong>📲 m-Kesh</strong><br>
+        <code id="numMKesh">834890828</code>
+        <button class="copiar" onclick="copiarNumero('834890828')">Copiar</button>
+      </div>
+
+      <div style="margin:15px 0;">
+        <strong>💳 m-Pesa</strong><br>
+        <code id="numMPesa">846393962</code>
+        <button class="copiar" onclick="copiarNumero('846393962')">Copiar</button>
+      </div>
+
+      <small style="display:block; text-align:center; margin-top:10px; color:#777;">
+        Após a doação, envie comprovativo por WhatsApp.
+      </small>
+    </div>
+  </div>
+
+  <!-- Modal: Histórico (SEM roda da sorte aqui) -->
+  <div class="modal" id="modalHistorico">
+    <div class="modal-content">
+      <button class="close-modal" onclick="fecharModal('modalHistorico')">&times;</button>
+      <h3>📁 Seu Histórico</h3>
+      <select id="mesHistorico">
+        <option>Dezembro 2025</option>
+        <option>Novembro 2025</option>
+        <option>Outubro 2025</option>
+      </select>
+      <ul class="historico-lista" id="listaHistorico">
+        <!-- preenchido dinamicamente -->
+      </ul>
+    </div>
+  </div>
+
+  <!-- Modal: Estatísticas -->
+  <div class="modal" id="modalEstatisticas">
+    <div class="modal-content">
+      <button class="close-modal" onclick="fecharModal('modalEstatisticas')">&times;</button>
+      <h3>📊 Estatísticas do Sistema</h3>
+      <div class="stats">
+        <p><strong>👥 Total de acessos:</strong> 2 847</p>
+        <p><strong>📝 Planos gerados:</strong> 1 219</p>
+        <p><strong>📥 PDFs baixados:</strong> 842</p>
+        <p><small>Dados atualizados em: 23/12/2025</small></p>
+      </div>
+      <button class="ligar" onclick="fecharModal('modalEstatisticas')">
+        Fechar
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ✅ Geração de ID anônimo e persistente por usuário
+    function getUsuarioID() {
+      let id = localStorage.getItem('usuario_id');
+      if (!id) {
+        // Gera UUID v4 simplificado com crypto (seguro e anônimo)
+        id = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+          (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+        localStorage.setItem('usuario_id', id);
+      }
+      return id;
+    }
+    const USUARIO_ATUAL = getUsuarioID(); // ✅ único por dispositivo
+
+    // ========== FUNCIONALIDADES EXISTENTES (adaptadas para USUARIO_ATUAL dinâmico) ==========
+    function mostrarContatoAdmin() { document.getElementById('modalAdmin').style.display = 'flex'; }
+    function mostrarOpcoesConta() { document.getElementById('modalConta').style.display = 'flex'; }
+    function mostrarDoacoes() { document.getElementById('modalDoacoes').style.display = 'flex'; }
+    function mostrarEstatisticas() { document.getElementById('modalEstatisticas').style.display = 'flex'; }
+    function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    // Histórico: carrega ao abrir
+    function mostrarHistorico() {
+      const modal = document.getElementById('modalHistorico');
+      modal.style.display = 'flex';
+      carregarHistorico();
+    }
+
+    function carregarHistorico() {
+      const historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
+      const lista = document.getElementById('listaHistorico');
+      if (historico.length === 0) {
+        lista.innerHTML = '<li style="text-align:center; color:#888;">Nenhum plano gerado ainda.</li>';
+        return;
+      }
+      lista.innerHTML = historico.map((item, i) => {
+        const data = new Date(item.data).toLocaleDateString('pt-MZ');
+        return `
+          <li>
+            <i class="fas fa-file-pdf"></i> ${item.nome}
+            <a href="#" onclick="baixarPDF('${item.nome}', ${i}); return false;" class="copiar" style="background:#3498db; width:auto; padding:4px 8px;">Baixar</a>
+            <small style="color:#888;">${data}</small>
+          </li>
+        `;
+      }).join('');
+    }
+
+    // Baixar PDF e registrar no histórico individual
+    function baixarPDF(nome, index) {
+      const historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
+      const item = historico[index];
+      if (!item) return;
+
+      const blob = new Blob([
+        `Plano de Aula Moçambicano — ${nome}\n`,
+        `Gerado em: ${new Date(item.data).toLocaleString('pt-MZ')}\n`,
+        `\nConteúdo gerado por: Plano de Aula MZ\n`,
+        `Usuário ID: ${USUARIO_ATUAL.substring(0,8)}...`
+      ], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nome;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      alert(`📥 ${nome} baixado com sucesso.`);
+    }
+
+    // Garantir que novos PDFs sejam salvos no histórico (exemplo de uso)
+    // Exemplo: usar assim ao gerar um novo plano:
+    // salvarNoHistorico('Plano_9a_CI_23-12.pdf');
+
+    function salvarNoHistorico(nome) {
+      let historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
+      historico.push({ nome, data: new Date().toISOString() });
+      localStorage.setItem(`historico_${USUARIO_ATUAL}`, JSON.stringify(historico));
+    }
+
+    // Dark Mode
+    document.getElementById('toggleDarkMode').addEventListener('change', function() {
+      document.body.classList.toggle('dark', this.checked);
+      localStorage.setItem('temaEscuro', this.checked);
+    });
+    if (localStorage.getItem('temaEscuro') === 'true') {
+      document.body.classList.add('dark');
+      document.getElementById('toggleDarkMode').checked = true;
+    }
+
+    // Menu Lateral
+    document.getElementById('menuToggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.add('active');
+      document.getElementById('overlay').classList.add('active');
+    });
+    document.getElementById('overlay').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('active');
+      document.getElementById('overlay').classList.remove('active');
+    });
+
+    // Copiar número
+    function copiarNumero(numero) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(numero).then(() => {
+          alert(`✅ ${numero} copiado!`);
+        }).catch(fallbackCopiar);
+      } else {
+        fallbackCopiar(numero);
+      }
+    }
+    function fallbackCopiar(numero) {
+      const el = document.createElement('textarea');
+      el.value = numero;
+      el.style.position = 'absolute';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      alert(`✅ ${numero} copiado!`);
+    }
+
+    // Atalho de teclado
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        ['modalAdmin','modalConta','modalDoacoes','modalHistorico','modalEstatisticas']
+          .forEach(id => fecharModal(id));
+      }
+    });
+
+    // PWA
+    let deferredPrompt;
+    const pwaInstallPrompt = document.getElementById('pwaInstallPrompt');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      setTimeout(() => {
+        if (deferredPrompt && !isAppInstalled()) {
+          pwaInstallPrompt.style.display = 'block';
+        }
+      }, 5000);
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      pwaInstallPrompt.style.display = 'none';
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+          pwaInstallPrompt.style.display = 'none';
+        });
+      }
+    }
+
+    function dismissPWA() {
+      pwaInstallPrompt.style.display = 'none';
+    }
+
+    function isAppInstalled() {
+      return window.matchMedia('(display-mode: standalone)').matches || 
+             navigator.standalone ||
+             document.referrer.includes('android-app://');
+    }
+
+    // Service Worker (atualização automática)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js').catch(err => console.warn('SW:', err));
+      navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
+    }
+  </script>
+</body>
+</html>
