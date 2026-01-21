@@ -1,1 +1,8 @@
-Benja
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.netlify.planodeaulamozv2.twa",
+        "sha256_cert_fingerprints": ["78:07:ED:FF:DE:EF:C1:EB:EB:BE:D7:F3:C6:A3:9E:83:CC:90:DE:68:F4:40:97:C4:C9:59:0C:19:0B:4B:76:76"]
+      }
+    }]
