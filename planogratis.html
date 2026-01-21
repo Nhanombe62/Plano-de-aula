@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plano de Aula Moçambicano</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    body{font-family:Times New Roman,Times,serif;font-size:12px;background:#eef2f5;padding:20px;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+    html,body{-webkit-touch-callout:none;-webkit-user-drag:none}
+    .container{max-width:1200px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 0 10px rgba(0,0,0,.1)}
+    h1,h2,h3{text-align:center;color:#2b5dab}
+    label{font-weight:700;margin-top:12px;display:block}
+    input[type=text],input[type=password]{width:100%;padding:10px;margin-top:5px;border:1px solid #ccc;border-radius:6px;font-size:12px;font-family:Times New Roman,Times,serif}
+    button{margin-top:15px;padding:10px 18px;border:none;border-radius:6px;cursor:pointer;font-size:15px}
+    .btn-azul{background:#2b5dab;color:#fff}
+    .botoes{text-align:center}
+    table{width:100%;border-collapse:collapse;margin-top:20px}
+    th,td{border:1px solid #333;padding:4px;vertical-align:top}
+    th{background:#e0e7ff;text-align:center}
+    .align-right{text-align:right}
+    .quadro-moral{font-family:Times New Roman,Times,serif;font-size:12pt;background:#fff;padding:15px;border:1px dashed #bba100;border-radius:8px;margin-top:30px;page-break-before:always}
+    .rodape{text-align:center;font-style:italic;margin-top:30px;color:#555}
+    textarea{width:100%;min-height:150px;font-family:Times New Roman,Times,serif;font-size:12px;margin-top:10px;padding:10px}
+    .preliminares{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-top:20px}
+    .loading{display:none;text-align:center;margin:15px 0;font-weight:700;color:#2b5dab}
+    .loading::after{content:" ⏳";animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @media print{.no-print{display:none!important}}
+
+    /* Overlay de contagem regressiva */
+    .overlay {
+      position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:999999;display:none;
+      align-items:center;justify-content:center;text-align:center;padding:20px;
+      font-family:Arial,Helvetica,sans-serif;color:#fff;
+    }
+    .overlay .box {
+      background:#000;padding:30px 50px;border-radius:12px;text-align:center;
+      font-size:24px;font-weight:bold;
+    }
+    .overlay .counter {
+      font-size:64px;margin:20px 0;color:#4fc3f7;
+      text-shadow:0 0 10px rgba(79,195,247,0.5);
+    }
+  </style>
+</head>
+<body oncontextmenu="return false">
+  <div class="container" id="main-container">
+    <h1>Plano de Aula Moçambicano</h1>
+    <h3 style="margin-top:-10px;color:#444;">Por Edmilson Bartolomeu Nhanombe</h3>
+
+    <label>Nome da Escola:</label>
+    <input type="text" id="escola" placeholder="Somente letras" maxlength="60" />
+
+    <label>Data:</label>
+    <input type="text" id="data" placeholder="dd/mm/aaaa (apenas letras e números e / )" maxlength="20"/>
+
+    <label>Nome do Professor:</label>
+    <input type="text" id="professor" placeholder="Somente letras" maxlength="60" />
+
+    <label>Disciplina:</label>
+    <input type="text" id="disciplina" placeholder="Somente letras" maxlength="60" />
+
+    <label>Classe:</label>
+    <input type="text" id="classe" placeholder="Máx 2 números" maxlength="2" />
+
+    <label>Unidade Temática:</label>
+    <input type="text" id="unidade" placeholder="Letras e números" maxlength="80" />
+
+    <label>Tema da Aula:</label>
+    <input type="text" id="tema" placeholder="Letras e símbolos matemáticos" maxlength="120" />
+
+    <div class="preliminares">
+      <div>
+        <label>Turma:</label>
+        <input type="text" id="turma" placeholder="1 letra" maxlength="1" />
+      </div>
+      <div>
+        <label>Nº de Alunos:</label>
+        <input type="text" id="numAlunos" class="align-right" placeholder="Somente números" maxlength="4" />
+      </div>
+      <div>
+        <label>Período:</label>
+        <input type="text" id="periodo" placeholder="Somente letras" maxlength="30" />
+      </div>
+      <div>
+        <label>Nº de Lição:</label>
+        <input type="text" id="numLicao" placeholder="Somente números" maxlength="4" />
+      </div>
+      <div>
+        <label>Tipo de Aula:</label>
+        <input type="text" id="tipoAula" placeholder="Somente letras" maxlength="40" />
+      </div>
+      <div>
+        <label>Duração:</label>
+        <input type="text" id="duracao" value="45 minutos" readonly />
+      </div>
+    </div>
+
+    <div class="botoes">
+      <button class="btn-azul" onclick="gerarPlano()">📘 Gerar Plano</button>
+      <button class="btn-azul" onclick="baixarPDFComAnuncio()">📥 Gerar PDF</button>
+    </div>
+
+    <div id="planoPDF"></div>
+    <div id="quadroPDF"></div>
+
+    <div class="no-print">
+      <button class="btn-azul" onclick="document.getElementById('inputFotoLivro').click()">📷 Carregar Foto do Livro</button>
+      <input type="file" id="inputFotoLivro" accept="image/*" style="display:none;" onchange="exibirFotoLivro(event)">
+      <div id="previewFotoLivro" style="margin-top:10px; text-align:center;"></div>
+    </div>
+
+    <div class="rodape">
+      Graduado no IFP de Morrumbala <br/>
+      <button class="btn-azul" onclick="alert('Em caso de dificuldades contacte: 876393961 ou 834890828')">Contactar Suporte</button>
+      <br/><br/>
+      🔗 <a href="https://whatsapp.com/channel/0029VbBdJD0BFLgNjJGmUO2O" target="_blank" style="color:#2b5dab; font-weight:bold; text-decoration:none;">
+        Canal de WhatsApp para mais informações
+      </a>
+    </div>
+  </div>
+
+  <!-- Overlay: Contagem regressiva -->
+  <div id="countdown-overlay" class="overlay" aria-hidden="true">
+    <div class="box">
+      <div>Aguarde...</div>
+      <div class="counter" id="countdown-value">5</div>
+      <div>segundos</div>
+    </div>
+  </div>
+
+<script>
+  const { jsPDF } = window.jspdf || {};
+
+  let imagemQuadroMoral = null;
+
+  // ========== Validação / Normalização de campos ==========
+  function apenasDigitosMax(el, maxLen) {
+    el.value = el.value.replace(/\D/g, '').slice(0, maxLen || el.maxLength || 9999);
+  }
+  function apenasLetraUnica(el) {
+    el.value = el.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ]/g, '').slice(0, 1);
+  }
+  function apenasLetras(el) {
+    el.value = el.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s]/g, '');
+  }
+  function letrasENumeros(el) {
+    el.value = el.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ0-9\s\/\-]/g, '');
+  }
+  function temaPermitido(el) {
+    el.value = el.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ0-9\s+\-\*\=\/\^_\(\)\{\}\[\]×÷±√%.,:;'"<>]/g, '');
+  }
+  function codigoConfirmacaoOnInput(el) {
+    el.value = el.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  }
+  function sanitizarQuadroInputRaw(str) {
+    if (!str) return '';
+    str = str.replace(/[\u{1F600}-\u{1F64F}]/gu, '')
+             .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
+             .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
+             .replace(/[\u{2600}-\u{26FF}]/gu, '')
+             .replace(/[\u{2700}-\u{27BF}]/gu, '');
+    str = str.replace(/[^\wÀ-ÖØ-öø-ÿ\s0-9\.\,\;\:\?\!\-\–\—\(\)\'\"%\/\n\r]/g, '');
+    return str;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const map = [
+      { id: 'classe', fn: (e)=>apenasDigitosMax(e.target, 2) },
+      { id: 'turma', fn: (e)=>apenasLetraUnica(e.target) },
+      { id: 'numAlunos', fn: (e)=>apenasDigitosMax(e.target) },
+      { id: 'numLicao', fn: (e)=>apenasDigitosMax(e.target) },
+      { id: 'periodo', fn: (e)=>apenasLetras(e.target) },
+      { id: 'escola', fn: (e)=>apenasLetras(e.target) },
+      { id: 'data', fn: (e)=>letrasENumeros(e.target) },
+      { id: 'professor', fn: (e)=>apenasLetras(e.target) },
+      { id: 'unidade', fn: (e)=>letrasENumeros(e.target) },
+      { id: 'tema', fn: (e)=>temaPermitido(e.target) },
+      { id: 'tipoAula', fn: (e)=>apenasLetras(e.target) },
+      { id: 'disciplina', fn: (e)=>apenasLetras(e.target) }
+    ];
+    map.forEach(m => {
+      const el = document.getElementById(m.id);
+      if (!el) return;
+      el.addEventListener('input', m.fn);
+      el.addEventListener('blur', m.fn);
+    });
+  });
+
+  // ========== Contagem regressiva ==========
+  function mostrarContagem(tempoSegundos, aoConcluir) {
+    const overlay = document.getElementById("countdown-overlay");
+    const counterEl = document.getElementById("countdown-value");
+    let tempo = tempoSegundos;
+    counterEl.textContent = tempo;
+
+    overlay.style.display = "flex";
+    overlay.setAttribute("aria-hidden", "false");
+
+    // Desabilitar controles
+    document.querySelectorAll("input, button, select").forEach(el => {
+      if (!el.dataset._wasDisabled) el.dataset._wasDisabled = el.disabled ? '1' : '0';
+      el.disabled = true;
+    });
+
+    const interval = setInterval(() => {
+      tempo--;
+      counterEl.textContent = tempo;
+      if (tempo <= 0) {
+        clearInterval(interval);
+        overlay.style.display = "none";
+        overlay.setAttribute("aria-hidden", "true");
+        document.querySelectorAll("input, button, select").forEach(el => {
+          el.disabled = el.dataset._wasDisabled === '1';
+          delete el.dataset._wasDisabled;
+        });
+        if (aoConcluir) aoConcluir();
+      }
+    }, 1000);
+  }
+
+  // ========== Funções principais ==========
+  function gerarPlano() {
+    mostrarContagem(5, () => {
+      const get = id => document.getElementById(id)?.value?.trim() || '';
+      const escola = get("escola"), data = get("data"), professor = get("professor"),
+            disciplina = get("disciplina"), classe = get("classe"), tema = get("tema"), unidade = get("unidade"),
+            turma = get("turma"), numAlunos = get("numAlunos"), periodo = get("periodo"),
+            numLicao = get("numLicao"), tipoAula = get("tipoAula");
+
+      if (!tema) { alert("Por favor, preencha o 'Tema da Aula'."); return; }
+
+      const planoData = { escola, data, professor, disciplina, classe, tema, unidade, turma, numAlunos, periodo, numLicao, tipoAula };
+      sessionStorage.setItem("planoData", JSON.stringify(planoData));
+
+      const objGeral = `Desenvolver competências relacionadas com o tema "${tema}".`;
+      const objCog = `Compreender e explicar o conteúdo sobre "${tema}".`;
+      const objPsi = `Aplicar os conhecimentos sobre "${tema}".`;
+      const objAfet = `Valorizar a importância de "${tema}" no dia a dia.`;
+
+      const prof1 = `- Saúda os alunos;\n- Verifica ambiente;\n- Apresenta o tema: ${tema};`;
+      const aluno1 = `- Responde à saudação;\n- Anota o tema;`;
+      const prof2 = `- Faz perguntas;\n- Explica com exemplos visuais;\n- Relaciona com o quotidiano;`;
+      const aluno2 = `- Participa;\n- Relaciona o tema;\n- Regista exemplos;`;
+      const prof3 = `- Propõe exercícios;\n- Circula pela sala;`;
+      const aluno3 = `- Resolve os exercícios;\n- Solicita ajuda;`;
+      const prof4 = `- Aplica avaliação;\n- Recolhe respostas;`;
+      const aluno4 = `- Responde individualmente;`;
+
+      const p1 = prof1.replace(/;/g, '').replace(/\n/g, '<br>');
+      const a1 = aluno1.replace(/;/g, '').replace(/\n/g, '<br>');
+      const p2 = prof2.replace(/;/g, '').replace(/\n/g, '<br>');
+      const a2 = aluno2.replace(/;/g, '').replace(/\n/g, '<br>');
+      const p3 = prof3.replace(/;/g, '').replace(/\n/g, '<br>');
+      const a3 = aluno3.replace(/;/g, '').replace(/\n/g, '<br>');
+      const p4 = prof4.replace(/;/g, '').replace(/\n/g, '<br>');
+      const a4 = aluno4.replace(/;/g, '').replace(/\n/g, '<br>');
+
+      // ✅ Campo de explicação manual na coluna Conteúdos (2ª linha)
+      const campoExplicacao = `<div contenteditable="true" style="min-height:60px;padding:4px;background:#f8f9fa;border:1px dashed #ccc;text-align:left;">
+        Insira a explicação manualmente aqui
+      </div>`;
+
+      document.getElementById("planoPDF").innerHTML = `
+        <div id="dadosEsquerda" style="display:none;">
+Escola: ${escola}
+Data: ${data}
+Professor: ${professor}
+Unidade Temática: ${unidade}
+Tema: ${tema}
+Tipo de Aula: ${tipoAula}
+        </div>
+        <div id="dadosDireita" style="display:none;">
+Classe: ${classe}
+Turma: ${turma}
+Nº de Alunos: ${numAlunos}
+Lição nº: ${numLicao}
+Duração: 45 minutos
+Período: ${periodo}
+        </div>
+        <div id="objetivoGeralPDF" style="display:none;">${objGeral}</div>
+        <div id="objetivosEspecificosPDF" style="display:none;">
+Cognitivo: ${objCog}
+Psicomotor: ${objPsi}
+Afetivo: ${objAfet}
+        </div>
+
+        <h2 style="text-align:center;">Plano de Aula</h2>
+        <div style="display: flex; justify-content: space-between; font-family:'Times New Roman'; font-size:12px;">
+          <div>
+            <p><strong>Escola:</strong> ${escola}</p>
+            <p><strong>Data:</strong> ${data}</p>
+            <p><strong>Professor:</strong> ${professor}</p>
+            <p><strong>Disciplina:</strong> ${disciplina}</p>
+            <p><strong>Unidade Temática:</strong> ${unidade}</p>
+            <p><strong>Tema:</strong> ${tema}</p>
+            <p><strong>Tipo de Aula:</strong> ${tipoAula}</p>
+          </div>
+          <div style="text-align: right; min-width: 300px;">
+            <p><strong>Classe:</strong> ${classe}</p>
+            <p><strong>Turma:</strong> ${turma}</p>
+            <p><strong>Nº de Alunos:</strong> ${numAlunos}</p>
+            <p><strong>Lição nº:</strong> ${numLicao}</p>
+            <p><strong>Duração:</strong> 45 minutos</p>
+            <p><strong>Período:</strong> ${periodo}</p>
+          </div>
+        </div>
+
+        <p contenteditable="true"><strong>Objetivo Geral:</strong> ${objGeral}</p>
+        <p><strong>Objetivos Específicos:</strong></p>
+        <p contenteditable="true"><strong>Cognitivo:</strong> ${objCog}</p>
+        <p contenteditable="true"><strong>Psicomotor:</strong> ${objPsi}</p>
+        <p contenteditable="true"><strong>Afetivo:</strong> ${objAfet}</p>
+
+        <table id="tabelaPlano" border="1" cellspacing="0" cellpadding="5" style="width:100%; border-collapse:collapse; margin-top:10px;">
+          <thead>
+            <tr>
+              <th>TEMPO</th>
+              <th>FUNÇÕES DIDÁCTICAS</th>
+              <th>CONTEÚDOS</th>
+              <th>ACTIVIDADES DO PROFESSOR</th>
+              <th>ACTIVIDADES DOS ALUNOS</th>
+              <th>MÉTODOS DE ENSINO</th>
+              <th>MEIOS DE ENSINO</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td contenteditable="true">00–05 min</td>
+              <td contenteditable="true">Introdução e motivação</td>
+              <td contenteditable="true">Saudação e organização</td>
+              <td contenteditable="true">${p1}</td>
+              <td contenteditable="true">${a1}</td>
+              <td contenteditable="true">Expositivo</td>
+              <td contenteditable="true">Quadro e giz</td>
+            </tr>
+            <tr>
+              <td contenteditable="true">05–20 min</td>
+              <td contenteditable="true">Mediação e assimilação</td>
+              <td>${campoExplicacao}</td>
+              <td contenteditable="true">${p2}</td>
+              <td contenteditable="true">${a2}</td>
+              <td contenteditable="true">Elaboração conjunta</td>
+              <td contenteditable="true">Quadro e livro</td>
+            </tr>
+            <tr>
+              <td contenteditable="true">20–35 min</td>
+              <td contenteditable="true">Domínio e consolidação</td>
+              <td contenteditable="true">Exercícios práticos</td>
+              <td contenteditable="true">${p3}</td>
+              <td contenteditable="true">${a3}</td>
+              <td contenteditable="true">Trabalho independente</td>
+              <td contenteditable="true">Caderno</td>
+            </tr>
+            <tr>
+              <td contenteditable="true">35–45 min</td>
+              <td contenteditable="true">Controlo e avaliação</td>
+              <td contenteditable="true">Avaliação</td>
+              <td contenteditable="true">${p4}</td>
+              <td contenteditable="true">${a4}</td>
+              <td contenteditable="true">Trabalho independente</td>
+              <td contenteditable="true">Folha/caderno</td>
+            </tr>
+          </tbody>
+        </table>`;
+    });
+  }
+
+  function baixarPDFComAnuncio() {
+    mostrarContagem(8, () => {
+      baixarPDF();
+    });
+  }
+
+  function exibirFotoLivro(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const imgData = e.target.result;
+      imagemQuadroMoral = imgData;
+      const img = document.createElement("img");
+      img.src = imgData;
+      img.style.cssText = "width:100%;max-width:800px;height:auto;border:1px solid #ccc;border-radius:4px;display:block;margin:20px auto";
+      img.alt = "Foto do Livro";
+      document.getElementById("quadroPDF").innerHTML = `
+        <div class="quadro-moral" style="text-align:center; padding:0; border:none;">
+          <h3 style="text-align:center; color:black; margin-bottom:10px;">QUADRO MORAL</h3>
+          <div id="conteudoMoral" style="outline:none; min-height:565px; display:flex; align-items:center; justify-content:center;">
+            ${img.outerHTML}
+          </div>
+        </div>
+      `;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function baixarPDF() {
+    const planoDataJSON = sessionStorage.getItem("planoData");
+    if (!planoDataJSON) { alert("❌ Nenhum plano encontrado. Gere o plano antes."); return; }
+    const planoData = JSON.parse(planoDataJSON);
+    const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+    doc.setFont("times", "normal");
+    doc.setFontSize(12);
+    doc.text("Plano de Aula", 148, 12, { align: "center" });
+
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = document.getElementById("planoPDF").innerHTML;
+
+    let yLeft = 25, yRight = 25;
+    const addLine = (label, value, x, y) => {
+      if (!value) value = "";
+      doc.text(`${label}:`, x, y);
+      doc.text(value, x + 45, y);
+      return y + 6;
+    };
+
+    const dadosEsquerda = tempDiv.querySelector('#dadosEsquerda');
+    if (dadosEsquerda) {
+      dadosEsquerda.innerText.split('\n').forEach(line => {
+        line = line.trim();
+        if (line && line.includes(':')) {
+          const [lb, v] = line.split(':').map(s => s.trim());
+          yLeft = addLine(lb, v, 10, yLeft);
+        }
+      });
+    }
+
+    const dadosDireita = tempDiv.querySelector('#dadosDireita');
+    if (dadosDireita) {
+      dadosDireita.innerText.split('\n').forEach(line => {
+        line = line.trim();
+        if (line && line.includes(':')) {
+          const [lb, v] = line.split(':').map(s => s.trim());
+          yRight = addLine(lb, v, 175, yRight);
+        }
+      });
+    }
+
+    let lastY = Math.max(yLeft, yRight);
+
+    const objGeralEl = tempDiv.querySelector('#objetivoGeralPDF');
+    if (objGeralEl) {
+      doc.setFont("times", "bold");
+      doc.text("Objetivo Geral:", 10, lastY + 5);
+      doc.setFont("times", "normal");
+      const w = doc.getTextWidth("Objetivo Geral: ");
+      doc.text(objGeralEl.innerText.trim(), 10 + w, lastY + 5);
+      lastY += 12;
+    }
+
+    doc.setFont("times", "bold");
+    doc.text("Objetivos Específicos:", 10, lastY);
+    doc.setFont("times", "normal");
+    lastY += 6;
+
+    const objEspEl = tempDiv.querySelector('#objetivosEspecificosPDF');
+    if (objEspEl) {
+      const lines = objEspEl.innerText.trim().split('\n').filter(l => l.trim());
+      lines.forEach(line => {
+        if (line.includes(':')) {
+          const [rotulo, conteudo] = line.split(':').map(s => s.trim());
+          doc.setFont("times", "bold");
+          doc.text(`${rotulo}:`, 15, lastY);
+          doc.setFont("times", "normal");
+          const w2 = doc.getTextWidth(`${rotulo}: `);
+          doc.text(conteudo, 15 + w2, lastY);
+          lastY += 6;
+        }
+      });
+      lastY += 5;
+    }
+
+    const tabela = tempDiv.querySelector('#tabelaPlano');
+    if (tabela) {
+      const rows = tabela.querySelectorAll("tbody tr");
+      const tableData = Array.from(rows).map(row => {
+        return Array.from(row.querySelectorAll("td")).map(td => {
+          let txt = td.innerText.trim();
+          txt = txt.replace(/-\s*/g, "- ")
+                   .replace(/\s*;\s*/g, "; ")
+                   .replace(/\s+/g, " ");
+          return txt;
+        });
+      });
+
+      if (doc && doc.autoTable) {
+        doc.autoTable({
+          startY: lastY,
+          head: [['TEMPO','FUNÇÕES DIDÁCTICAS','CONTEÚDOS','ACTIVIDADES DO PROFESSOR','ACTIVIDADES DOS ALUNOS','MÉTODOS DE ENSINO','MEIOS DE ENSINO']],
+          body: tableData,
+          theme: 'grid',
+          styles: { font: 'times', fontSize: 10, textColor: [0,0,0], lineWidth:0.2, lineColor:[0,0,0], halign:'left'},
+          headStyles: { fillColor:[200,200,200], textColor:[0,0,0], fontStyle:'bold', halign:'center'},
+          columnStyles: {0:{cellWidth:25},1:{cellWidth:35},2:{cellWidth:40},3:{cellWidth:50},4:{cellWidth:50},5:{cellWidth:30},6:{cellWidth:30}}
+        });
+      } else {
+        tableData.forEach(row => {
+          row.forEach((cell, idx) => {
+            doc.text(cell, 15 + idx*30, lastY);
+          });
+          lastY += 6;
+          if (lastY > 180) { doc.addPage(); lastY = 20; }
+        });
+      }
+    }
+
+    if (imagemQuadroMoral) {
+      doc.addPage();
+      doc.setFont('times', 'normal');
+      doc.setFontSize(12);
+      doc.text("Quadro Moral", 148, 15, null, null, 'center');
+      const imgWidth = 267;
+      const imgHeight = 180;
+      try {
+        doc.addImage(imagemQuadroMoral, 'JPEG', 15, 25, imgWidth, imgHeight, undefined, 'FAST');
+      } catch (e) {
+        // ignore
+      }
+    } else {
+      const quadroTexto = document.getElementById("quadroPDF").querySelector("#conteudoMoral")?.innerText.trim() || '';
+      if (quadroTexto) {
+        doc.addPage();
+        doc.setFont('times', 'normal');
+        doc.setFontSize(12);
+        doc.text("Quadro Moral", 148, 15, null, null, 'center');
+        const margin = 15;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const textWidth = pageWidth - 2 * margin;
+        let currentY = 25;
+        const lineHeight = 6;
+        const lines = doc.splitTextToSize(quadroTexto, textWidth);
+        for (let i = 0; i < lines.length; i++) {
+          if (currentY + lineHeight > 190) {
+            doc.addPage();
+            doc.setFont('times', 'normal');
+            doc.setFontSize(12);
+            doc.text("Quadro Moral (continuação)", 148, 15, null, null, 'center');
+            currentY = 25;
+          }
+          doc.text(lines[i], margin, currentY);
+          currentY += lineHeight;
+        }
+      }
+    }
+
+    const dataFileName = planoData.data?.replace(/[\/]/g, "-") || 'sem-data';
+    doc.save(`Plano_de_Aula_MZ_${dataFileName}.pdf`);
+  }
+
+  // Bloqueio básico (mantido como estava)
+  document.addEventListener("keydown", function(e) {
+    if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U' || e.code === 'KeyU')) { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && ['s','S','p','P','a','A'].includes(e.key)) { e.preventDefault(); return false; }
+  });
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); return false; });
+</script>
+</body>
+</html>

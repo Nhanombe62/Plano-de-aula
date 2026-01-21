@@ -135,7 +135,7 @@
     .btn:hover, .btn-sorte-link:hover { transform: translateY(-3px); }
     .btn-vip      { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); }
     .btn-gratis   { background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); }
-    .btn-caderno  { background: #ff9f43; }
+    .btn-ingles   { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); }
     .btn-quinzenal{ background: #3498db; }
     .btn-doacoes  { background: #e74c3c; }
     .btn-historico{ background: #2ecc71; }
@@ -302,8 +302,8 @@
     <button class="btn btn-gratis" onclick="window.location.href='planogratis.html'">
       <i class="fas fa-ad"></i> Plano Gratuito
     </button>
-    <button class="btn btn-caderno" onclick="mostrarOpcoesConta()">
-      <i class="fas fa-book"></i> Caderno
+    <button class="btn btn-ingles" onclick="window.location.href='ingles.html'">
+      <i class="fas fa-language"></i> Plano de Inglês
     </button>
     <button class="btn btn-quinzenal" onclick="window.open('https://profbenjanuario-4d854.web.app/plano_quinzenal.html  ', '_blank')">
       <i class="fas fa-calendar-alt"></i> Plano Quinzenal
@@ -328,26 +328,12 @@
       <a href="tel:+258876393961" class="ligar">
         <i class="fas fa-phone"></i> Ligar (87 639 3961)
       </a>
-      <a href="https://wa.me/258876393961 " target="_blank" class="whatsapp">
-        <i class="fab fa-whatsapp"></i> WhatsApp
+      <a href="https://chat.whatsapp.com/CD6USSJ0IPf8Z0X7cxFLvX" target="_blank" class="whatsapp">
+        <i class="fab fa-whatsapp"></i> Grupo WhatsApp
       </a>
       <a href="mailto:edmilsonnhanombe62@gmail.com" class="email">
         <i class="fas fa-envelope"></i> Email
       </a>
-    </div>
-  </div>
-
-  <!-- Modal: Caderno -->
-  <div class="modal" id="modalConta">
-    <div class="modal-content">
-      <button class="close-modal" onclick="fecharModal('modalConta')">&times;</button>
-      <h3>Caderno de Notas</h3>
-      <button class="doar" onclick="alert('🔐 Criar conta em breve!')">
-        <i class="fas fa-user-plus"></i> Criar Conta
-      </button>
-      <button class="ligar" onclick="alert('🔐 Login institucional em preparação.')">
-        <i class="fas fa-sign-in-alt"></i> Fazer Login
-      </button>
     </div>
   </div>
 
@@ -432,7 +418,6 @@
 
     // ========== FUNCIONALIDADES EXISTENTES (adaptadas para USUARIO_ATUAL dinâmico) ==========
     function mostrarContatoAdmin() { document.getElementById('modalAdmin').style.display = 'flex'; }
-    function mostrarOpcoesConta() { document.getElementById('modalConta').style.display = 'flex'; }
     function mostrarDoacoes() { document.getElementById('modalDoacoes').style.display = 'flex'; }
     function mostrarEstatisticas() { document.getElementById('modalEstatisticas').style.display = 'flex'; }
     function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -541,7 +526,7 @@
     // Atalho de teclado
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        ['modalAdmin','modalConta','modalDoacoes','modalHistorico','modalEstatisticas']
+        ['modalAdmin','modalDoacoes','modalHistorico','modalEstatisticas']
           .forEach(id => fecharModal(id));
       }
     });
