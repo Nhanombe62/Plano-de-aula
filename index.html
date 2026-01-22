@@ -630,6 +630,275 @@
     window.addEventListener('load', () => {
       limparHistoricoAntigo();
     });
+    
+    // =============================================
+// CONTROLE DO SERVICE WORKER E ATUALIZAÇÕES
+// =============================================
+
+// Versão do app (deve corresponder ao service worker)
+const APP_VERSION = 'v2.3.0';
+let newServiceWorker = null;
+let updateNotificationShown = false;
+
+// Registra e gerencia o Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    // Salva versão atual
+    localStorage.setItem('app_version', APP_VERSION);
+    
+    // Registra Service Worker
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(function(registration) {
+        console.log('✅ Service Worker registrado:', registration.scope);
+        
+        // Verifica versão salva
+        const savedVersion = localStorage.getItem('app_version');
+        if (savedVersion !== APP_VERSION) {
+          console.log('🔄 Nova versão detectada!');
+          setTimeout(() => showUpdateNotification(), 2000);
+        }
+        
+        // Verifica atualizações a cada 30 minutos
+        setInterval(() => {
+          registration.update();
+          console.log('🔄 Verificando atualizações...');
+        }, 30 * 60 * 1000);
+        
+        // Detecta nova versão disponível
+        registration.addEventListener('updatefound', () => {
+          console.log('🔄 Nova versão do Service Worker encontrada!');
+          newServiceWorker = registration.installing;
+          
+          newServiceWorker.addEventListener('statechange', () => {
+            if (newServiceWorker.state === 'installed') {
+              if (navigator.serviceWorker.controller) {
+                // Nova versão instalada
+                console.log('🆕 Nova versão pronta!');
+                showUpdateNotification();
+              }
+            }
+          });
+        });
+      })
+      .catch(function(error) {
+        console.log('❌ Falha no registro do Service Worker:', error);
+      });
+    
+    // Escuta mensagens do Service Worker
+    navigator.serviceWorker.addEventListener('message', function(event) {
+      if (event.data.type === 'SW_UPDATED') {
+        console.log('📢 Service Worker atualizado:', event.data.version);
+        showUpdateNotification();
+      }
+    });
+  });
+}
+
+// ==================== NOTIFICAÇÃO DE ATUALIZAÇÃO ====================
+function showUpdateNotification() {
+  if (updateNotificationShown) return;
+  
+  // Verifica se já tem a notificação
+  let updateDiv = document.getElementById('update-notification');
+  
+  if (!updateDiv) {
+    // Cria a notificação
+    updateDiv = document.createElement('div');
+    updateDiv.id = 'update-notification';
+    updateDiv.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+      z-index: 9999;
+      display: none;
+      max-width: 320px;
+      animation: slideIn 0.3s ease;
+      border-left: 5px solid #FFC107;
+    `;
+    
+    updateDiv.innerHTML = `
+      <div style="display: flex; align-items: flex-start; gap: 12px;">
+        <div style="background: rgba(255,255,255,0.2); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+          <i class="fas fa-sync-alt" style="font-size: 1.2rem;"></i>
+        </div>
+        <div style="flex: 1;">
+          <h4 style="margin: 0 0 5px 0; font-size: 1rem; font-weight: bold;">Atualização Disponível!</h4>
+          <p style="margin: 0 0 10px 0; font-size: 0.85rem; opacity: 0.9;">Uma nova versão do aplicativo está pronta.</p>
+          <div style="display: flex; gap: 8px;">
+            <button id="update-now-btn" style="
+              background: #FFC107;
+              color: #333;
+              border: none;
+              padding: 8px 16px;
+              border-radius: 6px;
+              cursor: pointer;
+              font-weight: bold;
+              font-size: 0.85rem;
+              flex: 1;
+            ">Atualizar Agora</button>
+            <button id="update-later-btn" style="
+              background: rgba(255,255,255,0.2);
+              color: white;
+              border: 1px solid rgba(255,255,255,0.3);
+              padding: 8px 16px;
+              border-radius: 6px;
+              cursor: pointer;
+              font-size: 0.85rem;
+            ">Depois</button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(updateDiv);
+    
+    // Estilo de animação
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+      }
+      #update-notification {
+        animation: slideIn 0.3s ease, pulse 2s infinite;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Event listeners
+    document.getElementById('update-now-btn').addEventListener('click', function() {
+      forceUpdate();
+      updateDiv.style.display = 'none';
+    });
+    
+    document.getElementById('update-later-btn').addEventListener('click', function() {
+      updateDiv.style.display = 'none';
+      updateNotificationShown = false;
+    });
+  }
+  
+  // Mostra a notificação
+  updateDiv.style.display = 'block';
+  updateNotificationShown = true;
+  
+  // Auto-esconde após 30 segundos
+  setTimeout(() => {
+    if (updateDiv.style.display === 'block') {
+      updateDiv.style.display = 'none';
+      updateNotificationShown = false;
+    }
+  }, 30000);
+}
+
+// ==================== ATUALIZAÇÃO FORÇADA ====================
+function forceUpdate() {
+  console.log('🔄 Forçando atualização...');
+  
+  if ('serviceWorker' in navigator) {
+    // Envia comando para pular espera
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage('SKIP_WAITING');
+    }
+    
+    // Limpa caches
+    if ('caches' in window) {
+      caches.keys().then(function(cacheNames) {
+        cacheNames.forEach(function(cacheName) {
+          caches.delete(cacheName);
+          console.log('🗑️ Cache removido:', cacheName);
+        });
+      });
+    }
+    
+    // Atualiza versão no localStorage
+    localStorage.setItem('app_version', APP_VERSION);
+    
+    // Recarrega a página após um curto delay
+    setTimeout(function() {
+      console.log('🔄 Recarregando página...');
+      window.location.reload(true);
+      
+      // Fallback se não recarregar
+      setTimeout(function() {
+        window.location.href = window.location.href + '?v=' + Date.now();
+      }, 1000);
+    }, 800);
+  } else {
+    // Fallback simples
+    window.location.reload(true);
+  }
+}
+
+// ==================== VERIFICAÇÃO INICIAL ====================
+// Verifica se há nova versão ao carregar
+document.addEventListener('DOMContentLoaded', function() {
+  // Verifica se o Service Worker está registrado
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistration().then(function(registration) {
+      if (registration) {
+        registration.update();
+      }
+    });
+  }
+  
+  // Verifica versão salva
+  setTimeout(function() {
+    const savedVersion = localStorage.getItem('app_version');
+    if (savedVersion && savedVersion !== APP_VERSION) {
+      console.log('🔄 Versão anterior detectada:', savedVersion, '-> Nova:', APP_VERSION);
+      setTimeout(() => showUpdateNotification(), 3000);
+    }
+  }, 1000);
+});
+
+// ==================== BOTÃO MANUAL DE ATUALIZAÇÃO ====================
+// Adiciona botão no menu lateral (opcional)
+function addUpdateButtonToMenu() {
+  const sidebar = document.getElementById('sidebar');
+  const updateItem = document.createElement('a');
+  updateItem.href = '#';
+  updateItem.className = 'sidebar-item';
+  updateItem.innerHTML = '<i class="fas fa-sync-alt"></i> Verificar Atualizações';
+  updateItem.onclick = function(e) {
+    e.preventDefault();
+    checkForUpdates();
+    fecharSidebar();
+  };
+  
+  // Insere após o item de configurações
+  const settingsItem = document.querySelector('.sidebar-item');
+  if (settingsItem) {
+    settingsItem.parentNode.insertBefore(updateItem, settingsItem.nextSibling);
+  }
+}
+
+function checkForUpdates() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistration().then(function(registration) {
+      if (registration) {
+        registration.update().then(function() {
+          alert('✅ Verificação de atualizações concluída!');
+          showUpdateNotification();
+        });
+      }
+    });
+  } else {
+    alert('⚠️ Service Worker não suportado neste navegador.');
+  }
+}
+
+// Adiciona o botão ao menu (opcional)
+setTimeout(addUpdateButtonToMenu, 1000);
   </script>
 </body>
 </html>
