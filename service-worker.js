@@ -1,4 +1,4 @@
-const CACHE_NAME = 'plano-aula-v2.3.1';
+const CACHE_NAME = 'plano-aula-v3.3.1';
 const DYNAMIC_CACHE = 'plano-aula-dynamic-v1';
 
 const urlsToCache = [
