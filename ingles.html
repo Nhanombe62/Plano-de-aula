@@ -2,7 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Smart Lesson Plan Generator</title>
+  
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-13268422844"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-13268422844');
+  </script>
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <style>
@@ -14,112 +25,129 @@
     
     body {
       font-family: "Times New Roman", Times, serif;
-      font-size: 12px;
+      font-size: 11px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 20px;
+      padding: 5px;
       min-height: 100vh;
+      width: 100%;
+      overflow-x: hidden;
     }
     
     .container {
-      max-width: 1200px;
+      width: 100%;
       margin: 0 auto;
       background: white;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
     
     h1, h2, h3 {
       color: #2b5dab;
       text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 8px;
+      font-size: 14px;
     }
     
     h1 {
-      font-size: 24px;
-      border-bottom: 2px solid #2b5dab;
-      padding-bottom: 10px;
-      margin-bottom: 25px;
+      font-size: 16px;
+      border-bottom: 1px solid #2b5dab;
+      padding-bottom: 6px;
+      margin-bottom: 15px;
     }
     
     /* Flow Navigation */
     .flow {
       display: none;
-      animation: fadeIn 0.5s ease;
     }
     
     .flow.active {
       display: block;
     }
     
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* Main Header Style */
+    .main-header {
+      text-align: center;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #2b5dab;
+    }
+    
+    .creator-info {
+      color: #666;
+      font-style: italic;
+      font-size: 11px;
     }
     
     /* Form Styles */
     .form-section {
       background: #f8f9fa;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      border-left: 4px solid #2b5dab;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      border-left: 3px solid #2b5dab;
     }
     
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 15px;
-      margin-top: 15px;
+    .section-title {
+      color: #2b5dab;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #ccc;
     }
     
     .form-group {
-      margin-bottom: 12px;
+      margin-bottom: 8px;
+      width: 100%;
     }
     
     label {
       display: block;
       font-weight: bold;
-      margin-bottom: 5px;
+      margin-bottom: 3px;
       color: #333;
+      font-size: 11px;
     }
     
     input[type="text"],
     textarea,
     select {
       width: 100%;
-      padding: 10px;
+      padding: 7px;
       border: 1px solid #ddd;
-      border-radius: 5px;
+      border-radius: 4px;
       font-family: "Times New Roman", Times, serif;
-      font-size: 12px;
+      font-size: 11px;
       background: white;
       color: #000000;
     }
     
     textarea {
-      min-height: 100px;
+      min-height: 70px;
       resize: vertical;
     }
     
     /* Buttons */
     .button-group {
       display: flex;
-      justify-content: space-between;
-      margin-top: 30px;
-      padding-top: 20px;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 15px;
+      padding-top: 12px;
       border-top: 1px solid #eee;
     }
     
     .btn {
-      padding: 12px 25px;
+      padding: 9px 12px;
       border: none;
-      border-radius: 6px;
+      border-radius: 4px;
       cursor: pointer;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 12px;
       transition: all 0.3s;
-      min-width: 150px;
+      width: 100%;
+      text-align: center;
     }
     
     .btn-primary {
@@ -138,8 +166,8 @@
     }
     
     .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
     }
     
     .btn:active {
@@ -148,110 +176,97 @@
     
     /* Table Section */
     .table-section {
-      margin: 30px 0;
-      padding: 20px;
+      margin: 15px 0;
+      padding: 12px;
       background: #f8f9fa;
-      border-radius: 10px;
+      border-radius: 6px;
+      overflow-x: auto;
     }
     
     .lesson-table {
       width: 100%;
+      min-width: 550px;
       border-collapse: collapse;
-      margin: 20px 0;
-      font-size: 12px;
-      background: white;
-      color: #000000;
+      margin: 12px 0;
+      font-size: 10px;
     }
     
     .lesson-table th {
       background: #2b5dab;
       color: white;
-      padding: 12px 8px;
+      padding: 6px 4px;
       text-align: center;
       font-weight: bold;
-      border: 1px solid #1a4a8a;
+      font-size: 10px;
     }
     
     .lesson-table td {
-      padding: 10px 8px;
+      padding: 5px 4px;
       border: 1px solid #ddd;
       vertical-align: top;
-      color: #000000;
     }
     
     .lesson-table input[type="text"],
     .lesson-table textarea {
       width: 100%;
-      padding: 8px;
+      padding: 5px;
       border: 1px solid #e9ecef;
       border-radius: 3px;
-      font-family: "Times New Roman", Times, serif;
-      font-size: 12px;
-      background: white;
-      color: #000000;
+      font-size: 10px;
     }
     
     .lesson-table textarea {
-      min-height: 80px;
-      resize: vertical;
+      min-height: 50px;
     }
     
     /* Explanation Section */
     .explanation-section {
       background: #e3f2fd;
-      padding: 25px;
-      border-radius: 10px;
-      margin: 25px 0;
+      padding: 12px;
+      border-radius: 6px;
+      margin: 15px 0;
       border: 1px solid #bbdefb;
     }
     
     .explanation-controls {
       display: flex;
-      gap: 10px;
-      margin-top: 15px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 8px;
     }
     
     .explanation-textarea {
-      min-height: 200px;
-      font-family: "Times New Roman", Times, serif;
-      font-size: 12px;
-      line-height: 1.6;
-      padding: 15px;
-      border: 1px solid #90caf9;
-      border-radius: 8px;
-      background: white;
-      color: #000000;
+      min-height: 120px;
+      font-size: 11px;
+      line-height: 1.4;
+      padding: 8px;
     }
     
     /* ChatGPT Button */
     .chatgpt-btn {
       background: linear-gradient(135deg, #10a37f, #1a7f64);
       color: white;
-      padding: 12px 25px;
-      border-radius: 6px;
+      padding: 9px 12px;
+      border-radius: 4px;
       border: none;
       cursor: pointer;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 12px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+      gap: 5px;
       transition: all 0.3s;
-    }
-    
-    .chatgpt-btn:hover {
-      background: linear-gradient(135deg, #0d8c6c, #156d54);
-      transform: translateY(-2px);
+      width: 100%;
     }
     
     /* Progress Bar */
     .progress-container {
       width: 100%;
-      height: 8px;
+      height: 5px;
       background: #e9ecef;
-      border-radius: 4px;
-      margin: 20px 0;
+      border-radius: 3px;
+      margin: 12px 0;
       overflow: hidden;
     }
     
@@ -270,7 +285,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.9);
       z-index: 9999;
       justify-content: center;
       align-items: center;
@@ -278,8 +293,8 @@
     }
     
     .progress-circle {
-      width: 120px;
-      height: 120px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       background: conic-gradient(#2b5dab 0%, #e9ecef 0%);
       display: flex;
@@ -292,23 +307,23 @@
     .progress-circle::before {
       content: '';
       position: absolute;
-      width: 100px;
-      height: 100px;
+      width: 70px;
+      height: 70px;
       background: #111;
       border-radius: 50%;
     }
     
     .progress-percent {
       color: white;
-      font-size: 24px;
+      font-size: 18px;
       font-weight: bold;
       z-index: 1;
     }
     
     .progress-text {
       color: white;
-      margin-top: 20px;
-      font-size: 16px;
+      margin-top: 15px;
+      font-size: 14px;
       text-align: center;
     }
     
@@ -317,7 +332,20 @@
       50% { transform: scale(1.05); }
     }
     
-    /* Desktop Warning */
+    /* Mobile Instructions */
+    .mobile-instructions {
+      display: block;
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 5px;
+      padding: 8px;
+      margin-bottom: 10px;
+      text-align: center;
+      font-size: 11px;
+      color: #856404;
+    }
+    
+    /* DESKTOP WARNING - MODIFICADO PARA APARECER APENAS EM DESKTOP */
     .desktop-warning {
       display: none;
       position: fixed;
@@ -325,7 +353,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.95);
+      background: rgba(0, 0, 0, 0.98);
       z-index: 99999;
       justify-content: center;
       align-items: center;
@@ -334,57 +362,127 @@
       padding: 20px;
     }
     
-    .desktop-warning-content {
-      background: #111;
-      padding: 40px;
-      border-radius: 15px;
-      max-width: 500px;
-      border: 2px solid #2b5dab;
-    }
-    
-    .desktop-warning h2 {
-      color: #ff6b6b;
-      margin-bottom: 20px;
-    }
-    
-    .desktop-warning p {
-      margin-bottom: 15px;
-      line-height: 1.6;
-    }
-    
     /* Responsive */
-    @media (max-width: 768px) {
-      .form-grid {
-        grid-template-columns: 1fr;
+    @media (max-width: 767px) {
+      .container {
+        display: block !important;
       }
       
-      .button-group {
-        flex-direction: column;
-        gap: 10px;
+      .desktop-warning {
+        display: none !important;
+      }
+    }
+    
+    @media (min-width: 768px) {
+      .container {
+        display: none !important;
+      }
+      
+      .desktop-warning {
+        display: flex !important;
+      }
+      
+      .desktop-warning-content {
+        background: #111;
+        padding: 30px;
+        border-radius: 10px;
+        max-width: 500px;
+        border: 2px solid #ff6b6b;
+      }
+      
+      .desktop-warning h2 {
+        color: #ff6b6b;
+        margin-bottom: 15px;
+        font-size: 22px;
+      }
+      
+      .desktop-warning p {
+        margin-bottom: 10px;
+        line-height: 1.5;
+        font-size: 14px;
+      }
+    }
+    
+    /* Small phones */
+    @media (max-width: 360px) {
+      body {
+        font-size: 10px;
+        padding: 3px;
+      }
+      
+      .container {
+        padding: 8px;
+      }
+      
+      input[type="text"],
+      textarea {
+        padding: 6px;
+        font-size: 10px;
       }
       
       .btn {
-        width: 100%;
+        padding: 7px 10px;
+        font-size: 11px;
       }
       
-      .explanation-controls {
-        flex-direction: column;
+      .lesson-table {
+        min-width: 500px;
+        font-size: 9px;
+      }
+    }
+    
+    /* Landscape mode for mobile */
+    @media (max-height: 500px) and (orientation: landscape) {
+      body {
+        padding: 3px;
+      }
+      
+      .container {
+        padding: 8px;
+      }
+      
+      .form-section {
+        padding: 8px;
+        margin-bottom: 8px;
+      }
+      
+      textarea {
+        min-height: 50px;
+      }
+      
+      .explanation-textarea {
+        min-height: 80px;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Desktop Warning -->
+  <!-- DESKTOP WARNING -->
   <div class="desktop-warning" id="desktopWarning">
     <div class="desktop-warning-content">
-      <h2>⚠️ Access Restricted</h2>
-      <p>This application is designed specifically for mobile and tablet devices.</p>
-      <p>Please access this tool from your smartphone or tablet for the best experience.</p>
-      <p style="margin-top: 30px; font-size: 14px; color: #aaa;">For assistance, contact your system administrator.</p>
+      <div style="font-size: 40px; margin-bottom: 15px;">📱</div>
+      <h2>⚠️ ACESSO BLOQUEADO EM DESKTOP</h2>
+      <p><strong>Este aplicativo é exclusivo para dispositivos móveis.</strong></p>
+      <p>Por questões de segurança e otimização, o acesso é permitido apenas em smartphones e tablets.</p>
+      <p style="margin-top: 15px; padding: 10px; background: rgba(255, 107, 107, 0.1); border-radius: 6px; border: 1px solid #ff6b6b; font-size: 12px;">
+        <strong>📌 Instruções:</strong><br>
+        1. Abra este link no seu smartphone<br>
+        2. Use o aplicativo normalmente<br>
+        3. Gere seu plano de aula em PDF
+      </p>
+      <p style="margin-top: 15px; color: #aaa; font-size: 12px;">
+        Desenvolvido por Prof. Edmilson Nhanombe | IFP Morrumbala
+      </p>
     </div>
   </div>
 
+  <!-- MAIN CONTENT (visible only on mobile) -->
   <div class="container" id="mainContainer">
+    <!-- Mobile Instructions -->
+    <div class="mobile-instructions">
+      <strong>Plano de Aula Mz</strong>
+    </div>
+    
     <!-- Circular Progress Overlay -->
     <div class="progress-overlay" id="progressOverlay">
       <div class="progress-circle" id="progressCircle">
@@ -398,77 +496,77 @@
       <div class="progress-bar" id="progressBar"></div>
     </div>
     
-    <!-- Flow 1: Basic Information -->
+    <!-- Flow 1: Basic Information - LAYOUT DA IMAGEM 2 -->
     <div id="flow1" class="flow active">
-      <h1>SCHOOL INFORMATION</h1>
+      <!-- Header simplificado -->
+      <div class="main-header">
+        <div class="creator-info">Created by Teacher Edmilson Nhanombe Graduated from IFP of Morrumbala.</div>
+      </div>
       
+      <!-- SCHOOL INFORMATION Section -->
       <div class="form-section">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>School Name *</label>
-            <input type="text" id="schoolName" placeholder="e.g., Chuiba Primary and Secondary School">
-          </div>
-          <div class="form-group">
-            <label>Date *</label>
-            <input type="text" id="date" placeholder="e.g., 14th January 2026">
-          </div>
-          <div class="form-group">
-            <label>Teacher's Name *</label>
-            <input type="text" id="teacher" placeholder="e.g., Torres Manuel Assane">
-          </div>
+        <div class="section-title">SCHOOL INFORMATION</div>
+        <div class="form-group">
+          <label>School Name *</label>
+          <input type="text" id="schoolName" placeholder="e.g., Chuiba Primary and Secondary School">
+        </div>
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="text" id="date" placeholder="e.g., 14th January 2026">
+        </div>
+        <div class="form-group">
+          <label>Teacher's Name *</label>
+          <input type="text" id="teacher" placeholder="e.g., Torres Manuel Assane">
         </div>
       </div>
       
-      <h2>SUBJECT DETAILS</h2>
+      <!-- SUBJECT DETAILS Section -->
       <div class="form-section">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Subject *</label>
-            <input type="text" id="subject" placeholder="e.g., English Language" onchange="updateOutcomesWithTopic()">
-          </div>
-          <div class="form-group">
-            <label>Grade/Class *</label>
-            <input type="text" id="grade" placeholder="e.g., Grade 8">
-          </div>
-          <div class="form-group">
-            <label>Lesson Type *</label>
-            <input type="text" id="lessonType" placeholder="e.g., Grammar, Structure, etc.">
-          </div>
-          <div class="form-group">
-            <label>Topic *</label>
-            <input type="text" id="topic" placeholder="e.g., Question Tags, Adverbs, etc." onchange="updateOutcomesWithTopic()">
-          </div>
+        <div class="section-title">SUBJECT DETAILS</div>
+        <div class="form-group">
+          <label>Subject *</label>
+          <input type="text" id="subject" placeholder="e.g., English Language" onchange="updateOutcomesWithTopic()">
+        </div>
+        <div class="form-group">
+          <label>Grade/Class *</label>
+          <input type="text" id="grade" placeholder="e.g., Grade 8">
+        </div>
+        <div class="form-group">
+          <label>Lesson Type *</label>
+          <input type="text" id="lessonType" placeholder="e.g., Grammar, Structure, etc.">
+        </div>
+        <div class="form-group">
+          <label>Topic *</label>
+          <input type="text" id="topic" placeholder="e.g., Question Tags, Adverbs, etc." onchange="updateOutcomesWithTopic()">
         </div>
       </div>
       
-      <h2>CLASS DETAILS</h2>
+      <!-- CLASS DETAILS Section -->
       <div class="form-section">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Streams</label>
-            <input type="text" id="streams" placeholder="e.g., A, B, C, D and E">
-          </div>
-          <div class="form-group">
-            <label>Number of Students</label>
-            <input type="text" id="numStudents" placeholder="e.g., 127-159">
-          </div>
-          <div class="form-group">
-            <label>Time</label>
-            <input type="text" id="time" placeholder="e.g., 1st - 6th">
-          </div>
-          <div class="form-group">
-            <label>Period</label>
-            <input type="text" id="period" placeholder="e.g., 3rd - 4th">
-          </div>
-          <div class="form-group">
-            <label>Duration *</label>
-            <input type="text" id="duration" value="45 minutes">
-          </div>
+        <div class="section-title">CLASS DETAILS</div>
+        <div class="form-group">
+          <label>Streams</label>
+          <input type="text" id="streams" placeholder="e.g., A, B, C, D and E">
+        </div>
+        <div class="form-group">
+          <label>Number of Students</label>
+          <input type="text" id="numStudents" placeholder="e.g., 127-159">
+        </div>
+        <div class="form-group">
+          <label>Time</label>
+          <input type="text" id="time" placeholder="e.g., 1st - 6th">
+        </div>
+        <div class="form-group">
+          <label>Period</label>
+          <input type="text" id="period" placeholder="e.g., 3rd - 4th">
+        </div>
+        <div class="form-group">
+          <label>Duration *</label>
+          <input type="text" id="duration" value="45 minutes">
         </div>
       </div>
       
       <div class="button-group">
-        <div></div>
         <button class="btn btn-primary" onclick="nextFlow(2)">
           NEXT: TEACHING METHODS & MATERIALS →
         </button>
@@ -543,7 +641,7 @@
     <!-- Flow 4: Lesson Outline & Explanation -->
     <div id="flow4" class="flow">
       <h1>LESSON OUTLINE</h1>
-      <p style="text-align: center; color: #666; margin-bottom: 20px;">Complete the table below with detailed activities for each stage</p>
+      <p style="text-align: center; color: #666; margin-bottom: 10px; font-size: 11px;">Complete the table below with detailed activities for each stage</p>
       
       <div class="table-section">
         <table class="lesson-table">
@@ -557,34 +655,34 @@
           </thead>
           <tbody id="lessonTable">
             <tr>
-              <td><input type="text" value="INTRODUCTION" readonly style="font-weight: bold; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></td>
-              <td><textarea id="introTeacher" placeholder="Teacher activities for introduction..." style="font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></textarea></td>
-              <td><textarea id="introStudent" placeholder="Learner activities for introduction..." style="font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></textarea></td>
-              <td><input type="text" value="5 min" style="text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></td>
+              <td><input type="text" value="INTRODUCTION" readonly style="font-weight: bold; text-align: center; font-size: 10px;"></td>
+              <td><textarea id="introTeacher" placeholder="Teacher activities for introduction..." style="font-size: 10px;"></textarea></td>
+              <td><textarea id="introStudent" placeholder="Learner activities for introduction..." style="font-size: 10px;"></textarea></td>
+              <td><input type="text" value="5 min" style="text-align: center; font-size: 10px;"></td>
             </tr>
             <tr>
-              <td><input type="text" value="PRESENTATION" readonly style="font-weight: bold; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></td>
-              <td><textarea id="presentTeacher" placeholder="Teacher activities for presentation..." style="font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></textarea></td>
-              <td><textarea id="presentStudent" placeholder="Learner activities for presentation..." style="font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></textarea></td>
-              <td><input type="text" value="15 min" style="text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></td>
+              <td><input type="text" value="PRESENTATION" readonly style="font-weight: bold; text-align: center; font-size: 10px;"></td>
+              <td><textarea id="presentTeacher" placeholder="Teacher activities for presentation..." style="font-size: 10px;"></textarea></td>
+              <td><textarea id="presentStudent" placeholder="Learner activities for presentation..." style="font-size: 10px;"></textarea></td>
+              <td><input type="text" value="15 min" style="text-align: center; font-size: 10px;"></td>
             </tr>
             <tr>
-              <td><input type="text" value="PRACTICE" readonly style="font-weight: bold; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></td>
-              <td><textarea id="practiceTeacher" placeholder="Teacher activities for practice..." style="font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></textarea></td>
-              <td><textarea id="practiceStudent" placeholder="Learner activities for practice..." style="font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></textarea></td>
-              <td><input type="text" value="10 min" style="text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></td>
+              <td><input type="text" value="PRACTICE" readonly style="font-weight: bold; text-align: center; font-size: 10px;"></td>
+              <td><textarea id="practiceTeacher" placeholder="Teacher activities for practice..." style="font-size: 10px;"></textarea></td>
+              <td><textarea id="practiceStudent" placeholder="Learner activities for practice..." style="font-size: 10px;"></textarea></td>
+              <td><input type="text" value="10 min" style="text-align: center; font-size: 10px;"></td>
             </tr>
             <tr>
-              <td><input type="text" value="PRODUCTION" readonly style="font-weight: bold; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></td>
-              <td><textarea id="productionTeacher" placeholder="Teacher activities for production..." style="font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></textarea></td>
-              <td><textarea id="productionStudent" placeholder="Learner activities for production..." style="font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></textarea></td>
-              <td><input type="text" value="10 min" style="text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></td>
+              <td><input type="text" value="PRODUCTION" readonly style="font-weight: bold; text-align: center; font-size: 10px;"></td>
+              <td><textarea id="productionTeacher" placeholder="Teacher activities for production..." style="font-size: 10px;"></textarea></td>
+              <td><textarea id="productionStudent" placeholder="Learner activities for production..." style="font-size: 10px;"></textarea></td>
+              <td><input type="text" value="10 min" style="text-align: center; font-size: 10px;"></td>
             </tr>
             <tr>
-              <td><input type="text" value="CONCLUSION" readonly style="font-weight: bold; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></td>
-              <td><textarea id="conclusionTeacher" placeholder="Teacher activities for conclusion..." style="font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></textarea></td>
-              <td><textarea id="conclusionStudent" placeholder="Learner activities for conclusion..." style="font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></textarea></td>
-              <td><input type="text" value="5 min" style="text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 12px; color: #000000;"></td>
+              <td><input type="text" value="CONCLUSION" readonly style="font-weight: bold; text-align: center; font-size: 10px;"></td>
+              <td><textarea id="conclusionTeacher" placeholder="Teacher activities for conclusion..." style="font-size: 10px;"></textarea></td>
+              <td><textarea id="conclusionStudent" placeholder="Learner activities for conclusion..." style="font-size: 10px;"></textarea></td>
+              <td><input type="text" value="5 min" style="text-align: center; font-size: 10px;"></td>
             </tr>
           </tbody>
         </table>
@@ -592,20 +690,20 @@
       
       <div class="explanation-section">
         <h3>GET EXPLANATION FROM CHATGPT</h3>
-        <p style="margin-bottom: 15px; color: #555;">
+        <p style="margin-bottom: 10px; color: #555; font-size: 11px;">
           <strong>Instructions:</strong><br>
           1. Click "OPEN CHATGPT" - it will open ChatGPT with perfect formatting<br>
-          2. Copy ALL the ChatGPT response (CTRL+A, CTRL+C)<br>
+          2. Copy ALL the ChatGPT response<br>
           3. Paste below and click "PROCESS & FILL TABLE"<br>
-          4. The system will automatically extract ALL teacher & learner activities for all 5 stages
+          4. The system will automatically extract ALL teacher & learner activities
         </p>
         
         <textarea class="explanation-textarea" id="chatgptExplanation" 
-                  placeholder="Paste the ENTIRE ChatGPT response here. Make sure it includes all 5 sections with TEACHER ACTIVITIES and LEARNER ACTIVITIES for each..."></textarea>
+                  placeholder="Paste the ENTIRE ChatGPT response here..."></textarea>
         
         <div class="explanation-controls">
           <button class="chatgpt-btn" onclick="openChatGPT()">
-            <span>🔍 OPEN CHATGPT (PERFECT FORMAT)</span>
+            <span>🔍 OPEN CHATGPT</span>
           </button>
           <button class="btn btn-primary" onclick="processExplanationWithProgress()">
             ⏳ PROCESS & FILL ALL 10 CELLS
@@ -615,7 +713,7 @@
           </button>
         </div>
         
-        <div class="loading" id="processingLoader" style="display: none;">Processing explanation and filling all cells...</div>
+        <div class="loading" id="processingLoader" style="display: none; font-size: 11px; margin-top: 5px;">Processing...</div>
       </div>
       
       <div class="button-group">
@@ -636,70 +734,104 @@
     const { jsPDF } = window.jspdf;
     let currentFlow = 1;
     
-    // Block F12 Developer Tools
-    document.addEventListener('keydown', function(e) {
-      // Block F12
-      if (e.key === 'F12' || e.keyCode === 123) {
-        e.preventDefault();
-        return false;
+    // Google Analytics Events
+    function trackEvent(category, action, label) {
+      if (typeof gtag !== 'undefined') {
+        gtag('event', action, {
+          'event_category': category,
+          'event_label': label
+        });
       }
-      
-      // Block Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U
-      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) {
-        e.preventDefault();
-        return false;
-      }
-      
-      // Block Ctrl+U (View Source)
-      if (e.ctrlKey && e.key === 'u') {
-        e.preventDefault();
-        return false;
-      }
-      
-      // Block right-click context menu
-      if (e.key === 'ContextMenu') {
-        e.preventDefault();
-        return false;
-      }
-    });
+    }
     
-    // Block right-click
-    document.addEventListener('contextmenu', function(e) {
-      e.preventDefault();
-      return false;
-    });
-    
-    // Check if device is mobile/tablet
+    // Simplified device detection
     function isMobileDevice() {
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-             (window.innerWidth <= 768 && window.innerHeight <= 1024);
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i.test(userAgent);
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      
+      return isMobile || hasTouch || window.innerWidth <= 768;
     }
     
-    // Show desktop warning if not mobile/tablet
-    if (!isMobileDevice()) {
-      document.getElementById('desktopWarning').style.display = 'flex';
-      document.getElementById('mainContainer').style.display = 'none';
-    }
+    // Check device on load
+    document.addEventListener('DOMContentLoaded', function() {
+      const isMobile = isMobileDevice();
+      const warningElement = document.getElementById('desktopWarning');
+      const mainContainer = document.getElementById('mainContainer');
+      
+      if (!isMobile && window.innerWidth >= 768) {
+        warningElement.style.display = 'flex';
+        mainContainer.style.display = 'none';
+        trackEvent('security', 'desktop_blocked', 'Desktop access blocked');
+        return;
+      } else {
+        warningElement.style.display = 'none';
+        mainContainer.style.display = 'block';
+        trackEvent('device', 'mobile_access', 'Mobile access granted');
+      }
+      
+      // Load saved data
+      const savedData = localStorage.getItem('lessonPlanData');
+      if (savedData) {
+        try {
+          const data = JSON.parse(savedData);
+          for (const key in data) {
+            const element = document.getElementById(key);
+            if (element) {
+              element.value = data[key];
+            }
+          }
+          trackEvent('data', 'load_saved', 'Loaded saved lesson plan');
+        } catch (e) {
+          console.error('Error loading saved data:', e);
+        }
+      }
+      
+      // Clear table initially
+      clearTable();
+      
+      // Auto-save on input changes
+      const inputs = document.querySelectorAll('input, textarea');
+      let saveTimeout;
+      
+      inputs.forEach(input => {
+        input.addEventListener('input', function() {
+          clearTimeout(saveTimeout);
+          saveTimeout = setTimeout(autoSaveData, 1000);
+        });
+      });
+      
+      updateProgressBar();
+      trackEvent('page', 'view', 'Lesson Plan Generator loaded');
+      
+      // Check on resize
+      window.addEventListener('resize', function() {
+        const isMobileNow = isMobileDevice();
+        if (!isMobileNow && window.innerWidth >= 768) {
+          warningElement.style.display = 'flex';
+          mainContainer.style.display = 'none';
+        }
+      });
+    });
     
-    // Auto-save when changing flows
+    // Flow navigation
     function nextFlow(next) {
       if (!validateCurrentFlow(currentFlow)) {
         return;
       }
       
-      // Auto-save before moving to next flow
+      trackEvent('navigation', 'next_flow', `From flow ${currentFlow} to ${next}`);
       autoSaveData();
       
       document.getElementById(`flow${currentFlow}`).classList.remove('active');
       currentFlow = next;
       document.getElementById(`flow${currentFlow}`).classList.add('active');
       updateProgressBar();
-      
       window.scrollTo(0, 0);
     }
     
     function prevFlow(prev) {
-      // Auto-save before going back
+      trackEvent('navigation', 'prev_flow', `From flow ${currentFlow} to ${prev}`);
       autoSaveData();
       
       document.getElementById(`flow${currentFlow}`).classList.remove('active');
@@ -709,7 +841,7 @@
       window.scrollTo(0, 0);
     }
     
-    // Update outcomes with topic instead of duration
+    // Update outcomes with topic
     function updateOutcomesWithTopic() {
       const topic = document.getElementById('topic').value || 'lesson topic';
       const subject = document.getElementById('subject').value || 'subject';
@@ -717,14 +849,12 @@
       const outcomesField = document.getElementById('outcomes');
       
       if (topic && subject && grade) {
-        // Default outcomes template with topic included
         const defaultOutcomes = `By the end of the ${subject} lesson on "${topic}" for ${grade}, students should be able to:
 1. 
 2. 
 3. 
 4. `;
         
-        // Only set if the field is empty or has very little content
         if (!outcomesField.value.trim() || outcomesField.value.trim().length < 50) {
           outcomesField.value = defaultOutcomes;
         }
@@ -735,46 +865,7 @@
     function autoSaveData() {
       const planData = collectAllData();
       localStorage.setItem('lessonPlanData', JSON.stringify(planData));
-      console.log('Auto-saved data');
     }
-    
-    // Load saved data on startup
-    document.addEventListener('DOMContentLoaded', function() {
-      const savedData = localStorage.getItem('lessonPlanData');
-      if (savedData) {
-        try {
-          const data = JSON.parse(savedData);
-          
-          // Load form data
-          for (const key in data) {
-            const element = document.getElementById(key);
-            if (element) {
-              element.value = data[key];
-            }
-          }
-          
-          console.log('Data loaded from localStorage');
-        } catch (e) {
-          console.error('Error loading saved data:', e);
-        }
-      }
-      
-      // Clear table initially
-      clearTable();
-      
-      // Set up auto-save on input changes with debounce
-      const inputs = document.querySelectorAll('input, textarea');
-      let saveTimeout;
-      
-      inputs.forEach(input => {
-        input.addEventListener('input', function() {
-          clearTimeout(saveTimeout);
-          saveTimeout = setTimeout(autoSaveData, 1000); // Save after 1 second of inactivity
-        });
-      });
-      
-      updateProgressBar();
-    });
     
     // Clear table function
     function clearTable() {
@@ -794,11 +885,12 @@
       });
     }
     
-    // Clear all text (ChatGPT explanation and table)
+    // Clear all text
     function clearAllText() {
       if (confirm('Clear ALL text including ChatGPT explanation and table content?')) {
         document.getElementById('chatgptExplanation').value = '';
         clearTable();
+        trackEvent('action', 'clear_all_text', 'User cleared all text');
       }
     }
     
@@ -863,20 +955,17 @@
         return;
       }
       
-      // Auto-save before generating outline
+      trackEvent('action', 'generate_outline', 'User generated lesson outline');
       autoSaveData();
       
       document.getElementById(`flow${currentFlow}`).classList.remove('active');
       currentFlow = 4;
       document.getElementById(`flow${currentFlow}`).classList.add('active');
       updateProgressBar();
-      
-      // Don't fill default activities anymore - table starts empty
-      
       window.scrollTo(0, 0);
     }
     
-    // Open ChatGPT with pre-filled query - UPDATED TO INCLUDE 2 EXERCISES
+    // Open ChatGPT with pre-filled query
     function openChatGPT() {
       const topic = document.getElementById('topic').value || 'lesson topic';
       const grade = document.getElementById('grade').value || 'Grade 8';
@@ -890,66 +979,36 @@
 IMPORTANT FORMATTING INSTRUCTIONS:
 You MUST structure your response EXACTLY as shown below. Use ONLY these section names and labels:
 
-[START FORMAT]
 INTRODUCTION SECTION
-TEACHER ACTIVITIES: [Detailed teacher activities for introduction. Start with "Teacher:" and use bullet points with "-" for each activity. After each sentence ending with a period, start a new line with "-" for the next activity.]
-LEARNER ACTIVITIES: [Detailed learner activities for introduction. Start with "Learners:" and use bullet points with "-" for each activity. After each sentence ending with a period, start a new line with "-" for the next activity.]
+TEACHER ACTIVITIES: [Detailed teacher activities for introduction. Start with "Teacher:" and use bullet points with "-" for each activity.]
+LEARNER ACTIVITIES: [Detailed learner activities for introduction. Start with "Learners:" and use bullet points with "-" for each activity.]
 
 PRESENTATION SECTION
-TEACHER ACTIVITIES: [Detailed teacher activities for presentation. Start with "Teacher:" and use bullet points with "-" for each activity. After each sentence ending with a period, start a new line with "-" for the next activity.]
-LEARNER ACTIVITIES: [Detailed learner activities for presentation. Start with "Learners:" and use bullet points with "-" for each activity. After each sentence ending with a period, start a new line with "-" for the next activity.]
+TEACHER ACTIVITIES: [Detailed teacher activities for presentation. Start with "Teacher:" and use bullet points with "-" for each activity.]
+LEARNER ACTIVITIES: [Detailed learner activities for presentation. Start with "Learners:" and use bullet points with "-" for each activity.]
 
 PRACTICE SECTION
-TEACHER ACTIVITIES: [Detailed teacher activities for practice. Start with "Teacher:" and use bullet points with "-" for each activity. After each sentence ending with a period, start a new line with "-" for the next activity.]
-LEARNER ACTIVITIES: [Detailed learner activities for practice. Start with "Learners:" and use bullet points with "-" for each activity. After each sentence ending with a period, start a new line with "-" for the next activity.]
+TEACHER ACTIVITIES: [Detailed teacher activities for practice. Start with "Teacher:" and use bullet points with "-" for each activity.]
+LEARNER ACTIVITIES: [Detailed learner activities for practice. Start with "Learners:" and use bullet points with "-" for each activity.]
 
 PRODUCTION SECTION
-TEACHER ACTIVITIES: [Detailed teacher activities for production. Start with "Teacher:" and use bullet points with "-" for each activity. Include TWO specific exercises related to "${topic}" for students to complete.]
-LEARNER ACTIVITIES: [Detailed learner activities for production. Start with "Learners:" and use bullet points with "-" for each activity. Include completion of TWO exercises: 1) [First exercise description] 2) [Second exercise description]]
+TEACHER ACTIVITIES: [Detailed teacher activities for production. Start with "Teacher:" and use bullet points with "-" for each activity.]
+LEARNER ACTIVITIES: [Detailed learner activities for production. Start with "Learners:" and use bullet points with "-" for each activity.]
 
 CONCLUSION SECTION
-TEACHER ACTIVITIES: [Detailed teacher activities for conclusion. Start with "Teacher:" and use bullet points with "-" for each activity. After each sentence ending with a period, start a new line with "-" for the next activity.]
-LEARNER ACTIVITIES: [Detailed learner activities for conclusion. Start with "Learners:" and use bullet points with "-" for each activity. After each sentence ending with a period, start a new line with "-" for the next activity.]
-[END FORMAT]
+TEACHER ACTIVITIES: [Detailed teacher activities for conclusion. Start with "Teacher:" and use bullet points with "-" for each activity.]
+LEARNER ACTIVITIES: [Detailed learner activities for conclusion. Start with "Learners:" and use bullet points with "-" for each activity.]
 
 Additional context:
 - Lesson type: ${lessonType}
 - Specific outcomes: ${outcomes}
 - Duration: ${duration}
 - Include hands-on, interactive activities
-- Make it practical for classroom implementation
-- For PRODUCTION section, include TWO specific exercises related to the topic
-
-IMPORTANT: Each activity section must start with either "Teacher:" or "Learners:" exactly once at the beginning. Use bullet points with "-" for each separate activity.`;
+- Make it practical for classroom implementation`;
 
       const url = `https://chat.openai.com/?q=${encodeURIComponent(query)}`;
       window.open(url, '_blank');
-    }
-    
-    // Format activities with proper bullet points
-    function formatActivitiesWithBullets(text, role) {
-      if (!text) return '';
-      
-      // Remove existing "Teacher:" or "Learners:" if present
-      text = text.replace(/^(Teacher|Learners):\s*/i, '');
-      
-      // Split by sentences ending with period
-      const sentences = text.split(/(?<=\.)\s+/).filter(s => s.trim());
-      
-      // Format with role prefix and bullet points
-      let formatted = `${role}: `;
-      sentences.forEach((sentence, index) => {
-        const trimmed = sentence.trim();
-        if (trimmed) {
-          if (index === 0) {
-            formatted += `- ${trimmed}`;
-          } else {
-            formatted += `\n- ${trimmed}`;
-          }
-        }
-      });
-      
-      return formatted;
+      trackEvent('action', 'open_chatgpt', `Topic: ${topic}`);
     }
     
     // Process with circular progress
@@ -960,6 +1019,8 @@ IMPORTANT: Each activity section must start with either "Teacher:" or "Learners:
         return;
       }
       
+      trackEvent('action', 'process_chatgpt', 'User processed ChatGPT explanation');
+      
       // Show progress overlay
       const overlay = document.getElementById('progressOverlay');
       const progressCircle = document.getElementById('progressCircle');
@@ -969,7 +1030,6 @@ IMPORTANT: Each activity section must start with either "Teacher:" or "Learners:
       overlay.style.display = 'flex';
       let progress = 0;
       
-      // Simulate 30 seconds progress
       const interval = setInterval(() => {
         progress += 1;
         const percent = Math.min(progress, 100);
@@ -978,9 +1038,8 @@ IMPORTANT: Each activity section must start with either "Teacher:" or "Learners:
         
         if (progress >= 100) {
           clearInterval(interval);
-          progressText.textContent = 'Processing complete! Filling table...';
+          progressText.textContent = 'Processing complete!';
           
-          // Process the explanation
           setTimeout(() => {
             try {
               const sections = extractSectionsWithRegex(explanation);
@@ -989,23 +1048,26 @@ IMPORTANT: Each activity section must start with either "Teacher:" or "Learners:
                 fillTableFromSections(sections);
                 overlay.style.display = 'none';
                 alert('✓ Table filled successfully! All 10 cells updated.');
+                trackEvent('action', 'table_filled_success', 'ChatGPT explanation successfully filled table');
               } else {
                 const fallbackSections = extractSectionsFallback(explanation);
                 if (validateSections(fallbackSections)) {
                   fillTableFromSections(fallbackSections);
                   overlay.style.display = 'none';
-                  alert('✓ Table filled using alternative parsing. Please review.');
+                  alert('✓ Table filled using alternative parsing.');
+                  trackEvent('action', 'table_filled_fallback', 'Used fallback parsing method');
                 } else {
                   throw new Error('Could not extract all sections');
                 }
               }
             } catch (error) {
               overlay.style.display = 'none';
-              alert('⚠️ Format not recognized. Please ensure you copied the EXACT format from ChatGPT. Click "OPEN CHATGPT" for the correct format.');
+              alert('⚠️ Format not recognized. Please ensure you copied the EXACT format from ChatGPT.');
+              trackEvent('error', 'chatgpt_format_error', 'ChatGPT format not recognized');
             }
-          }, 1000);
+          }, 500);
         }
-      }, 300); // 30 seconds total (300ms * 100 = 30 seconds)
+      }, 200);
     }
     
     // Extract sections with REGEX
@@ -1053,9 +1115,7 @@ IMPORTANT: Each activity section must start with either "Teacher:" or "Learners:
         .replace(/^[:\-\s]+/, '')
         .replace(/[:\-\s]+$/, '')
         .replace(/\b(Teacher|Learner|Student)\s+Activities?\s*:/gi, '')
-        .trim()
-        .replace(/\.\s*\./g, '.')
-        .replace(/\s+([.,;])/g, '$1');
+        .trim();
     }
     
     // Extract by sequence
@@ -1117,59 +1177,41 @@ IMPORTANT: Each activity section must start with either "Teacher:" or "Learners:
     function splitTeacherStudentSmart(text) {
       const result = { teacher: '', student: '' };
       
-      const separators = [' then ', ' and ', ' while ', ' after ', ' subsequently ', ' followed by '];
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim());
       
-      for (const separator of separators) {
-        if (text.toLowerCase().includes(separator)) {
-          const parts = text.split(new RegExp(separator, 'i'));
-          if (parts.length >= 2) {
-            result.teacher = parts[0].trim();
-            result.student = parts.slice(1).join(' ').trim();
-            break;
-          }
-        }
-      }
-      
-      if (!result.teacher && !result.student) {
-        const sentences = text.split(/[.!?]+/).filter(s => s.trim());
+      sentences.forEach(sentence => {
+        const lower = sentence.toLowerCase();
         
-        sentences.forEach(sentence => {
-          const lower = sentence.toLowerCase();
-          
-          const teacherIndicators = [
-            'teacher will', 'teacher explains', 'teacher demonstrates', 'teacher shows',
-            'teacher presents', 'teacher models', 'teacher asks', 'teacher writes',
-            'teacher guides', 'teacher facilitates', 'teacher reviews', 'teacher summarizes'
-          ];
-          
-          const studentIndicators = [
-            'students will', 'students practice', 'students work', 'students complete',
-            'students answer', 'students respond', 'students write', 'students read',
-            'students discuss', 'students create', 'students present', 'students apply',
-            'learners will', 'learners practice', 'learners work', 'learners complete'
-          ];
-          
-          let teacherScore = 0;
-          let studentScore = 0;
-          
-          teacherIndicators.forEach(indicator => {
-            if (lower.includes(indicator)) teacherScore++;
-          });
-          
-          studentIndicators.forEach(indicator => {
-            if (lower.includes(indicator)) studentScore++;
-          });
-          
-          if (teacherScore > studentScore) {
-            result.teacher += sentence.trim() + '. ';
-          } else if (studentScore > teacherScore) {
-            result.student += sentence.trim() + '. ';
-          } else {
-            result.teacher += sentence.trim() + '. ';
-            result.student += sentence.trim() + '. ';
-          }
+        const teacherIndicators = [
+          'teacher will', 'teacher explains', 'teacher demonstrates', 'teacher shows',
+          'teacher presents', 'teacher models', 'teacher asks', 'teacher writes'
+        ];
+        
+        const studentIndicators = [
+          'students will', 'students practice', 'students work', 'students complete',
+          'students answer', 'students respond', 'students write', 'students read',
+          'learners will', 'learners practice', 'learners work', 'learners complete'
+        ];
+        
+        let teacherScore = 0;
+        let studentScore = 0;
+        
+        teacherIndicators.forEach(indicator => {
+          if (lower.includes(indicator)) teacherScore++;
         });
-      }
+        
+        studentIndicators.forEach(indicator => {
+          if (lower.includes(indicator)) studentScore++;
+        });
+        
+        if (teacherScore > studentScore) {
+          result.teacher += sentence.trim() + '. ';
+        } else if (studentScore > teacherScore) {
+          result.student += sentence.trim() + '. ';
+        } else {
+          result.teacher += sentence.trim() + '. ';
+        }
+      });
       
       result.teacher = cleanText(result.teacher);
       result.student = cleanText(result.student);
@@ -1191,7 +1233,7 @@ IMPORTANT: Each activity section must start with either "Teacher:" or "Learners:
         }
       }
       
-      return filledCount >= requiredFields * 0.8;
+      return filledCount >= requiredFields * 0.7;
     }
     
     // Fallback extraction
@@ -1203,11 +1245,31 @@ IMPORTANT: Each activity section must start with either "Teacher:" or "Learners:
     function cleanText(text) {
       if (!text) return '';
       return text
-        .replace(/[^\w\s.,:;!?()\-'"\n]/g, '')
         .replace(/\s+/g, ' ')
-        .replace(/\s([.,:;!?)])/g, '$1')
-        .replace(/([.,:;!?(])\s/g, '$1 ')
         .trim();
+    }
+    
+    // Format activities
+    function formatActivitiesWithBullets(text, role) {
+      if (!text) return '';
+      
+      text = text.replace(/^(Teacher|Learners):\s*/i, '');
+      
+      const sentences = text.split(/(?<=\.)\s+/).filter(s => s.trim());
+      
+      let formatted = `${role}: `;
+      sentences.forEach((sentence, index) => {
+        const trimmed = sentence.trim();
+        if (trimmed) {
+          if (index === 0) {
+            formatted += `- ${trimmed}`;
+          } else {
+            formatted += `\n- ${trimmed}`;
+          }
+        }
+      });
+      
+      return formatted;
     }
     
     // Fill table with extracted sections
@@ -1234,11 +1296,12 @@ IMPORTANT: Each activity section must start with either "Teacher:" or "Learners:
       }
     }
     
-    // Manual save function (optional backup)
+    // Manual save function
     function saveAllData() {
       const planData = collectAllData();
       localStorage.setItem('lessonPlanData', JSON.stringify(planData));
       alert('✅ All data saved successfully!');
+      trackEvent('action', 'save_data', 'User saved lesson plan data');
     }
     
     // Collect all form and table data
@@ -1255,37 +1318,36 @@ IMPORTANT: Each activity section must start with either "Teacher:" or "Learners:
       return formData;
     }
     
-    // Generate PDF in A4 Horizontal format with Times New Roman font and adjusted margins
+    // Generate PDF function
     function generatePDF() {
       const data = collectAllData();
       
-      // Create PDF in A4 Landscape format
+      trackEvent('action', 'generate_pdf', `Subject: ${data.subject || 'Unknown'}`);
+      
       const doc = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
         format: 'a4'
       });
       
-      // Set Times New Roman font for entire document
       doc.setFont('times');
       doc.setFontSize(12);
       
-      // Set margins: 2cm left, 1.5cm right (alargando mais para direita)
-      const pageWidth = 297; // A4 landscape width in mm
-      const pageHeight = 210; // A4 landscape height in mm
-      const leftMargin = 20; // 2 cm
-      const rightMargin = 15; // 1.5 cm (reduzido para alargar tabela para direita)
-      const topMargin = 15; // 1.5 cm
+      const pageWidth = 297;
+      const pageHeight = 210;
+      const leftMargin = 20;
+      const rightMargin = 15;
+      const topMargin = 15;
       const contentWidth = pageWidth - leftMargin - rightMargin;
       
-      // Header - SCHOOL INFORMATION
+      // Header
       doc.setFontSize(16);
       doc.setFont('times', 'bold');
       doc.text('LESSON PLAN', pageWidth / 2, topMargin + 5, { align: 'center' });
       
       let y = topMargin + 15;
       
-      // School Information Section
+      // School Information
       doc.setFontSize(12);
       doc.setFont('times', 'bold');
       doc.text('SCHOOL:', leftMargin, y);
@@ -1421,7 +1483,7 @@ IMPORTANT: Each activity section must start with either "Teacher:" or "Learners:
         ]
       ];
       
-      // Create table using autoTable with Times New Roman font and adjusted margins
+      // Create table using autoTable
       doc.autoTable({
         startY: y,
         head: [['STAGES', 'TEACHER\'S ACTIVITIES', 'LEARNER\'S ACTIVITIES', 'TIME']],
@@ -1435,7 +1497,7 @@ IMPORTANT: Each activity section must start with either "Teacher:" or "Learners:
           lineWidth: 0.2,
           overflow: 'linebreak',
           halign: 'left',
-          textColor: [0, 0, 0] // Full black
+          textColor: [0, 0, 0]
         },
         headStyles: { 
           fillColor: [43, 93, 171],
@@ -1446,17 +1508,14 @@ IMPORTANT: Each activity section must start with either "Teacher:" or "Learners:
         },
         columnStyles: {
           0: { cellWidth: 30, halign: 'center', fontStyle: 'bold' },
-          1: { cellWidth: (contentWidth - 70) / 2 + 10, fontSize: 10 }, // Alargado para direita
-          2: { cellWidth: (contentWidth - 70) / 2 + 10, fontSize: 10 }, // Alargado para direita
+          1: { cellWidth: (contentWidth - 70) / 2 + 10, fontSize: 10 },
+          2: { cellWidth: (contentWidth - 70) / 2 + 10, fontSize: 10 },
           3: { cellWidth: 20, halign: 'center' }
         },
         margin: { left: leftMargin, right: rightMargin },
-        tableWidth: contentWidth + 10, // Alargado
+        tableWidth: contentWidth + 10,
         pageBreak: 'auto',
-        showHead: 'firstPage',
-        didDrawPage: function(data) {
-          // Don't repeat headers on subsequent pages
-        }
+        showHead: 'firstPage'
       });
       
       // Save PDF
