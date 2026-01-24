@@ -2,87 +2,61 @@ const CACHE_NAME = 'plano-aula-v3.3.1';
 const DYNAMIC_CACHE = 'plano-aula-dynamic-v1';
 
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/sobre.html',
-  '/termos.html',
-  '/planovip.html',
-  '/planogratis.html',
-  '/ingles.html',
-  '/abano.html',
-  '/plano_quinzenal.html',
-  '/.well-known/assetlinks.json',
-  '/icon-192x192.png',
-  '/manifest.json'
+  '/', '/index.html', /* ... demais páginas */
 ];
 
-// ==================== INSTALAÇÃO ====================
 self.addEventListener('install', event => {
   self.skipWaiting();
+  // Opcional: ainda pode precachear, mas NÃO usará offline
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      console.log('Cache instalado:', CACHE_NAME);
-      return cache.addAll(urlsToCache);
+      return cache.addAll(urlsToCache).catch(err => {
+        console.warn('Falha ao cachear alguns recursos:', err);
+      });
     })
   );
 });
 
-// ==================== FETCH ====================
+// 👇 FETCH: SEMPRE tenta da rede, NUNCA usa cache como fallback
 self.addEventListener('fetch', event => {
+  // Ignora extensões do Chrome
   if (event.request.url.startsWith('chrome-extension://')) return;
 
-  // Para navegação HTML
+  // Para navegação (HTML)
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          const responseClone = response.clone();
-          caches.open(DYNAMIC_CACHE).then(cache => {
-            cache.put(event.request, responseClone);
-          });
-          return response;
-        })
-        .catch(() => {
-          // Se offline, serve do cache ou index.html
-          return caches.match(event.request)
-            .then(res => res || caches.match('/index.html'));
-        })
+      fetch(event.request).catch(() => {
+        // Está offline → não permite carregar página
+        return new Response('<h1>Offline</h1><p>É necessário estar conectado à internet para acessar este conteúdo.</p>', {
+          headers: { 'Content-Type': 'text/html' },
+          status: 503,
+          statusText: 'Service Unavailable'
+        });
+      })
     );
     return;
   }
 
-  // Outros recursos: cache-first
+  // Para outros recursos (CSS, JS, imagens, etc.)
   event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      const fetchPromise = fetch(event.request).then(networkResponse => {
-        caches.open(DYNAMIC_CACHE).then(cache => {
-          cache.put(event.request, networkResponse.clone());
-        });
-        return networkResponse;
-      }).catch(() => cachedResponse);
-      return cachedResponse || fetchPromise;
+    fetch(event.request).catch(() => {
+      // Opcional: pode retornar um recurso vazio ou erro
+      return new Response('', { status: 503 });
     })
   );
 });
 
-// ==================== ATIVAÇÃO ====================
+// Ativação (mantém limpeza, mas opcional)
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (![CACHE_NAME, DYNAMIC_CACHE].includes(cacheName)) {
-            console.log('Removendo cache antigo:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     }).then(() => clients.claim())
   );
-});
-
-// ==================== MENSAGENS ====================
-self.addEventListener('message', event => {
-  if (event.data === 'SKIP_WAITING') self.skipWaiting();
-  if (event.data === 'UPDATE_CACHE') self.registration.update();
 });
