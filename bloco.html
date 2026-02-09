@@ -339,7 +339,7 @@
 
             // Variável para controlar se o mural foi adicionado
             let muralAdicionado = false;
-            const precoMural = 5; // 5 MZN por aula
+            const precoMural = 5; // 5 MZN fixos
 
             // Ir para etapa 2
             function goToStep2() {
@@ -366,7 +366,7 @@
             // Evento do botão do mural
             if (muralBtn) {
                 muralBtn.addEventListener('click', function () {
-                    if (confirm('Tem a certeza que pretende adicionar 1 página de Quadro Mural por aula?\n\nIsso irá adicionar uma página vertical adicional a cada aula e acrescentará 5 MZN por aula ao valor total.')) {
+                    if (confirm('Tem a certeza que pretende adicionar 1 página de Quadro Mural?\n\nIsso irá adicionar uma página vertical adicional e acrescentará 5 MZN ao valor total.')) {
                         muralAdicionado = true;
                         this.classList.remove('btn-outline');
                         this.classList.add('btn-mural-added');
@@ -384,13 +384,13 @@
             function updatePrice() {
                 const numAulas = parseInt(numAulasSelect.value);
                 if (numAulas) {
-                    // Calcular valor base: cada 10 aulas = 50 MZN
+                    // Calcular valor base: cada 10 aulas = 12 MZN
                     let total = Math.ceil(numAulas / 10) * 12;
                     
-                    // Adicionar 5 MZN por aula se o mural foi adicionado
+                    // Adicionar 5 MZN FIXOS (não por aula) se o mural foi adicionado
                     if (muralAdicionado) {
-                        total += numAulas * 5;
-                        muralInfo.textContent = `Inclui ${numAulas} páginas de Quadro Mural (+5 MZN por aula)`;
+                        total += 5; // Apenas 5 MZN fixos, não por aula
+                        muralInfo.textContent = `Inclui 1 página de Quadro Mural (+5 MZN)`;
                         muralInfo.style.display = 'block';
                     } else {
                         muralInfo.textContent = '';
