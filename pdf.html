@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerar PDF - Bloco de Planificação</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Times New Roman', serif; }
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; line-height: 1.6; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+        .container { max-width: 800px; margin: 0 auto; background-color: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); padding: 40px; text-align: center; position: relative; }
+        .blurred { filter: blur(5px); opacity: 0.5; transition: all 0.5s ease; pointer-events: none; }
+        h1 { color: #2c3e50; margin-bottom: 20px; font-size: 28px; font-family: 'Times New Roman', serif; }
+        .processing-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.5s ease; }
+        .processing-overlay.active { opacity: 1; visibility: visible; }
+        .spinner-container { position: relative; width: 200px; height: 200px; margin-bottom: 30px; }
+        .spinner { width: 100%; height: 100%; border: 8px solid rgba(52, 152, 219, 0.2); border-top: 8px solid #3498db; border-radius: 50%; animation: spin 2s linear infinite; }
+        .percentage-circle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 48px; font-weight: bold; color: #2c3e50; }
+        .status-text { font-size: 24px; color: #2c3e50; font-weight: bold; margin-bottom: 10px; font-family: 'Times New Roman', serif; }
+        .status-subtext { font-size: 18px; color: #7f8c8d; font-family: 'Times New Roman', serif; }
+        .btn-group { display: flex; gap: 15px; margin-top: 30px; justify-content: center; flex-wrap: wrap; }
+        .btn { padding: 15px 30px; font-size: 16px; border-radius: 8px; cursor: pointer; transition: all 0.3s; font-weight: 600; border: none; text-decoration: none; display: inline-block; min-width: 180px; font-family: 'Times New Roman', serif; }
+        .primary-btn { background: linear-gradient(135deg, #3498db, #2980b9); color: white; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3); }
+        .primary-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4); }
+        .secondary-btn { background: linear-gradient(135deg, #95a5a6, #7f8c8d); color: white; box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3); }
+        .secondary-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4); }
+        .success-btn { background: linear-gradient(135deg, #27ae60, #219653); color: white; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3); }
+        .success-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4); }
+        .info-box { background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 10px; padding: 25px; margin: 20px 0; text-align: left; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); font-family: 'Times New Roman', serif; }
+        .info-box h3 { color: #2c3e50; margin-bottom: 15px; font-size: 20px; font-family: 'Times New Roman', serif; }
+        .info-row { display: flex; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #ddd; }
+        .info-label { font-weight: 600; width: 150px; color: #555; font-family: 'Times New Roman', serif; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .hidden { display: none !important; }
+        .visible { display: flex !important; animation: fadeIn 0.5s; }
+        .loading { font-size: 18px; color: #3498db; margin: 20px 0; font-family: 'Times New Roman', serif; }
+        .success-message { margin: 30px 0; text-align: center; }
+        .success-message h2 { color: #27ae60; font-size: 28px; margin-bottom: 10px; }
+        .success-message p { font-size: 18px; color: #555; margin-bottom: 20px; }
+        .progress-stages { margin-top: 20px; width: 80%; max-width: 400px; }
+        .progress-stage { display: flex; align-items: center; margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px; transition: all 0.3s; }
+        .progress-stage.active { background: #e3f2fd; border-left: 4px solid #3498db; }
+        .stage-check { width: 24px; height: 24px; border-radius: 50%; background: #ddd; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: white; font-size: 12px; }
+        .stage-check.completed { background: #27ae60; }
+        .stage-text { flex: 1; text-align: left; font-size: 14px; }
+        .stage-text.completed { color: #27ae60; font-weight: bold; }
+        .countdown-timer { font-size: 20px; color: #e74c3c; font-weight: bold; margin: 20px 0; font-family: 'Times New Roman', serif; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        .data-review { margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 10px; border-left: 4px solid #3498db; }
+        .countdown-box { margin: 20px auto; padding: 15px 30px; background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); border-radius: 10px; max-width: 300px; box-shadow: 0 4px 15px rgba(255, 154, 158, 0.3); }
+        
+        /* Modal de Pagamento */
+        .payment-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .payment-modal.active { opacity: 1; visibility: visible; }
+        .payment-content { 
+            background: white; 
+            border-radius: 15px; 
+            width: 90%; 
+            max-width: 500px; 
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px; 
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); 
+            transform: translateY(20px); 
+            transition: transform 0.3s ease; 
+        }
+        .payment-modal.active .payment-content { transform: translateY(0); }
+        
+        .payment-header { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center; }
+        .payment-header h3 { font-size: 20px; margin-bottom: 8px; }
+        .payment-header p { font-size: 14px; opacity: 0.9; }
+        
+        .payment-step { margin-bottom: 15px; }
+        .payment-step h4 { font-size: 16px; margin-bottom: 10px; color: #333; }
+        
+        .aula-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
+        .aula-btn { padding: 10px 6px; background: #f3f4f6; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.3s; font-weight: 600; color: #374151; font-size: 13px; }
+        .aula-btn:hover { background: #e5e7eb; }
+        .aula-btn.selected { background: #4f46e5; color: white; border-color: #4f46e5; }
+        
+        .code-input { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 16px; letter-spacing: 1px; text-transform: uppercase; text-align: center; font-weight: bold; margin: 10px 0; }
+        .code-input:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        
+        .payment-loader { display: none; text-align: center; margin: 15px 0; }
+        .payment-spinner { border: 4px solid #f3f4f6; border-top: 4px solid #4f46e5; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 10px; }
+        
+        .payment-result { margin: 15px 0; padding: 12px; border-radius: 10px; display: none; font-size: 14px; }
+        .payment-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .payment-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        
+        /* Estilo da seção de pagamento E-Mola */
+        .payment-mpesa {
+            margin-top: 15px;
+            padding: 12px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-radius: 8px;
+            border-left: 3px solid #10b981;
+            font-size: 13px;
+        }
+        .payment-mpesa h4 {
+            color: #065f46;
+            margin-bottom: 8px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .payment-mpesa-details {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+        .payment-mpesa-details p {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .copy-btn {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s;
+        }
+        .copy-btn:hover {
+            background: #3730a3;
+            transform: translateY(-1px);
+        }
+        .copy-btn.copied {
+            background: #10b981;
+        }
+        
+        /* Estilo do botão de validação */
+        .validate-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin-top: 10px;
+        }
+        .validate-btn:hover { transform: translateY(-2px); }
+        .validate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .test-code-info { 
+            margin-top: 12px; 
+            padding: 8px; 
+            background: #fff3cd; 
+            border: 1px solid #ffecb5; 
+            border-radius: 6px; 
+            color: #856404;
+            font-size: 12px;
+        }
+        .test-code-info strong { color: #856404; }
+    </style>
+</head>
+<body>
+    <div id="processingOverlay" class="processing-overlay">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            <div class="percentage-circle" id="percentageCircle">0%</div>
+        </div>
+        <div class="status-text" id="statusText">Iniciando Processo</div>
+        <div class="status-subtext" id="statusSubtext">Preparando a geração do PDF...</div>
+        <div class="progress-stages">
+            <div class="progress-stage" id="stage1">
+                <div class="stage-check">1</div>
+                <div class="stage-text">Carregando Dados</div>
+            </div>
+            <div class="progress-stage" id="stage2">
+                <div class="stage-check">2</div>
+                <div class="stage-text">Processando Informações</div>
+            </div>
+            <div class="progress-stage" id="stage3">
+                <div class="stage-check">3</div>
+                <div class="stage-text">Gerando PDF</div>
+            </div>
+            <div class="progress-stage" id="stage4">
+                <div class="stage-check">4</div>
+                <div class="stage-text">Finalizando</div>
+            </div>
+        </div>
+        <div id="countdownTimer" class="countdown-timer hidden"></div>
+    </div>
+    
+    <div id="paymentModal" class="payment-modal">
+        <div class="payment-content">
+            <div class="payment-header">
+                <h3>🔐 VALIDAR CÓDIGO DE ACESSO</h3>
+                <p>Insira seu código para liberar o download</p>
+            </div>
+            
+            <!-- Passo 1: Selecionar tipo de aula -->
+            <div class="payment-step">
+                <h4>1. Selecione seu pacote:</h4>
+                <div class="aula-buttons" id="aulaButtons">
+                    <button class="aula-btn" data-aula="10 aulas">10 AULAS</button>
+                    <button class="aula-btn" data-aula="20 aulas">20 AULAS</button>
+                    <button class="aula-btn" data-aula="30 aulas">30 AULAS</button>
+                    <button class="aula-btn" data-aula="40 aulas">40 AULAS</button>
+                    <button class="aula-btn" data-aula="50 aulas">50 AULAS</button>
+                    <button class="aula-btn" data-aula="60 aulas">60 AULAS</button>
+                </div>
+            </div>
+            
+            <!-- Passo 2: Inserir código -->
+            <div class="payment-step">
+                <h4>2. Insira seu código:</h4>
+                <input type="text" id="codigoInput" class="code-input" placeholder="Selecione o pacote primeiro" maxlength="20" disabled>
+            </div>
+            
+            <!-- Botão de validação -->
+            <button id="validarBtn" class="validate-btn" disabled>
+                ✅ VALIDAR CÓDIGO E LIBERAR DOWNLOAD
+            </button>
+            
+            <!-- Seção de pagamento M-Pesa -->
+            <div class="payment-mpesa">
+                <h4>📱 Pagamento por E-Mola</h4>
+                <p>Para obter um código, faça o pagamento para:</p>
+                <div class="payment-mpesa-details">
+                    <p><strong>Número:</strong> 876393961 
+                        <button id="copyNumberBtn" class="copy-btn">Copiar</button>
+                    </p>
+                    <p><strong>Nome:</strong> Edmilson Bartolomeu Nhanombe</p>
+                    <p><em>Após o pagamento, você receberá um código de confirmação via SMS.</em></p>
+                </div>
+            </div>
+            
+            <!-- Loader -->
+            <div class="payment-loader" id="paymentLoader">
+                <div class="payment-spinner"></div>
+                <p>Validando código...</p>
+            </div>
+            
+            <!-- Resultado -->
+            <div class="payment-result" id="paymentResult"></div>
+            
+            <div class="test-code-info">
+            </div>
+        </div>
+    </div>
+    
+    <div class="container" id="mainContainer">
+        <h1>Gerando PDF do Bloco de Planificação</h1>
+        <div id="infoContainer" class="info-box"></div>
+        <div id="loadingSection">
+            <div class="data-review">
+                <p>Verifique os dados acima antes de iniciar a geração do PDF.</p>
+                <p>A geração começará automaticamente em <span id="countdownDisplay">10</span> segundos...</p>
+            </div>
+            <div class="btn-group">
+                <button id="generatePdfBtn" class="btn primary-btn">Iniciar Geração do PDF Agora</button>
+                <a href="index.html" class="btn secondary-btn">Voltar ao Formulário</a>
+            </div>
+        </div>
+        <div id="successSection" class="hidden">
+            <div class="success-message">
+                <h2>✅ PDF Gerado com Sucesso!</h2>
+                <p>Seu bloco de planificação está pronto para download.</p>
+                <p style="color: #666; font-size: 16px;">
+                    O PDF foi gerado com <span id="totalPaginasGeradas">0</span> páginas.
+                </p>
+            </div>
+            <div class="btn-group">
+                <button id="downloadPdfBtn" class="btn success-btn">📥 Baixar PDF</button>
+                <a href="index.html" class="btn secondary-btn">Criar Novo Bloco</a>
+            </div>
+            <div class="info-box" style="margin-top: 20px; text-align: center;">
+                <p><em>Para gerar outro PDF, você precisará de um novo código de acesso.</em></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const dados = {
+                escola: urlParams.get('escola') || '',
+                professor: urlParams.get('professor') || '',
+                disciplina: urlParams.get('disciplina') || '',
+                classe: urlParams.get('classe') || '',
+                anoLectivo: urlParams.get('anoLectivo') || '',
+                numAulas: parseInt(urlParams.get('numAulas')) || 0,
+                dataGeracao: urlParams.get('dataGeracao') || '',
+                periodo: urlParams.get('periodo') || '',
+                muralAdicionado: urlParams.get('muralAdicionado') === '1',
+                valorTotal: urlParams.get('valorTotal') || 0
+            };
+            
+            if (!dados.escola || !dados.professor || !dados.numAulas) {
+                document.getElementById('infoContainer').innerHTML = `
+                    <h3 style="color: #e74c3c;">⚠️ Dados Insuficientes</h3>
+                    <p>Os dados necessários para gerar o PDF não foram fornecidos corretamente.</p>
+                    <p>Por favor, volte ao <a href="index.html">formulário</a> e preencha todos os campos obrigatórios.</p>
+                `;
+                document.getElementById('loadingSection').classList.add('hidden');
+                return;
+            }
+            
+            const processingOverlay = document.getElementById('processingOverlay');
+            const percentageCircle = document.getElementById('percentageCircle');
+            const statusText = document.getElementById('statusText');
+            const statusSubtext = document.getElementById('statusSubtext');
+            const mainContainer = document.getElementById('mainContainer');
+            const loadingSection = document.getElementById('loadingSection');
+            const successSection = document.getElementById('successSection');
+            const generatePdfBtn = document.getElementById('generatePdfBtn');
+            const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+            const infoContainer = document.getElementById('infoContainer');
+            const countdownTimer = document.getElementById('countdownTimer');
+            const countdownDisplay = document.getElementById('countdownDisplay');
+            const stage1 = document.getElementById('stage1');
+            const stage2 = document.getElementById('stage2');
+            const stage3 = document.getElementById('stage3');
+            const stage4 = document.getElementById('stage4');
+            const paymentModal = document.getElementById('paymentModal');
+            const codigoInput = document.getElementById('codigoInput');
+            const validarBtn = document.getElementById('validarBtn');
+            const paymentLoader = document.getElementById('paymentLoader');
+            const paymentResult = document.getElementById('paymentResult');
+            const aulaButtons = document.querySelectorAll('.aula-btn');
+            const copyNumberBtn = document.getElementById('copyNumberBtn');
+            
+            let totalPaginas = dados.numAulas * 2;
+            if (dados.muralAdicionado) totalPaginas += dados.numAulas;
+            totalPaginas += 2;
+            
+            let valorBase = dados.valorTotal;
+            
+            infoContainer.innerHTML = `
+                <h3>📋 Dados do Bloco</h3>
+                <div class="info-row">
+                    <div class="info-label">Escola:</div>
+                    <div>${dados.escola || "Não informado"}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Professor:</div>
+                    <div>${dados.professor || "Não informado"}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Disciplina:</div>
+                    <div>${dados.disciplina || "Não informado"}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Classe:</div>
+                    <div>${dados.classe || "Não informado"}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Ano Lectivo:</div>
+                    <div>${dados.anoLectivo || "Não informado"}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Número de Aulas:</div>
+                    <div>${dados.numAulas} aulas</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Páginas por Aula:</div>
+                    <div>${dados.muralAdicionado ? "3 (2 horizontais + 1 vertical)" : "2 (horizontais)"}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Total de Páginas:</div>
+                    <div>${totalPaginas} páginas</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Quadro Mural:</div>
+                    <div style="color: ${dados.muralAdicionado ? '#27ae60' : '#e74c3c'}; font-weight: bold;">
+                        ${dados.muralAdicionado ? "✓ ADICIONADO (+5 MZN por aula)" : "Não adicionado"}
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Período:</div>
+                    <div>${dados.periodo || "Não informado"}</div>
+                </div>
+                <div class="info-row" style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 15px;">
+                    <div class="info-label">💰 Valor Estimado:</div>
+                    <div style="color: #27ae60; font-weight: bold; font-size: 18px;">
+                        ${valorBase} MZN
+                    </div>
+                </div>
+            `;
+            
+            let dataFormatada = "_____/_________/20______";
+            if (dados.dataGeracao) {
+                const dataObj = new Date(dados.dataGeracao);
+                dataFormatada = dataObj.toLocaleDateString('pt-MZ', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+            
+            let currentPercentage = 0;
+            let pdfDoc = null;
+            let pdfGenerated = false;
+            let progressInterval = null;
+            let countdownInterval = null;
+            let autoStartCountdown = null;
+            let selectedAulaPacote = null;
+            let codigoValidado = false;
+            const totalProcessingTime = 20000;
+            const countdownTime = 10000;
+            const updateInterval = 100;
+            const totalUpdates = totalProcessingTime / updateInterval;
+            const percentagePerUpdate = 100 / totalUpdates;
+            
+            // Variáveis globais para o sistema de pagamento
+            let selectedAula = null;
+            
+            // Configurar botão copiar número
+            copyNumberBtn.addEventListener('click', function() {
+                const phoneNumber = '876393961';
+                navigator.clipboard.writeText(phoneNumber).then(() => {
+                    const originalText = this.textContent;
+                    this.textContent = 'Copiado!';
+                    this.classList.add('copied');
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Erro ao copiar:', err);
+                    alert('Erro ao copiar número. Por favor, copie manualmente: 876393961');
+                });
+            });
+            
+            // Configurar botões de aula do modal de pagamento
+            aulaButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remover seleção anterior
+                    aulaButtons.forEach(b => {
+                        b.classList.remove('selected');
+                    });
+                    
+                    // Selecionar novo
+                    this.classList.add('selected');
+                    selectedAula = this.dataset.aula;
+                    selectedAulaPacote = this.dataset.aula;
+                    
+                    // Habilitar input de código
+                    codigoInput.disabled = false;
+                    codigoInput.placeholder = "EX: ABC123";
+                    codigoInput.focus();
+                    
+                    // Habilitar botão de validação
+                    validarBtn.disabled = false;
+                });
+            });
+            
+            function autoSelectPacote() {
+                const numAulas = dados.numAulas;
+                let pacote;
+                if (numAulas <= 10) pacote = "10 aulas";
+                else if (numAulas <= 20) pacote = "20 aulas";
+                else if (numAulas <= 30) pacote = "30 aulas";
+                else if (numAulas <= 40) pacote = "40 aulas";
+                else if (numAulas <= 50) pacote = "50 aulas";
+                else pacote = "60 aulas";
+                aulaButtons.forEach(btn => {
+                    if (btn.dataset.aula === pacote) {
+                        btn.classList.add('selected');
+                        selectedAula = pacote;
+                        selectedAulaPacote = pacote;
+                        codigoInput.disabled = false;
+                        codigoInput.placeholder = "EX: ABC123";
+                        validarBtn.disabled = false;
+                    }
+                });
+            }
+            
+            // Configurar botão de validação
+            validarBtn.addEventListener('click', validarCodigo);
+            
+            // Configurar input para aceitar Enter
+            codigoInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !validarBtn.disabled) {
+                    validarCodigo();
+                }
+            });
+            
+            // Função para validar código
+            async function validarCodigo() {
+                const codigo = codigoInput.value.trim().toUpperCase();
+                
+                if (!selectedAula) {
+                    showPaymentResult("error", "Selecione o tipo de aula primeiro!");
+                    return;
+                }
+                
+                if (!codigo) {
+                    showPaymentResult("error", "Digite o código!");
+                    return;
+                }
+                
+
+                if (codigo === "") {
+
+                    paymentLoader.style.display = 'block';
+                    paymentResult.style.display = 'none';
+                    validarBtn.disabled = true;
+                    
+                    setTimeout(() => {
+                        paymentLoader.style.display = 'none';
+                        
+                        // Verificar se o pacote é suficiente
+                        const pacoteSelecionado = parseInt(selectedAula.split(' ')[0]);
+                        const aulasSolicitadas = dados.numAulas;
+                        
+                        if (pacoteSelecionado < aulasSolicitadas) {
+                            showPaymentResult("error", `Código válido apenas para ${pacoteSelecionado} aulas. Seu PDF tem ${aulasSolicitadas} aulas.`);
+                            validarBtn.disabled = false;
+                            return;
+                        }
+                        
+                        codigoValidado = true;
+                        showPaymentResult("success", "✅ Código validado com sucesso! Iniciando download...");
+                        
+                        setTimeout(() => {
+                            paymentModal.classList.remove('active');
+                            baixarPDF();
+                        }, 1000);
+                    }, 1500);
+                    return;
+                }
+                
+                // Mostrar loader
+                paymentLoader.style.display = 'block';
+                paymentResult.style.display = 'none';
+                validarBtn.disabled = true;
+                
+                // Obter informações do navegador
+                const userAgent = navigator.userAgent;
+                
+                try {
+                    // NOVO LINK DO GOOGLE APPS SCRIPT
+                    const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyp3DYFfRNt9mcC8sU1hG6cXa5lll0End82ABA1pRDL-lCRWhNdWDmpC1y5Cwee09kx/exec';
+                    
+                    // Fazer chamada para o Google Apps Script
+                    const url = GOOGLE_APPS_SCRIPT_URL + '?tipoAula=' + encodeURIComponent(selectedAula) + '&codigo=' + encodeURIComponent(codigo) + '&userAgent=' + encodeURIComponent(userAgent);
+                    
+                    const response = await fetch(url);
+                    const resultado = await response.json();
+                    
+                    paymentLoader.style.display = 'none';
+                    validarBtn.disabled = false;
+                    
+                    if (resultado.success) {
+                        // Verificar se o pacote é suficiente
+                        const pacoteSelecionado = parseInt(selectedAula.split(' ')[0]);
+                        const aulasSolicitadas = dados.numAulas;
+                        
+                        if (pacoteSelecionado < aulasSolicitadas) {
+                            showPaymentResult("error", `Código válido apenas para ${pacoteSelecionado} aulas. Seu PDF tem ${aulasSolicitadas} aulas.`);
+                            return;
+                        }
+                        
+                        codigoValidado = true;
+                        showPaymentResult("success", "✅ Código validado com sucesso! Iniciando download...");
+                        
+                        setTimeout(() => {
+                            paymentModal.classList.remove('active');
+                            baixarPDF();
+                        }, 1000);
+                        
+                    } else {
+                        // MODIFICAÇÃO AQUI: Tratar mensagem específica do Google Apps Script
+                        let errorMessage = resultado.message || "❌ Código inválido ou já utilizado!";
+                        
+                        // Se a mensagem contiver "Código inválido para o pacote selecionado"
+                        if (errorMessage.includes("Código inválido para o pacote selecionado")) {
+                            errorMessage = "Erro: o código não existe no sistema.";
+                        }
+                        
+                        showPaymentResult("error", errorMessage);
+                    }
+                    
+                } catch (error) {
+                    console.error('Erro na validação:', error);
+                    paymentLoader.style.display = 'none';
+                    validarBtn.disabled = false;
+                    showPaymentResult("error", "Erro ao conectar com o servidor. Tente novamente.");
+                }
+            }
+            
+            function showPaymentResult(tipo, mensagem) {
+                paymentResult.style.display = 'block';
+                paymentResult.className = `payment-result ${tipo === 'success' ? 'payment-success' : 'payment-error'}`;
+                paymentResult.innerHTML = `<p>${mensagem}</p>`;
+            }
+            
+            function updatePercentage(percentage) {
+                currentPercentage = Math.min(percentage, 100);
+                percentageCircle.textContent = `${Math.round(currentPercentage)}%`;
+                [stage1, stage2, stage3, stage4].forEach(stage => {
+                    stage.classList.remove('active');
+                    stage.querySelector('.stage-check').classList.remove('completed');
+                    stage.querySelector('.stage-text').classList.remove('completed');
+                });
+                if (percentage >= 0) stage1.classList.add('active');
+                if (percentage > 25) {
+                    stage1.querySelector('.stage-check').classList.add('completed');
+                    stage1.querySelector('.stage-text').classList.add('completed');
+                    stage2.classList.add('active');
+                }
+                if (percentage > 50) {
+                    stage2.querySelector('.stage-check').classList.add('completed');
+                    stage2.querySelector('.stage-text').classList.add('completed');
+                    stage3.classList.add('active');
+                }
+                if (percentage > 75) {
+                    stage3.querySelector('.stage-check').classList.add('completed');
+                    stage3.querySelector('.stage-text').classList.add('completed');
+                    stage4.classList.add('active');
+                }
+                if (percentage >= 100) {
+                    stage4.querySelector('.stage-check').classList.add('completed');
+                    stage4.querySelector('.stage-text').classList.add('completed');
+                }
+            }
+            
+            function showStatus(message, submessage = "") {
+                statusText.textContent = message;
+                if (submessage) statusSubtext.textContent = submessage;
+            }
+            
+            function startAutoCountdown() {
+                let secondsLeft = countdownTime / 1000;
+                countdownDisplay.textContent = secondsLeft;
+                autoStartCountdown = setInterval(function() {
+                    secondsLeft--;
+                    countdownDisplay.textContent = secondsLeft;
+                    if (secondsLeft <= 0) {
+                        clearInterval(autoStartCountdown);
+                        startGenerationProcess();
+                    }
+                }, 1000);
+            }
+            
+            function startCountdown() {
+                let secondsLeft = 5;
+                countdownTimer.classList.remove('hidden');
+                countdownTimer.textContent = `Iniciando em ${secondsLeft} segundos...`;
+                countdownInterval = setInterval(function() {
+                    secondsLeft--;
+                    countdownTimer.textContent = `Iniciando em ${secondsLeft} segundos...`;
+                    if (secondsLeft <= 0) {
+                        clearInterval(countdownInterval);
+                        countdownTimer.classList.add('hidden');
+                        startPDFGeneration();
+                    }
+                }, 1000);
+            }
+            
+            generatePdfBtn.addEventListener('click', function() {
+                clearInterval(autoStartCountdown);
+                startGenerationProcess();
+            });
+            
+            function startGenerationProcess() {
+                infoContainer.classList.add('hidden');
+                loadingSection.classList.add('hidden');
+                mainContainer.classList.add('blurred');
+                processingOverlay.classList.add('active');
+                generatePdfBtn.disabled = true;
+                generatePdfBtn.textContent = "Gerando...";
+                currentPercentage = 0;
+                updatePercentage(0);
+                showStatus("Preparando Dados", "Analisando informações do formulário...");
+                setTimeout(() => {
+                    startCountdown();
+                }, 1000);
+            }
+            
+            function startPDFGeneration() {
+                currentPercentage = 0;
+                updatePercentage(0);
+                showStatus("Iniciando Processo", "Preparando a geração do PDF...");
+                progressInterval = setInterval(function() {
+                    if (currentPercentage < 100) {
+                        currentPercentage += percentagePerUpdate;
+                        updatePercentage(currentPercentage);
+                        if (currentPercentage < 25) {
+                            showStatus("Carregando Dados", "Obtendo informações do formulário...");
+                        } else if (currentPercentage < 50) {
+                            showStatus("Processando Informações", "Organizando dados para o PDF...");
+                        } else if (currentPercentage < 80) {
+                            showStatus("Gerando PDF", "Criando páginas do bloco de planificação...");
+                        } else {
+                            showStatus("Finalizando", "Preparando para download...");
+                        }
+                    } else {
+                        if (progressInterval) {
+                            clearInterval(progressInterval);
+                        }
+                        if (pdfGenerated) {
+                            completeGeneration();
+                        }
+                    }
+                }, updateInterval);
+                setTimeout(() => {
+                    generatePDF(dados, dataFormatada);
+                }, 1000);
+            }
+            
+            function completeGeneration() {
+                updatePercentage(100);
+                showStatus("Processo Concluído!", "PDF gerado com sucesso!");
+                setTimeout(() => {
+                    processingOverlay.classList.remove('active');
+                    mainContainer.classList.remove('blurred');
+                    successSection.classList.remove('hidden');
+                    document.getElementById('totalPaginasGeradas').textContent = totalPaginas;
+                    document.getElementById('resumoPaginas').textContent = totalPaginas;
+                    document.getElementById('resumoValor').textContent = valorBase + " MZN";
+                    autoSelectPacote();
+                }, 1000);
+            }
+            
+            downloadPdfBtn.addEventListener('click', function() {
+                if (pdfDoc && pdfGenerated) {
+                    paymentModal.classList.add('active');
+                } else {
+                    alert("PDF ainda não foi gerado. Por favor, aguarde.");
+                }
+            });
+            
+            function baixarPDF() {
+                if (pdfDoc && pdfGenerated && codigoValidado) {
+                    const fileName = `Bloco_Planificacao_${dados.professor.replace(/\s+/g, '_')}_${dados.numAulas}_Aulas${dados.muralAdicionado ? '_ComMural' : ''}.pdf`;
+                    pdfDoc.save(fileName);
+                    downloadPdfBtn.disabled = true;
+                    downloadPdfBtn.textContent = "✅ PDF Baixado";
+                } else if (!codigoValidado) {
+                    alert("Código não validado. Por favor, valide primeiro.");
+                } else {
+                    alert("PDF ainda não foi gerado. Por favor, aguarde.");
+                }
+            }
+            
+            paymentModal.addEventListener('click', function(e) {
+                if (e.target === paymentModal) {
+                    paymentModal.classList.remove('active');
+                }
+            });
+            
+            function loadImage(url) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                        const dataUrl = canvas.toDataURL('image/png');
+                        resolve(dataUrl);
+                    };
+                    img.onerror = reject;
+                    img.src = url;
+                });
+            }
+            
+            async function generatePDF(dados, dataFormatada) {
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF({
+                        orientation: 'landscape',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+                    
+                    doc.setProperties({
+                        title: `Bloco de Planificação - ${dados.professor}`,
+                        subject: 'Plano de Aula',
+                        author: 'Plano de Aula MZ',
+                        creator: 'Sistema de Geração de Blocos'
+                    });
+                    
+                    // PÁGINA 1 - CAPA
+                    const marginLeft = 15;
+                    const marginRight = 15;
+                    const marginTop = 15;
+                    const marginBottom = 15;
+                    const usableWidth = 297 - marginLeft - marginRight;
+                    const usableHeight = 210 - marginTop - marginBottom;
+                    
+                    doc.setLineWidth(1.5);
+                    doc.rect(marginLeft, marginTop, usableWidth, usableHeight);
+                    doc.setLineWidth(0.8);
+                    doc.rect(marginLeft + 2, marginTop + 2, usableWidth - 4, usableHeight - 4);
+                    
+                    try {
+                        const imgUrl = 'https://raw.githubusercontent.com/nhanomb3/planodeaula/6143d599ba10a0f35fdf07a14baca1b76518bed3/1770417519977.png';
+                        const imgData = await loadImage(imgUrl);
+                        doc.addImage(imgData, 'PNG', 148 - 15, 25, 30, 30);
+                    } catch (error) {
+                        console.log('Imagem não carregada, continuando sem ela');
+                    }
+                    
+                    doc.setDrawColor(0, 0, 0);
+                    doc.setFillColor(0, 0, 0);
+                    doc.setTextColor(0, 0, 0);
+                    
+                    doc.setFontSize(16);
+                    doc.setFont("times", "bold");
+                    doc.text("REPÚBLICA DE MOÇAMBIQUE", 148, 60, { align: "center" });
+                    doc.text("MINISTÉRIO DA EDUCAÇÃO", 148, 70, { align: "center" });
+                    doc.text("BLOCO DE PLANIFICAÇÃO", 148, 80, { align: "center" });
+                    
+                    doc.setLineWidth(0.5);
+                    doc.line(60, 85, 235, 85);
+                    doc.setFontSize(13);
+                    doc.text("⬛", 148, 85, { align: "center" });
+                    
+                    doc.setFontSize(12);
+                    doc.setFont("times", "normal");
+                    doc.text(`ESCOLA: ${dados.escola || "___________________"}`, 148, 100, { align: "center" });
+                    doc.text(`PROFESSOR: ${dados.professor || "___________________"}`, 148, 110, { align: "center" });
+                    doc.text(`DISCIPLINA: ${dados.disciplina || "___________________"}`, 148, 120, { align: "center" });
+                    doc.text(`CLASSE: ${dados.classe || "___________________"}`, 148, 130, { align: "center" });
+                    
+                    let infoAulas = `BLOCO COM ${dados.numAulas} AULAS: ${dados.numAulas * 2} páginas`;
+                    if (dados.muralAdicionado) {
+                        infoAulas += ` + ${dados.numAulas} páginas de Quadro Mural`;
+                    }
+                    doc.text(infoAulas, 148, 140, { align: "center" });
+                    
+                    doc.setFontSize(10);
+                    doc.text(`Data de geração: ${dataFormatada}`, 148, 180, { align: "center" });
+                    
+                    // PÁGINA 2 - DECLARAÇÃO PEDAGÓGICA
+                    doc.addPage();
+                    doc.setLineWidth(1.5);
+                    doc.rect(marginLeft, marginTop, usableWidth, usableHeight);
+                    doc.setLineWidth(0.8);
+                    doc.rect(marginLeft + 2, marginTop + 2, usableWidth - 4, usableHeight - 4);
+                    
+                    doc.setFontSize(16);
+                    doc.setFont("times", "bold");
+                    doc.text("DECLARAÇÃO PEDAGÓGICA", 148, 35, { align: "center" });
+                    
+                    doc.setFontSize(11);
+                    doc.setFont("times", "normal");
+                    let yPos = 50;
+                    const textoDeclaracao = [
+                        "O presente documento constitui um instrumento oficial de planificação didática, elaborado em conformidade com as diretrizes curriculares nacionais e os princípios pedagógicos estabelecidos pelo Ministério da Educação de Moçambique.",
+                        "",
+                        `Este bloco de planificação é de uso exclusivo e pessoal do Professor ${dados.professor || "___________________"}, destinando-se unicamente ao exercício profissional da atividade docente, com vista à organização, execução e avaliação do processo de ensino-aprendizagem.`,
+                        "",
+                        "O conteúdo aqui plasmado reflete o planeamento pedagógico do Professor, baseado no programa curricular vigente, e deve ser utilizado com ética, responsabilidade e compromisso com a qualidade educativa.",
+                        "",
+                        "Fica expressamente proibida a reprodução, distribution, partilha ou utilização por terceiros não autorizados, resguardando-se os direitos de propriedade intelectual e as normas deontológicas da profissão.",
+                        "",
+                        `A presente declaração atesta a autenticidade e finalidade educativa deste documento, que poderá ser solicitado para fins de supervisão pedagógica e avaliação do desempenho do Professor ${dados.professor || "___________________"}, nos termos legais aplicáveis.`
+                    ];
+                    
+                    textoDeclaracao.forEach(linha => {
+                        if (yPos > 170) {
+                            doc.addPage();
+                            doc.setLineWidth(1.5);
+                            doc.rect(marginLeft, marginTop, usableWidth, usableHeight);
+                            doc.setLineWidth(0.8);
+                            doc.rect(marginLeft + 2, marginTop + 2, usableWidth - 4, usableHeight - 4);
+                            yPos = 35;
+                        }
+                        if (linha === "") {
+                            yPos += 5;
+                        } else {
+                            const lines = doc.splitTextToSize(linha, usableWidth - 30);
+                            doc.text(lines, marginLeft + 10, yPos);
+                            yPos += lines.length * 6;
+                        }
+                    });
+                    
+                    yPos += 15;
+                    doc.text("ASSINATURA DO DOCENTE:", marginLeft + 10, yPos);
+                    yPos += 10;
+                    doc.text("_________________________________________", marginLeft + 10, yPos);
+                    yPos += 10;
+                    doc.text(dados.professor || "___________________", marginLeft + 10, yPos);
+                    doc.setFontSize(10);
+                    doc.text(`Data: ${dataFormatada}`, 148, 185, { align: "center" });
+                    
+                    // PÁGINAS DE PLANO DE AULA
+                    for (let i = 1; i <= dados.numAulas; i++) {
+                        // PÁGINA 1 DA AULA
+                        doc.addPage('a4', 'l');
+                        const totalPagesAula = dados.muralAdicionado ? 3 : 2;
+                        doc.setFontSize(9);
+                        doc.setFont("times", "normal");
+                        doc.text(`Aula ${i} - Página 1/${totalPagesAula}`, 270, 12, { align: "right" });
+                        doc.setFontSize(20);
+                        doc.setFont("times", "bold");
+                        doc.text("PLANO DE AULA", 148, 22, { align: "center" });
+                        doc.setFontSize(12);
+                        doc.setFont("times", "normal");
+                        
+                        let leftY = 30;
+                        doc.text(`Escola: ${dados.escola || "___________________"}`, 15, leftY);
+                        leftY += 6;
+                        doc.text(`Data: __________/__________/__________`, 15, leftY);
+                        leftY += 6;
+                        doc.text(`Professor: ${dados.professor || "___________________"}`, 15, leftY);
+                        leftY += 6;
+                        doc.text(`Disciplina: ${dados.disciplina || "___________________"}`, 15, leftY);
+                        leftY += 6;
+                        doc.text(`Unidade Temática: ___________________`, 15, leftY);
+                        leftY += 6;
+                        doc.text(`Tema: _____________________________________________________________`, 15, leftY);
+                        leftY += 8;
+                        doc.setFont("times", "bold");
+                        doc.text(`Objectivo Geral: ________________________________________`, 15, leftY);
+                        leftY += 10;
+                        
+                        let rightY = 30;
+                        doc.setFont("times", "bold");
+                        doc.text(`Classe: ${dados.classe || "__________"}`, 170, rightY);
+                        doc.setFont("times", "normal");
+                        rightY += 6;
+                        doc.text(`Turma: __________`, 170, rightY);
+                        rightY += 6;
+                        doc.text(`Lição nº: _____`, 170, rightY);
+                        rightY += 6;
+                        doc.text(`Duração: __________`, 170, rightY);
+                        rightY += 6;
+                        doc.text(`Período: ${dados.periodo || "__________"}`, 170, rightY);
+                        rightY += 6;
+                        doc.text(`Tipo de Aula: __________`, 170, rightY);
+                        rightY += 6;
+                        doc.text(`Número de alunos: __________`, 170, rightY);
+                        
+                        let objY = Math.max(leftY, rightY) + 5;
+                        doc.setFont("times", "bold");
+                        doc.text("OBJECTIVOS ESPECÍFICOS:", 15, objY);
+                        doc.setFont("times", "normal");
+                        objY += 6;
+                        doc.text("1. Cognitivo: ___________________________________________________", 20, objY);
+                        objY += 6;
+                        doc.text("2. Psicomotor: ___________________________________________________", 20, objY);
+                        objY += 6;
+                        doc.text("3. Afetivo: ___________________________________________________", 20, objY);
+                        
+                        const tableY = objY + 10;
+                        const colWidths = [22, 38, 34, 38, 38, 34, 38];
+                        const totalWidth = colWidths.reduce((a, b) => a + b, 0);
+                        const scaleFactor = 267 / totalWidth;
+                        const scaledWidths = colWidths.map(w => w * scaleFactor);
+                        const tableStartX = (297 - 267) / 2;
+                        
+                        doc.setFont("times", "bold");
+                        doc.setFontSize(10);
+                        let xPos = tableStartX;
+                        const headerY = tableY;
+                        const headers = ["TEMPO", "FUNÇÃO DIDÁCTICA", "CONTEÚDOS", "ACTIVIDADES DO PROFESSOR", "ACTIVIDADES DOS ALUNOS", "MÉTODOS DE ENSINO", "MEIOS DE ENSINO"];
+                        
+                        headers.forEach((header, index) => {
+                            doc.setFillColor(240, 240, 240);
+                            doc.rect(xPos, headerY, scaledWidths[index], 12, 'F');
+                            doc.setDrawColor(0, 0, 0);
+                            doc.setLineWidth(0.2);
+                            doc.rect(xPos, headerY, scaledWidths[index], 12);
+                            const lines = doc.splitTextToSize(header, scaledWidths[index] - 4);
+                            let textY = headerY + 4;
+                            lines.forEach((line, lineIndex) => {
+                                doc.text(line, xPos + 2, textY + (lineIndex * 4));
+                            });
+                            xPos += scaledWidths[index];
+                        });
+                        
+                        // Linha 1: Introdução e Motivação
+                        const row1Y = headerY + 12;
+                        xPos = tableStartX;
+                        doc.setFillColor(255, 255, 255);
+                        doc.rect(xPos, row1Y, scaledWidths[0], 35, 'F');
+                        doc.rect(xPos, row1Y, scaledWidths[0], 35);
+                        xPos += scaledWidths[0];
+                        doc.setFillColor(255, 255, 255);
+                        doc.rect(xPos, row1Y, scaledWidths[1], 35, 'F');
+                        doc.rect(xPos, row1Y, scaledWidths[1], 35);
+                        doc.setFont("times", "bold");
+                        const func1 = doc.splitTextToSize("Introdução e Motivação", scaledWidths[1] - 4);
+                        let funcY1 = row1Y + 12;
+                        func1.forEach(line => {
+                            doc.text(line, xPos + 2, funcY1);
+                            funcY1 += 5;
+                        });
+                        xPos += scaledWidths[1];
+                        for (let j = 2; j < 7; j++) {
+                            doc.setFillColor(255, 255, 255);
+                            doc.rect(xPos, row1Y, scaledWidths[j], 35, 'F');
+                            doc.rect(xPos, row1Y, scaledWidths[j], 35);
+                            xPos += scaledWidths[j];
+                        }
+                        
+                        // Linha 2: Mediação e Assimilação
+                        const row2Y = row1Y + 35;
+                        xPos = tableStartX;
+                        doc.setFillColor(255, 255, 255);
+                        doc.rect(xPos, row2Y, scaledWidths[0], 35, 'F');
+                        doc.rect(xPos, row2Y, scaledWidths[0], 35);
+                        xPos += scaledWidths[0];
+                        doc.setFillColor(255, 255, 255);
+                        doc.rect(xPos, row2Y, scaledWidths[1], 35, 'F');
+                        doc.rect(xPos, row2Y, scaledWidths[1], 35);
+                        const func2 = doc.splitTextToSize("Mediação e Assimilação", scaledWidths[1] - 4);
+                        let funcY2 = row2Y + 12;
+                        func2.forEach(line => {
+                            doc.text(line, xPos + 2, funcY2);
+                            funcY2 += 5;
+                        });
+                        xPos += scaledWidths[1];
+                        for (let j = 2; j < 7; j++) {
+                            doc.setFillColor(255, 255, 255);
+                            doc.rect(xPos, row2Y, scaledWidths[j], 35, 'F');
+                            doc.rect(xPos, row2Y, scaledWidths[j], 35);
+                            xPos += scaledWidths[j];
+                        }
+                        
+                        // PÁGINA 2 DA AULA
+                        doc.addPage('a4', 'l');
+                        doc.setFontSize(9);
+                        doc.setFont("times", "normal");
+                        doc.text(`Aula ${i} - Página 2/${totalPagesAula}`, 270, 12, { align: "right" });
+                        
+                        // Linha 3: Domínio e Consolidação
+                        const row3Y = 25;
+                        xPos = tableStartX;
+                        doc.setFillColor(255, 255, 255);
+                        doc.rect(xPos, row3Y, scaledWidths[0], 35, 'F');
+                        doc.rect(xPos, row3Y, scaledWidths[0], 35);
+                        xPos += scaledWidths[0];
+                        doc.setFillColor(255, 255, 255);
+                        doc.rect(xPos, row3Y, scaledWidths[1], 35, 'F');
+                        doc.rect(xPos, row3Y, scaledWidths[1], 35);
+                        const func3 = doc.splitTextToSize("Domínio e Consolidação", scaledWidths[1] - 4);
+                        let funcY3 = row3Y + 12;
+                        func3.forEach(line => {
+                            doc.text(line, xPos + 2, funcY3);
+                            funcY3 += 5;
+                        });
+                        xPos += scaledWidths[1];
+                        for (let j = 2; j < 7; j++) {
+                            doc.setFillColor(255, 255, 255);
+                            doc.rect(xPos, row3Y, scaledWidths[j], 35, 'F');
+                            doc.rect(xPos, row3Y, scaledWidths[j], 35);
+                            xPos += scaledWidths[j];
+                        }
+                        
+                        // Linha 4: Controlo e Avaliação
+                        const row4Y = row3Y + 35;
+                        xPos = tableStartX;
+                        doc.setFillColor(255, 255, 255);
+                        doc.rect(xPos, row4Y, scaledWidths[0], 35, 'F');
+                        doc.rect(xPos, row4Y, scaledWidths[0], 35);
+                        xPos += scaledWidths[0];
+                        doc.setFillColor(255, 255, 255);
+                        doc.rect(xPos, row4Y, scaledWidths[1], 35, 'F');
+                        doc.rect(xPos, row4Y, scaledWidths[1], 35);
+                        const func4 = doc.splitTextToSize("Controlo e Avaliação", scaledWidths[1] - 4);
+                        let funcY4 = row4Y + 12;
+                        func4.forEach(line => {
+                            doc.text(line, xPos + 2, funcY4);
+                            funcY4 += 5;
+                        });
+                        xPos += scaledWidths[1];
+                        for (let j = 2; j < 7; j++) {
+                            doc.setFillColor(255, 255, 255);
+                            doc.rect(xPos, row4Y, scaledWidths[j], 35, 'F');
+                            doc.rect(xPos, row4Y, scaledWidths[j], 35);
+                            xPos += scaledWidths[j];
+                        }
+                        
+                        // Se mural não foi adicionado, adicionar "Quadro Mural" na página 2
+                        if (!dados.muralAdicionado) {
+                            let yPosMural = row4Y + 45;
+                            doc.setFont("times", "bold");
+                            doc.setFontSize(14);
+                            doc.text("QUADRO MURAL", 148, yPosMural, { align: "center" });
+                            yPosMural += 8;
+                            doc.setFont("times", "normal");
+                            doc.setFontSize(10);
+                            doc.text("Espaço reservado para anotações do quadro", 148, yPosMural, { align: "center" });
+                            
+                            yPosMural += 10;
+                            for (let j = 0; j < 8; j++) {
+                                doc.line(30, yPosMural, 267, yPosMural);
+                                yPosMural += 8;
+                            }
+                        }
+                        
+                        // PÁGINA 3 DA AULA (QUADRO MURAL) - se foi adicionado
+                        if (dados.muralAdicionado) {
+                            doc.addPage('a4', 'p');
+                            doc.setFontSize(9);
+                            doc.setFont("times", "normal");
+                            doc.text(`Aula ${i} - Página 3/${totalPagesAula}`, 200, 12, { align: "right" });
+                            doc.setFontSize(16);
+                            doc.setFont("times", "bold");
+                            doc.text("QUADRO MURAL", 105, 30, { align: "center" });
+                            doc.setFontSize(12);
+                            doc.setFont("times", "bold");
+                            doc.text("1. Explicação do tema:", 20, 50);
+                            let y = 60;
+                            for (let j = 0; j < 20; j++) {
+                                doc.line(20, y, 190, y);
+                                y += 7;
+                            }
+                            doc.text("2. Exercícios:", 20, 200);
+                            y = 210;
+                            for (let j = 0; j < 5; j++) {
+                                doc.line(20, y, 190, y);
+                                y += 7;
+                            }
+                            doc.text("3. TPC:", 20, 250);
+                            y = 260;
+                            for (let j = 0; j < 5; j++) {
+                                doc.line(20, y, 190, y);
+                                y += 7;
+                            }
+                        }
+                    }
+                    
+                    pdfDoc = doc;
+                    pdfGenerated = true;
+                    
+                    if (currentPercentage >= 100) {
+                        completeGeneration();
+                    }
+                    
+                } catch (error) {
+                    console.error("Erro ao gerar PDF:", error);
+                    showStatus("Erro no Processo", "Ocorreu um erro ao gerar o PDF.");
+                    setTimeout(() => {
+                        processingOverlay.classList.remove('active');
+                        mainContainer.classList.remove('blurred');
+                        loadingSection.classList.remove('hidden');
+                        generatePdfBtn.disabled = false;
+                        generatePdfBtn.textContent = "Tentar Novamente";
+                    }, 2000);
+                }
+            }
+            
+            setTimeout(function() {
+                startAutoCountdown();
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

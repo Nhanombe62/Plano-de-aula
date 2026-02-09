@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biografia - Criador do Plano de Aula MZ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f5ff;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        
+        .biography-container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        /* Cabeçalho com imagem e informações principais */
+        .header {
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3a6f 100%);
+            padding: 40px;
+            color: white;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .profile-image-container {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .profile-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 20%;
+        }
+        
+        .profile-info {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            opacity: 0.9;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .tag {
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
+        /* Conteúdo principal */
+        .content {
+            padding: 40px;
+        }
+        
+        .section-title {
+            color: #2c5aa0;
+            font-size: 24px;
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eaeaea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            font-size: 22px;
+        }
+        
+        p {
+            margin-bottom: 18px;
+            font-size: 17px;
+            text-align: justify;
+        }
+        
+        .highlight {
+            background-color: #f0f7ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+            border-left: 4px solid #2c5aa0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .timeline {
+            position: relative;
+            margin: 30px 0;
+            padding-left: 30px;
+        }
+        
+        .timeline:before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: #2c5aa0;
+        }
+        
+        .timeline-item {
+            margin-bottom: 25px;
+            position: relative;
+            padding-left: 25px;
+        }
+        
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 5px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: #2c5aa0;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px #2c5aa0;
+        }
+        
+        .year {
+            font-weight: bold;
+            color: #2c5aa0;
+            font-size: 18px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        /* Seção de agradecimentos */
+        .acknowledgment {
+            background: linear-gradient(to right, #fff9e6, #fff0cc);
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 40px;
+            border-left: 5px solid #e6b800;
+        }
+        
+        .acknowledgment h3 {
+            color: #b38f00;
+            margin-bottom: 15px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Rodapé */
+        .footer {
+            text-align: center;
+            padding: 25px;
+            background-color: #f8f9fa;
+            color: #666;
+            border-top: 1px solid #eaeaea;
+            font-size: 15px;
+        }
+        
+        .app-name {
+            color: #2c5aa0;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header {
+                padding: 30px 20px;
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-image-container {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 28px;
+            }
+            
+            .subtitle {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .biography-container {
+                border-radius: 8px;
+            }
+            
+            .header {
+                padding: 25px 15px;
+            }
+            
+            .content {
+                padding: 20px 15px;
+            }
+            
+            .section-title {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="biography-container">
+        <div class="header">
+            <div class="profile-image-container">
+                <img src="https://raw.githubusercontent.com/nhanomb3/Planodeaula-/4ab981311bc169092c43fb879025fb08f8dfc58f/1770590378788.png" 
+                     alt="Edmilson Bartolomeu Nhanombe" class="profile-image">
+            </div>
+            
+            <div class="profile-info">
+                <h1>Edmilson Bartolomeu Nhanombe</h1>
+                <div class="subtitle">Criador do Aplicativo Plano de Aula MZ</div>
+                <div class="tag">Natural de Inharrime, Província de Inhambane</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="section-title">
+                <i class="fas fa-user-graduate"></i>
+                <span>Trajetória Educacional</span>
+            </div>
+            
+            <p>Edmilson Bartolomeu Nhanombe nasceu em 26 de outubro de 2001 na província de Inhambane, mais precisamente em Inharrime. Órfão de pai desde os sete meses de vida, foi criado pela mãe, demonstrando desde cedo uma notável resiliência perante os desafios da vida.</p>
+            
+            <p>Iniciou seus estudos no povoado de Madovela, onde frequentou a primeira classe aos 7 anos na Escola Primária Completa de Madovela. Após concluir a 6ª classe, mudou-se para a cidade de Xai-Xai para viver com um tio paterno, onde deu continuidade aos seus estudos.</p>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <span class="year">2013 - 7ª Classe</span>
+                    <p>Frequentou a 7ª classe na Escola Primária Completa Marie N'guambi na cidade de Xai-Xai.</p>
+                </div>
+                
+                <div class="timeline-item">
+                    <span class="year">2014-2017 - Formação Técnica</span>
+                    <p>Ingressou no Instituto Industrial de Inhamissa, especializando-se em bate-chapa e pintura. Concluiu esta formação em 2017, equivalente à 10ª classe.</p>
+                </div>
+                
+                <div class="timeline-item">
+                    <span class="year">2018 - Mudança para Caia</span>
+                    <p>Devido a circunstâncias familiares, transferiu-se para o distrito de Caia, onde passou a residir com uma tia materna. Frequentou a 11ª classe na Escola Secundária Mathias Manuel Khapesse.</p>
+                </div>
+                
+                <div class="timeline-item">
+                    <span class="year">2019 - Conclusão do Ensino Secundário</span>
+                    <p>Concluiu a 12ª classe na mesma instituição, completando assim o ensino secundário.</p>
+                </div>
+                
+                <div class="timeline-item">
+                    <span class="year">2020-2021 - Período de Pausa</span>
+                    <p>Por dois anos, enfrentou uma pausa nos estudos devido a desafios pessoais, demonstrando que a vida reserva diferentes ritmos para cada trajetória.</p>
+                </div>
+                
+                <div class="timeline-item">
+                    <span class="year">2022-2025 - Formação Docente</span>
+                    <p>Foi admitido no Instituto de Formação de Professores de Morrumbala, onde cursou o programa "12+3" para formação de professores, concluindo em 2025.</p>
+                </div>
+            </div>
+            
+            <div class="highlight">
+                <p>Paralelamente à sua formação acadêmica, Edmilson participou de um curso de informática abrangente, onde adquiriu conhecimentos em diversos pacotes de software e noções sobre desenvolvimento de aplicativos. Foi essa formação que lhe proporcionou as bases para criar o <strong>Plano de Aula MZ</strong>, aplicativo que visa auxiliar professores moçambicanos no planejamento das suas atividades lectivas.</p>
+            </div>
+            
+            <div class="section-title">
+                <i class="fas fa-hands-helping"></i>
+                <span>Reconhecimentos e Agradecimentos</span>
+            </div>
+            
+            <div class="acknowledgment">
+                <h3><i class="fas fa-heart"></i> Palavras de Gratidão</h3>
+                <p>Edmilson expressa profunda gratidão a Deus pela vida e pela orientação constante na superação de suas dificuldades. Reconhece de forma especial sua mãe, Dona Mavo, pelo apoio incondicional em todas as circunstâncias da vida.</p>
+                
+                <p>Também agradece a todas as pessoas que, de forma positiva ou negativa, participaram da sua jornada, pois cada uma contribuiu para a pessoa que é hoje. Acredita que sem essas experiências e relações, sua trajetória não seria a mesma.</p>
+            </div>
+            
+            <p>Através do aplicativo <strong>Plano de Aula MZ</strong>, Edmilson busca retribuir à sociedade moçambicana parte do conhecimento adquirido, facilitando o trabalho dos educadores e contribuindo indiretamente para a melhoria da qualidade de ensino no país.</p>
+        </div>
+        
+        <div class="footer">
+            <p>Biografia de <strong>Edmilson Bartolomeu Nhanombe</strong> - Criador do <span class="app-name">Plano de Aula MZ</span></p>
+            <p>Última atualização: Setembro</p>
+        </div>
+    </div>
+</body>
+</html>

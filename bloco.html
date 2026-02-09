@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bloco de Planificação Pedagógica</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(to right, #2c3e50, #3498db);
+            color: white;
+            padding: 28px 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            opacity: 0.9;
+            margin-top: 6px;
+        }
+
+        .form-section {
+            padding: 30px;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .required::after {
+            content: " *";
+            color: #e53e3e;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.25s ease;
+            background-color: #fff;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+        }
+
+        input[readonly] {
+            background-color: #f7fafc;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .price-info {
+            background-color: #f0fdf4;
+            border-left: 4px solid #38a169;
+            padding: 14px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .price-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2f855a;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: #3182ce;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2c5aa0;
+        }
+
+        .btn-secondary {
+            background-color: #48bb78;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #38a169;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid #3182ce;
+            color: #3182ce;
+        }
+
+        .btn-outline:hover {
+            background-color: #ebf8ff;
+        }
+
+        .btn-disabled {
+            background-color: #e2e8f0 !important;
+            color: #a0aec0 !important;
+            cursor: not-allowed !important;
+            pointer-events: none;
+        }
+
+        .btn-mural-added {
+            background-color: #38a169 !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        .btn-mural-added:hover {
+            background-color: #2d8556 !important;
+        }
+
+        @media (max-width: 600px) {
+            .form-group {
+                min-width: 100%;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Bloco de Planificação Pedagógica</h1>
+            <p class="subtitle">Plano de Aula MZ</p>
+        </header>
+
+        <div class="form-section">
+            <!-- Etapa 1 -->
+            <div class="step active" id="step1">
+                <h2>Dados do Bloco de Planificação</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="escola" class="required">Nome da Escola</label>
+                        <input type="text" id="escola" placeholder="Ex: Escola Secundária de Maputo" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="professor" class="required">Nome do Professor</label>
+                        <input type="text" id="professor" placeholder="Ex: Ana Silva" required />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="disciplina">Disciplina</label>
+                        <input type="text" id="disciplina" placeholder="Ex: Matemática" />
+                    </div>
+                    <div class="form-group">
+                        <label for="classe">Classe</label>
+                        <input type="text" id="classe" placeholder="Ex: 10ª Classe" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="anoLectivo">Ano Lectivo</label>
+                        <input type="text" id="anoLectivo" placeholder="Ex: 2026" />
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="nextBtn">Próximo</button>
+                </div>
+            </div>
+
+            <!-- Etapa 2 -->
+            <div class="step" id="step2">
+                <h2>Finalizar Bloco</h2>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dataGeracao">Data de Geração</label>
+                        <input type="text" id="dataGeracao" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label for="periodo">Período</label>
+                        <select id="periodo">
+                            <option value="">Selecione (opcional)</option>
+                            <option value="Manhã">Manhã</option>
+                            <option value="Tarde">Tarde</option>
+                            <option value="Noite">Noite</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Número de Aulas + Botão do Quadro Mural -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="numAulas" class="required">Número de Aulas</label>
+                        <select id="numAulas" required>
+                            <option value="">Selecione o número de aulas</option>
+                            <option value="10">10 aulas (20 páginas)</option>
+                            <option value="20">20 aulas (40 páginas)</option>
+                            <option value="30">30 aulas (60 páginas)</option>
+                            <option value="40">40 aulas (80 páginas)</option>
+                            <option value="50">50 aulas (100 páginas)</option>
+                            <option value="60">60 aulas (120 páginas)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end; min-width: auto;">
+                        <button type="button" id="muralBtn" class="btn btn-outline" style="height: fit-content; padding: 8px 12px; font-size: 14px; white-space: nowrap;">
+                            + Adicionar 1 página de Quadro Mural
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Valor a pagar -->
+                <div class="price-info" id="priceInfo" style="display: none;">
+                    <p>Valor a pagar:</p>
+                    <div class="price-value" id="priceValue">0 MZN</div>
+                    <div id="muralInfo" style="font-size: 14px; margin-top: 5px; color: #2d3748;"></div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-outline" id="prevBtn">Voltar</button>
+                    <button class="btn btn-primary" id="generateBtn">Pré-visualizar Bloco</button>
+                    <a href="#" class="btn btn-secondary disabled" id="pdfLink">Gerar PDF</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Definir data automática (dd/mm/aaaa)
+            const today = new Date();
+            const formattedDate = String(today.getDate()).padStart(2, '0') + '/' +
+                                  String(today.getMonth() + 1).padStart(2, '0') + '/' +
+                                  today.getFullYear();
+            const dataGeracaoInput = document.getElementById('dataGeracao');
+            if (dataGeracaoInput) {
+                dataGeracaoInput.value = formattedDate;
+            }
+
+            // Elementos
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const nextBtn = document.getElementById('nextBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const numAulasSelect = document.getElementById('numAulas');
+            const priceInfo = document.getElementById('priceInfo');
+            const priceValue = document.getElementById('priceValue');
+            const pdfLink = document.getElementById('pdfLink');
+            const muralBtn = document.getElementById('muralBtn');
+            const muralInfo = document.getElementById('muralInfo');
+
+            // Variável para controlar se o mural foi adicionado
+            let muralAdicionado = false;
+            const precoMural = 5; // 5 MZN por aula
+
+            // Ir para etapa 2
+            function goToStep2() {
+                const escola = document.getElementById('escola')?.value?.trim() || '';
+                const professor = document.getElementById('professor')?.value?.trim() || '';
+                if (!escola || !professor) {
+                    alert('Por favor, preencha os campos obrigatórios: Nome da Escola e Nome do Professor.');
+                    return;
+                }
+                step1.classList.remove('active');
+                step2.classList.add('active');
+            }
+
+            // Voltar para etapa 1
+            function goToStep1() {
+                step2.classList.remove('active');
+                step1.classList.add('active');
+            }
+
+            // Eventos
+            if (nextBtn) nextBtn.addEventListener('click', e => { e.preventDefault(); goToStep2(); });
+            if (prevBtn) prevBtn.addEventListener('click', e => { e.preventDefault(); goToStep1(); });
+
+            // Evento do botão do mural
+            if (muralBtn) {
+                muralBtn.addEventListener('click', function () {
+                    if (confirm('Tem a certeza que pretende adicionar 1 página de Quadro Mural por aula?\n\nIsso irá adicionar uma página vertical adicional a cada aula e acrescentará 5 MZN por aula ao valor total.')) {
+                        muralAdicionado = true;
+                        this.classList.remove('btn-outline');
+                        this.classList.add('btn-mural-added');
+                        this.innerHTML = '✓ Quadro Mural Adicionado';
+                        this.disabled = true;
+                        
+                        // Atualizar o preço
+                        updatePrice();
+                        updatePdfLink();
+                    }
+                });
+            }
+
+            // Função para atualizar o preço
+            function updatePrice() {
+                const numAulas = parseInt(numAulasSelect.value);
+                if (numAulas) {
+                    // Calcular valor base: cada 10 aulas = 50 MZN
+                    let total = Math.ceil(numAulas / 10) * 12;
+                    
+                    // Adicionar 5 MZN por aula se o mural foi adicionado
+                    if (muralAdicionado) {
+                        total += numAulas * 5;
+                        muralInfo.textContent = `Inclui ${numAulas} páginas de Quadro Mural (+5 MZN por aula)`;
+                        muralInfo.style.display = 'block';
+                    } else {
+                        muralInfo.textContent = '';
+                        muralInfo.style.display = 'none';
+                    }
+                    
+                    priceValue.textContent = total + ' MZN';
+                    priceInfo.style.display = 'block';
+                    return total; // Retornar o valor calculado
+                } else {
+                    priceInfo.style.display = 'none';
+                    return 0;
+                }
+            }
+
+            // Atualizar preço quando mudar o número de aulas
+            if (numAulasSelect) {
+                numAulasSelect.addEventListener('change', function () {
+                    updatePrice();
+                    updatePdfLink();
+                });
+            }
+
+            // Coletar dados
+            function getFormData() {
+                const numAulas = document.getElementById('numAulas')?.value || '';
+                const valorTotal = updatePrice(); // Usar a função updatePrice para obter o valor correto
+                
+                return {
+                    escola: document.getElementById('escola')?.value?.trim() || '',
+                    professor: document.getElementById('professor')?.value?.trim() || '',
+                    disciplina: document.getElementById('disciplina')?.value?.trim() || '',
+                    classe: document.getElementById('classe')?.value?.trim() || '',
+                    anoLectivo: document.getElementById('anoLectivo')?.value?.trim() || '',
+                    numAulas: numAulas,
+                    periodo: document.getElementById('periodo')?.value || '',
+                    dataGeracao: document.getElementById('dataGeracao')?.value || '',
+                    muralAdicionado: muralAdicionado ? '1' : '0',
+                    valorTotal: valorTotal // Adicionando o valor total calculado
+                };
+            }
+
+            // Atualizar link do PDF
+            function updatePdfLink() {
+                const data = getFormData();
+                if (data.escola && data.professor && data.numAulas) {
+                    const params = new URLSearchParams(data).toString();
+                    if (pdfLink) {
+                        pdfLink.href = `pdf.html?${params}`;
+                        pdfLink.classList.remove('disabled');
+                    }
+                } else {
+                    if (pdfLink) {
+                        pdfLink.href = '#';
+                        pdfLink.classList.add('disabled');
+                    }
+                }
+            }
+
+            // Monitorar campos
+            const fieldIds = ['escola', 'professor', 'disciplina', 'classe', 'anoLectivo', 'periodo'];
+            fieldIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', updatePdfLink);
+                    el.addEventListener('change', updatePdfLink);
+                }
+            });
+
+            // Pré-visualizar - Abrir link do Google Drive
+            const generateBtn = document.getElementById('generateBtn');
+            if (generateBtn) {
+                generateBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const data = getFormData();
+                    if (!data.escola || !data.professor || !data.numAulas) {
+                        alert('Preencha todos os campos obrigatórios antes de pré-visualizar.');
+                        return;
+                    }
+                    // Abrir o link do Google Drive em nova aba
+                    window.open('https://drive.google.com/file/d/12RJVugadoiDJoS3N51YOirYndAvw2pr9/view?usp=drivesdk', '_blank');
+                });
+            }
+
+            // Inicializar
+            updatePdfLink();
+        });
+    </script>
+</body>
+</html>
