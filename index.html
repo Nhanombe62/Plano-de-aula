@@ -1,904 +1,531 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta name="theme-color" content="#2196f3">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Plano de Aula">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bloco de Planificação - English</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="icon-192x192.png">
-  <link rel="apple-touch-icon" href="icon-192x192.png">
-  
-  <meta charset="UTF-8" />
-  <title>Plano de Aula Moçambicano</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <style>
-    :root {
-      --cor-primaria: #2b5dab;
-      --cor-fundo: #f8f9fa;
-      --cor-texto: #333;
-      --sombra: 0 4px 12px rgba(0,0,0,0.1);
-      --cor-sucesso: #2ecc71;
-      --cor-perigo: #e74c3c;
-    }
+        body {
+            background: linear-gradient(135deg, #27ae60, #2c3e50);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--cor-fundo);
-      color: var(--cor-texto);
-    }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
 
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 20px;
-      background: var(--cor-primaria);
-      color: white;
-      box-shadow: var(--sombra);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-    .navbar h1 { font-size: 1.3rem; font-weight: 600; }
-    .menu-toggle, .btn-phone {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        header {
+            background: linear-gradient(to right, #2c3e50, #27ae60);
+            color: white;
+            padding: 28px 20px;
+            text-align: center;
+        }
 
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: -300px;
-      width: 280px;
-      height: 100vh;
-      background: white;
-      box-shadow: var(--sombra);
-      padding: 20px 0;
-      transition: left 0.3s ease;
-      z-index: 2000;
-      display: flex;
-      flex-direction: column;
-    }
-    .sidebar.active { left: 0; }
-    .sidebar-header {
-      padding: 15px;
-      text-align: center;
-      border-bottom: 1px solid #eee;
-      margin-bottom: 10px;
-      font-weight: bold;
-      color: var(--cor-primaria);
-      font-size: 0.9rem;
-    }
-    .sidebar-item {
-      display: block;
-      padding: 12px 20px;
-      text-decoration: none;
-      color: #333;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    .sidebar-item:hover { background: #f8f9fa; }
-    .sidebar-footer { margin-top: auto; padding: 15px; text-align: center; font-size: 0.8rem; color: #777; }
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+        }
 
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 1500;
-    }
-    .overlay.active { display: block; }
+        .subtitle {
+            font-size: 15px;
+            opacity: 0.9;
+            margin-top: 6px;
+        }
 
-    .botoes-principais {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      padding: 15px;
-      max-width: 600px;
-      margin: 20px auto;
-    }
-    .btn, .btn-sorte-link {
-      padding: 16px;
-      border: none;
-      border-radius: 12px;
-      color: white;
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      box-shadow: var(--sombra);
-      text-decoration: none;
-      min-height: 110px;
-    }
-    .btn-vip      { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); }
-    .btn-gratis   { background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); }
-    .btn-ingles   { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); }
-    .btn-quinzenal{ background: #3498db; }
-    .btn-doacoes  { background: #e74c3c; }
-    .btn-historico{ background: #2ecc71; }
-    .btn-sorte-link{ 
-      background: #9b59b6; 
-      grid-column: span 2;
-      min-height: 80px;
-    }
+        .form-section {
+            padding: 30px;
+        }
 
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      z-index: 3000;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background: white;
-      width: 90%;
-      max-width: 400px;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: left;
-      position: relative;
-    }
-    .modal-content h3 { 
-      margin-bottom: 15px; 
-      color: var(--cor-primaria);
-      text-align: center;
-      font-size: 1.1rem;
-    }
-    .modal-content a, .modal-content button {
-      display: block;
-      width: 100%;
-      margin: 6px 0;
-      padding: 12px;
-      text-decoration: none;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      text-align: center;
-      font-size: 0.9rem;
-    }
-    .ligar { background: #1976d2; }
-    .whatsapp { background: #25d366; }
-    .email { background: #e74c3c; }
-    .copiar { 
-      background: #95a5a6; 
-      font-size: 0.8rem;
-      padding: 8px;
-      margin-top: 5px;
-    }
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 600;
+        }
 
-    ul.historico-lista { 
-      list-style: none; 
-      max-height: 250px; 
-      overflow-y: auto; 
-      padding: 0; 
-      margin-top: 10px;
-    }
-    ul.historico-lista li { 
-      padding: 10px 12px; 
-      border-bottom: 1px solid #eee; 
-      display: flex; 
-      align-items: center;
-      justify-content: space-between;
-      font-size: 0.9rem;
-    }
-    ul.historico-lista li i { color: var(--cor-sucesso); font-size: 0.9rem; }
+        .step {
+            display: none;
+        }
 
-    .stats {
-      background: #f8f9fa;
-      border-radius: 8px;
-      padding: 12px;
-      margin: 10px 0;
-      font-size: 0.85rem;
-    }
-    .stats p { margin: 6px 0; }
+        .step.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
 
-    body.dark {
-      --cor-fundo: #121212;
-      --cor-texto: #e0e0e0;
-      background-color: var(--cor-fundo);
-      color: var(--cor-texto);
-    }
-    body.dark .navbar { background: #1a1a1a; }
-    body.dark .sidebar,
-    body.dark .modal-content { background: #1e1e1e; color: #e0e0e0; }
-    body.dark .sidebar-item,
-    body.dark .stats { color: #e0e0e0; background: #2d2d2d; }
-    body.dark ul.historico-lista li { 
-      border-color: #444; 
-      background: #2d2d2d;
-    }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-    @media (min-width: 768px) {
-      .botoes-principais {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 16px;
-        padding: 20px;
-        max-width: 800px;
-      }
-      .btn-sorte-link { 
-        grid-column: span 3;
-      }
-    }
-  </style>
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .required::after {
+            content: " *";
+            color: #e53e3e;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.25s ease;
+            background-color: #fff;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #27ae60;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.15);
+        }
+
+        input[readonly] {
+            background-color: #f7fafc;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .price-info {
+            background-color: #f0fdf4;
+            border-left: 4px solid #27ae60;
+            padding: 14px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .price-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #219a52;
+        }
+
+        .btn-secondary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid #27ae60;
+            color: #27ae60;
+        }
+
+        .btn-outline:hover {
+            background-color: #e8f8f0;
+        }
+
+        .btn-mural-added {
+            background-color: #27ae60 !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        .btn-mural-added:hover {
+            background-color: #219a52 !important;
+        }
+
+        .btn-disabled {
+            background-color: #e2e8f0 !important;
+            color: #a0aec0 !important;
+            cursor: not-allowed !important;
+            pointer-events: none;
+        }
+
+        .language-tip {
+            background-color: #f0f9ff;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .language-tip h4 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .language-tip ul {
+            margin-left: 20px;
+            color: #4a5568;
+        }
+
+        @media (max-width: 600px) {
+            .form-group {
+                min-width: 100%;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>📚 English Lesson Plan Generator</h1>
+            <p class="subtitle">Create your professional English teaching plan</p>
+        </header>
 
-  <nav class="navbar">
-    <h1>Plano de Aula MZ</h1>
-    <div style="display:flex; gap:10px; align-items:center;">
-      <button class="btn-phone" onclick="mostrarContatoAdmin()" title="Falar com Equipa Técnica">
-        <i class="fas fa-phone"></i>
-      </button>
-      <button class="menu-toggle" id="menuToggle">
-        <i class="fas fa-bars"></i>
-      </button>
-    </div>
-  </nav>
+        <div class="form-section">
+            <!-- STEP 1 - Basic Information -->
+            <div class="step active" id="step1">
+                <h2>📋 School & Teacher Information</h2>
+                
+                <div class="language-tip">
+                    <h4>🇬🇧 Teaching Tips</h4>
+                    <ul>
+                        <li>Use communicative approach in your lessons</li>
+                        <li>Include all four skills: Listening, Speaking, Reading, Writing</li>
+                        <li>Add pronunciation practice in every lesson</li>
+                    </ul>
+                </div>
 
-  <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      Desenvolvido pelo Prof: Edmilson
-    </div>
-    <a href="#" class="sidebar-item" onclick="mostrarEstatisticas()">
-      <i class="fas fa-cog"></i> Definições
-    </a>
-    <div class="sidebar-item" style="display:flex; align-items:center; justify-content:space-between;">
-      <span style="display:flex; align-items:center; gap:8px;">
-        <i class="fas fa-moon"></i> Modo Escuro
-      </span>
-      <label style="position:relative; display:inline-block; width:40px; height:20px; background:#ccc; border-radius:10px; cursor:pointer;">
-        <input type="checkbox" id="toggleDarkMode" style="opacity:0; width:0; height:0;">
-        <span style="position:absolute; top:2px; left:2px; width:16px; height:16px; background:white; border-radius:50%; transition:0.3s;"></span>
-      </label>
-    </div>
-    <a href="termos.html" class="sidebar-item">
-      <i class="fas fa-shield-alt"></i> Termos e Políticas
-    </a>
-    <a href="sobre.html" class="sidebar-item">
-      <i class="fas fa-info-circle"></i> Sobre
-    </a>
-    <div class="sidebar-footer">
-      © 2025 | EB 4 de Outubro
-    </div>
-  </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="escola" class="required">School Name</label>
+                        <input type="text" id="escola" placeholder="e.g., EPC de Magoanine" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="professor" class="required">Teacher Name</label>
+                        <input type="text" id="professor" placeholder="e.g., Maria João" required />
+                    </div>
+                </div>
 
-  <div class="overlay" id="overlay"></div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="disciplina">Subject</label>
+                        <input type="text" id="disciplina" value="English Language" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label for="classe">Grade / Class</label>
+                        <select id="classe">
+                            <option value="8ª Classe">8ª Classe</option>
+                            <option value="9ª Classe">9ª Classe</option>
+                            <option value="10ª Classe">10ª Classe</option>
+                            <option value="11ª Classe">11ª Classe</option>
+                            <option value="12ª Classe">12ª Classe</option>
+                        </select>
+                    </div>
+                </div>
 
-  <div class="botoes-principais">
-    <button class="btn btn-vip" onclick="window.location.href='planovip.html'">
-      <i class="fas fa-crown"></i> Plano VIP
-    </button>
-    <button class="btn btn-gratis" onclick="window.location.href='planogratis.html'">
-      <i class="fas fa-ad"></i> Plano Gratuito
-    </button>
-    <button class="btn btn-ingles" onclick="window.location.href='ingles.html'">
-      <i class="fas fa-language"></i> Plano de Inglês
-    </button>
-    <button class="btn btn-quinzenal" onclick="window.open('https://profbenjanuario-4d854.web.app/plano_quinzenal.html', '_blank')">
-      <i class="fas fa-calendar-alt"></i> Plano Quinzenal
-    </button>
-    <button class="btn btn-doacoes" onclick="mostrarDoacoes()">
-      <i class="fas fa-heart"></i> Doações
-    </button>
-    <button class="btn btn-historico" onclick="mostrarHistorico()">
-      <i class="fas fa-history"></i> Histórico
-    </button>
-    <a href="abano.html" class="btn-sorte-link">
-      <i class="fas fa-dice"></i> Abano da Sorte
-    </a>
-  </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="anoLectivo">Academic Year</label>
+                        <input type="text" id="anoLectivo" placeholder="e.g., 2026" />
+                    </div>
+                    <div class="form-group">
+                        <label for="nivel">English Level</label>
+                        <select id="nivel">
+                            <option value="Beginner">Beginner (Iniciante)</option>
+                            <option value="Elementary">Elementary (Básico)</option>
+                            <option value="Pre-Intermediate">Pre-Intermediate (Pré-Intermediário)</option>
+                            <option value="Intermediate">Intermediate (Intermediário)</option>
+                            <option value="Upper-Intermediate">Upper-Intermediate (Intermediário Superior)</option>
+                        </select>
+                    </div>
+                </div>
 
-  <!-- Modal: Contato Admin -->
-  <div class="modal" id="modalAdmin">
-    <div class="modal-content">
-      <h3>Falar com a Equipa Técnica</h3>
-      <a href="tel:+258876393961" class="ligar">
-        <i class="fas fa-phone"></i> Ligar (87 639 3961)
-      </a>
-      <a href="https://chat.whatsapp.com/CD6USSJ0IPf8Z0X7cxFLvX" target="_blank" class="whatsapp">
-        <i class="fab fa-whatsapp"></i> Grupo WhatsApp
-      </a>
-      <a href="mailto:edmilsonnhanombe62@gmail.com" class="email">
-        <i class="fas fa-envelope"></i> Email
-      </a>
-    </div>
-  </div>
-
-  <!-- Modal: Doações -->
-  <div class="modal" id="modalDoacoes">
-    <div class="modal-content">
-      <h3>💰 Apoie o Plano de Aula MZ</h3>
-      <p>Escolha o serviço e copie o número para doar:</p>
-
-      <div style="margin:12px 0;">
-        <strong>📱 Emola</strong><br>
-        <code id="numEmola">876393961</code>
-        <button class="copiar" onclick="copiarNumero('876393961')">Copiar</button>
-      </div>
-
-      <div style="margin:12px 0;">
-        <strong>📲 m-Kesh</strong><br>
-        <code id="numMKesh">834890828</code>
-        <button class="copiar" onclick="copiarNumero('834890828')">Copiar</button>
-      </div>
-
-      <div style="margin:12px 0;">
-        <strong>💳 m-Pesa</strong><br>
-        <code id="numMPesa">846393962</code>
-        <button class="copiar" onclick="copiarNumero('846393962')">Copiar</button>
-      </div>
-
-      <small style="display:block; text-align:center; margin-top:10px; color:#777;">
-        Após a doação, envie comprovativo por WhatsApp.
-      </small>
-    </div>
-  </div>
-
-  <!-- Modal: Histórico -->
-  <div class="modal" id="modalHistorico">
-    <div class="modal-content">
-      <h3>📁 Seu Histórico (últimos 15 dias)</h3>
-      <ul class="historico-lista" id="listaHistorico">
-        <!-- preenchido dinamicamente -->
-      </ul>
-      <div style="text-align:center; margin-top:12px;">
-        <button onclick="limparHistoricoCompleto()" style="background:#e74c3c; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">
-          <i class="fas fa-trash"></i> Limpar Todo Histórico
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Estatísticas -->
-  <div class="modal" id="modalEstatisticas">
-    <div class="modal-content">
-      <h3>📊 Estatísticas do Sistema</h3>
-      <div class="stats">
-        <p><strong>👥 Total de acessos:</strong> 2 847</p>
-        <p><strong>📝 Planos gerados:</strong> 1 219</p>
-        <p><strong>📥 PDFs baixados:</strong> 842</p>
-        <p><small>Atualizado em: 23/12</small></p>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // ✅ Histórico simples por usuário
-    function getUsuarioID() {
-      let id = localStorage.getItem('usuario_id');
-      if (!id) {
-        id = 'user_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('usuario_id', id);
-      }
-      return id;
-    }
-    
-    const USUARIO_ATUAL = getUsuarioID();
-
-    // ✅ Sistema para controlar modais/sidebar abertos
-    let modalAberto = null;
-    let sidebarAberta = false;
-
-    // ✅ Funções básicas
-    function mostrarContatoAdmin() { 
-      fecharSidebar(); // Fecha sidebar se aberta
-      abrirModal('modalAdmin');
-    }
-    
-    function mostrarDoacoes() { 
-      fecharSidebar(); // Fecha sidebar se aberta
-      abrirModal('modalDoacoes');
-    }
-    
-    function mostrarEstatisticas() { 
-      fecharSidebar(); // Fecha sidebar se aberta
-      abrirModal('modalEstatisticas');
-    }
-    
-    function abrirModal(id) {
-      // Fecha modal anterior se existir
-      if (modalAberto) {
-        document.getElementById(modalAberto).style.display = 'none';
-      }
-      
-      document.getElementById(id).style.display = 'flex';
-      modalAberto = id;
-    }
-    
-    function fecharModal() { 
-      if (modalAberto) {
-        document.getElementById(modalAberto).style.display = 'none';
-        modalAberto = null;
-      }
-    }
-
-    function abrirSidebar() {
-      fecharModal(); // Fecha modal se aberto
-      document.getElementById('sidebar').classList.add('active');
-      document.getElementById('overlay').classList.add('active');
-      sidebarAberta = true;
-    }
-    
-    function fecharSidebar() { 
-      document.getElementById('sidebar').classList.remove('active');
-      document.getElementById('overlay').classList.remove('active');
-      sidebarAberta = false;
-    }
-
-    // ✅ Histórico funcional
-    function mostrarHistorico() {
-      fecharSidebar(); // Fecha sidebar se aberta
-      abrirModal('modalHistorico');
-      carregarHistorico();
-    }
-
-    function carregarHistorico() {
-      // Limpa itens com mais de 15 dias
-      limparHistoricoAntigo();
-      
-      const historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
-      const lista = document.getElementById('listaHistorico');
-      
-      if (historico.length === 0) {
-        lista.innerHTML = '<li style="text-align:center; color:#888; padding:12px; font-size:0.85rem;">Nenhum plano gerado ainda.</li>';
-        return;
-      }
-      
-      // Ordena do mais recente para o mais antigo
-      historico.sort((a, b) => new Date(b.data) - new Date(a.data));
-      
-      lista.innerHTML = historico.map((item, i) => {
-        const data = new Date(item.data);
-        const dataFormatada = `${data.getDate().toString().padStart(2, '0')}/${(data.getMonth() + 1).toString().padStart(2, '0')}`;
-        
-        return `
-          <li>
-            <i class="fas fa-file-pdf"></i> 
-            <span style="flex-grow:1; margin-left:8px; font-size:0.85rem;">${item.nome}</span>
-            <div style="display:flex; align-items:center; gap:6px;">
-              <button onclick="baixarPDF('${item.nome}', ${i})" style="background:#3498db; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.75rem;">
-                Baixar
-              </button>
-              <small style="color:#888; font-size:0.75rem;">${dataFormatada}</small>
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="nextBtn">Next →</button>
+                </div>
             </div>
-          </li>
-        `;
-      }).join('');
-    }
 
-    function limparHistoricoAntigo() {
-      let historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
-      const agora = new Date();
-      const quinzeDiasAtras = new Date(agora.getTime() - (15 * 24 * 60 * 60 * 1000));
-      
-      historico = historico.filter(item => {
-        const dataItem = new Date(item.data);
-        return dataItem > quinzeDiasAtras;
-      });
-      
-      localStorage.setItem(`historico_${USUARIO_ATUAL}`, JSON.stringify(historico));
-    }
+            <!-- STEP 2 - Finalize -->
+            <div class="step" id="step2">
+                <h2>📝 Finalize Your Lesson Plan</h2>
 
-    function baixarPDF(nome, index) {
-      const historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
-      const item = historico[index];
-      
-      if (!item) return;
-      
-      // Simula download do PDF
-      const link = document.createElement('a');
-      link.href = '#';
-      link.download = nome;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      alert(`PDF "${nome}" baixado com sucesso!`);
-    }
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dataGeracao">Generation Date</label>
+                        <input type="text" id="dataGeracao" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label for="periodo">Period</label>
+                        <select id="periodo">
+                            <option value="">Select (optional)</option>
+                            <option value="Morning">Morning / Manhã</option>
+                            <option value="Afternoon">Afternoon / Tarde</option>
+                            <option value="Evening">Evening / Noite</option>
+                        </select>
+                    </div>
+                </div>
 
-    // ✅ Esta função deve ser chamada nas outras páginas quando um PDF é gerado
-    function salvarNoHistorico(nomeDoPlano) {
-      let historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
-      
-      historico.push({
-        nome: nomeDoPlano,
-        data: new Date().toISOString()
-      });
-      
-      localStorage.setItem(`historico_${USUARIO_ATUAL}`, JSON.stringify(historico));
-    }
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="numAulas" class="required">Number of Lessons</label>
+                        <select id="numAulas" required>
+                            <option value="">Select number of lessons</option>
+                            <option value="10">10 lessons (20 pages)</option>
+                            <option value="20">20 lessons (40 pages)</option>
+                            <option value="30">30 lessons (60 pages)</option>
+                            <option value="40">40 lessons (80 pages)</option>
+                            <option value="50">50 lessons (100 pages)</option>
+                            <option value="60">60 lessons (120 pages)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end; min-width: auto;">
+                        <button type="button" id="muralBtn" class="btn btn-outline" style="height: fit-content; padding: 8px 12px; font-size: 14px; white-space: nowrap;">
+                            + Add Board Plan (+5 MZN)
+                        </button>
+                    </div>
+                </div>
 
-    function limparHistoricoCompleto() {
-      if (confirm('Tem certeza que deseja limpar todo o histórico? Esta ação não pode ser desfeita.')) {
-        localStorage.removeItem(`historico_${USUARIO_ATUAL}`);
-        carregarHistorico();
-      }
-    }
+                <div class="language-tip">
+                    <h4>🎯 Common English Topics Included:</h4>
+                    <ul>
+                        <li>Verb tenses (Present, Past, Future)</li>
+                        <li>Modal verbs (Can, Must, Should)</li>
+                        <li>Conditional sentences</li>
+                        <li>Passive voice</li>
+                        <li>Reported speech</li>
+                        <li>Vocabulary themes</li>
+                        <li>Pronunciation practice</li>
+                    </ul>
+                </div>
 
-    // ✅ Dark Mode
-    document.getElementById('toggleDarkMode').addEventListener('change', function() {
-      document.body.classList.toggle('dark', this.checked);
-      localStorage.setItem('temaEscuro', this.checked);
-    });
-    
-    if (localStorage.getItem('temaEscuro') === 'true') {
-      document.body.classList.add('dark');
-      document.getElementById('toggleDarkMode').checked = true;
-    }
+                <div class="price-info" id="priceInfo" style="display: none;">
+                    <p>Total Amount:</p>
+                    <div class="price-value" id="priceValue">0 MZN</div>
+                    <div id="muralInfo" style="font-size: 14px; margin-top: 5px; color: #2d3748;"></div>
+                </div>
 
-    // ✅ Menu Lateral
-    document.getElementById('menuToggle').addEventListener('click', abrirSidebar);
-    
-    document.getElementById('overlay').addEventListener('click', () => {
-      fecharSidebar();
-      fecharModal();
-    });
+                <div class="btn-group">
+                    <button class="btn btn-outline" id="prevBtn">← Back</button>
+                    <button class="btn btn-primary" id="generateBtn">Preview Sample</button>
+                    <a href="#" class="btn btn-secondary disabled" id="pdfLink">Generate PDF</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    // ✅ Fechar modais ao clicar fora
-    document.querySelectorAll('.modal').forEach(modal => {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          fecharModal();
-        }
-      });
-    });
-
-    // ✅ Sistema de botão voltar do celular
-    // Impede que o botão voltar feche o app
-    window.addEventListener('popstate', function(event) {
-      // Não faz nada - impede comportamento padrão de fechar app
-    });
-
-    // Adiciona estado inicial para impedir que o primeiro back feche o app
-    if (window.history && window.history.pushState) {
-      window.history.pushState({page: 'main'}, '', '');
-      
-      window.addEventListener('popstate', function(e) {
-        // Se tem modal aberto, fecha ele
-        if (modalAberto) {
-          fecharModal();
-          e.preventDefault();
-          return;
-        }
-        
-        // Se tem sidebar aberta, fecha ela
-        if (sidebarAberta) {
-          fecharSidebar();
-          e.preventDefault();
-          return;
-        }
-        
-        // Se não tem nada aberto, adiciona estado novamente para impedir fechar app
-        window.history.pushState({page: 'main'}, '', '');
-      });
-    }
-
-    // ✅ Copiar número
-    function copiarNumero(numero) {
-      navigator.clipboard.writeText(numero).then(() => {
-        alert(`✅ Número ${numero} copiado!`);
-      }).catch(() => {
-        // Fallback para navegadores antigos
-        const input = document.createElement('input');
-        input.value = numero;
-        document.body.appendChild(input);
-        input.select();
-        document.execCommand('copy');
-        document.body.removeChild(input);
-        alert(`✅ Número ${numero} copiado!`);
-      });
-    }
-
-    // ✅ Fechar com ESC
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (modalAberto) {
-          fecharModal();
-        } else if (sidebarAberta) {
-          fecharSidebar();
-        }
-      }
-    });
-
-    // ✅ Inicialização
-    window.addEventListener('load', () => {
-      limparHistoricoAntigo();
-    });
-    
-    // =============================================
-// CONTROLE DO SERVICE WORKER E ATUALIZAÇÕES
-// =============================================
-
-// Versão do app (deve corresponder ao service worker)
-const APP_VERSION = 'v2.3.0';
-let newServiceWorker = null;
-let updateNotificationShown = false;
-
-// Registra e gerencia o Service Worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    // Salva versão atual
-    localStorage.setItem('app_version', APP_VERSION);
-    
-    // Registra Service Worker
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(function(registration) {
-        console.log('✅ Service Worker registrado:', registration.scope);
-        
-        // Verifica versão salva
-        const savedVersion = localStorage.getItem('app_version');
-        if (savedVersion !== APP_VERSION) {
-          console.log('🔄 Nova versão detectada!');
-          setTimeout(() => showUpdateNotification(), 2000);
-        }
-        
-        // Verifica atualizações a cada 30 minutos
-        setInterval(() => {
-          registration.update();
-          console.log('🔄 Verificando atualizações...');
-        }, 30 * 60 * 1000);
-        
-        // Detecta nova versão disponível
-        registration.addEventListener('updatefound', () => {
-          console.log('🔄 Nova versão do Service Worker encontrada!');
-          newServiceWorker = registration.installing;
-          
-          newServiceWorker.addEventListener('statechange', () => {
-            if (newServiceWorker.state === 'installed') {
-              if (navigator.serviceWorker.controller) {
-                // Nova versão instalada
-                console.log('🆕 Nova versão pronta!');
-                showUpdateNotification();
-              }
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Set automatic date
+            const today = new Date();
+            const formattedDate = String(today.getDate()).padStart(2, '0') + '/' +
+                                  String(today.getMonth() + 1).padStart(2, '0') + '/' +
+                                  today.getFullYear();
+            const dataGeracaoInput = document.getElementById('dataGeracao');
+            if (dataGeracaoInput) {
+                dataGeracaoInput.value = formattedDate;
             }
-          });
+
+            // Elements
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const nextBtn = document.getElementById('nextBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const numAulasSelect = document.getElementById('numAulas');
+            const priceInfo = document.getElementById('priceInfo');
+            const priceValue = document.getElementById('priceValue');
+            const pdfLink = document.getElementById('pdfLink');
+            const muralBtn = document.getElementById('muralBtn');
+            const muralInfo = document.getElementById('muralInfo');
+
+            let muralAdicionado = false;
+            const precoMural = 5;
+
+            function goToStep2() {
+                const escola = document.getElementById('escola')?.value?.trim() || '';
+                const professor = document.getElementById('professor')?.value?.trim() || '';
+                if (!escola || !professor) {
+                    alert('Please fill in all required fields: School Name and Teacher Name.');
+                    return;
+                }
+                step1.classList.remove('active');
+                step2.classList.add('active');
+            }
+
+            function goToStep1() {
+                step2.classList.remove('active');
+                step1.classList.add('active');
+            }
+
+            if (nextBtn) nextBtn.addEventListener('click', e => { e.preventDefault(); goToStep2(); });
+            if (prevBtn) prevBtn.addEventListener('click', e => { e.preventDefault(); goToStep1(); });
+
+            if (muralBtn) {
+                muralBtn.addEventListener('click', function () {
+                    if (confirm('Add Board Plan page?\n\nThis will add 1 vertical page for board notes and add 5 MZN to the total.')) {
+                        muralAdicionado = true;
+                        this.classList.remove('btn-outline');
+                        this.classList.add('btn-mural-added');
+                        this.innerHTML = '✓ Board Plan Added';
+                        this.disabled = true;
+                        
+                        updatePrice();
+                        updatePdfLink();
+                    }
+                });
+            }
+
+            function updatePrice() {
+                const numAulas = parseInt(numAulasSelect.value);
+                if (numAulas) {
+                    let total = Math.ceil(numAulas / 10) * 12;
+                    
+                    if (muralAdicionado) {
+                        total += 5;
+                        muralInfo.textContent = `Includes Board Plan page (+5 MZN)`;
+                        muralInfo.style.display = 'block';
+                    } else {
+                        muralInfo.textContent = '';
+                        muralInfo.style.display = 'none';
+                    }
+                    
+                    priceValue.textContent = total + ' MZN';
+                    priceInfo.style.display = 'block';
+                    return total;
+                } else {
+                    priceInfo.style.display = 'none';
+                    return 0;
+                }
+            }
+
+            if (numAulasSelect) {
+                numAulasSelect.addEventListener('change', function () {
+                    updatePrice();
+                    updatePdfLink();
+                });
+            }
+
+            function getFormData() {
+                const numAulas = document.getElementById('numAulas')?.value || '';
+                const valorTotal = updatePrice();
+                
+                return {
+                    escola: document.getElementById('escola')?.value?.trim() || '',
+                    professor: document.getElementById('professor')?.value?.trim() || '',
+                    disciplina: 'English Language',
+                    classe: document.getElementById('classe')?.value || '',
+                    anoLectivo: document.getElementById('anoLectivo')?.value?.trim() || '',
+                    nivel: document.getElementById('nivel')?.value || 'Beginner',
+                    numAulas: numAulas,
+                    periodo: document.getElementById('periodo')?.value || '',
+                    dataGeracao: document.getElementById('dataGeracao')?.value || '',
+                    muralAdicionado: muralAdicionado ? '1' : '0',
+                    valorTotal: valorTotal
+                };
+            }
+
+            function updatePdfLink() {
+                const data = getFormData();
+                if (data.escola && data.professor && data.numAulas) {
+                    const params = new URLSearchParams(data).toString();
+                    if (pdfLink) {
+                        pdfLink.href = `pdf-ingles.html?${params}`;
+                        pdfLink.classList.remove('disabled');
+                    }
+                } else {
+                    if (pdfLink) {
+                        pdfLink.href = '#';
+                        pdfLink.classList.add('disabled');
+                    }
+                }
+            }
+
+            const fieldIds = ['escola', 'professor', 'classe', 'anoLectivo', 'periodo', 'nivel'];
+            fieldIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', updatePdfLink);
+                    el.addEventListener('change', updatePdfLink);
+                }
+            });
+
+            const generateBtn = document.getElementById('generateBtn');
+            if (generateBtn) {
+                generateBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const data = getFormData();
+                    if (!data.escola || !data.professor || !data.numAulas) {
+                        alert('Please fill in all required fields before preview.');
+                        return;
+                    }
+                    window.open('https://drive.google.com/file/d/1xampleEnglishLessonPlan/view?usp=drivesdk', '_blank');
+                });
+            }
+
+            updatePdfLink();
         });
-      })
-      .catch(function(error) {
-        console.log('❌ Falha no registro do Service Worker:', error);
-      });
-    
-    // Escuta mensagens do Service Worker
-    navigator.serviceWorker.addEventListener('message', function(event) {
-      if (event.data.type === 'SW_UPDATED') {
-        console.log('📢 Service Worker atualizado:', event.data.version);
-        showUpdateNotification();
-      }
-    });
-  });
-}
-
-// ==================== NOTIFICAÇÃO DE ATUALIZAÇÃO ====================
-function showUpdateNotification() {
-  if (updateNotificationShown) return;
-  
-  // Verifica se já tem a notificação
-  let updateDiv = document.getElementById('update-notification');
-  
-  if (!updateDiv) {
-    // Cria a notificação
-    updateDiv = document.createElement('div');
-    updateDiv.id = 'update-notification';
-    updateDiv.style.cssText = `
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, #4CAF50, #2E7D32);
-      color: white;
-      padding: 15px 20px;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-      z-index: 9999;
-      display: none;
-      max-width: 320px;
-      animation: slideIn 0.3s ease;
-      border-left: 5px solid #FFC107;
-    `;
-    
-    updateDiv.innerHTML = `
-      <div style="display: flex; align-items: flex-start; gap: 12px;">
-        <div style="background: rgba(255,255,255,0.2); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
-          <i class="fas fa-sync-alt" style="font-size: 1.2rem;"></i>
-        </div>
-        <div style="flex: 1;">
-          <h4 style="margin: 0 0 5px 0; font-size: 1rem; font-weight: bold;">Atualização Disponível!</h4>
-          <p style="margin: 0 0 10px 0; font-size: 0.85rem; opacity: 0.9;">Uma nova versão do aplicativo está pronta.</p>
-          <div style="display: flex; gap: 8px;">
-            <button id="update-now-btn" style="
-              background: #FFC107;
-              color: #333;
-              border: none;
-              padding: 8px 16px;
-              border-radius: 6px;
-              cursor: pointer;
-              font-weight: bold;
-              font-size: 0.85rem;
-              flex: 1;
-            ">Atualizar Agora</button>
-            <button id="update-later-btn" style="
-              background: rgba(255,255,255,0.2);
-              color: white;
-              border: 1px solid rgba(255,255,255,0.3);
-              padding: 8px 16px;
-              border-radius: 6px;
-              cursor: pointer;
-              font-size: 0.85rem;
-            ">Depois</button>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    document.body.appendChild(updateDiv);
-    
-    // Estilo de animação
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-      }
-      @keyframes pulse {
-        0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
-        70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
-      }
-      #update-notification {
-        animation: slideIn 0.3s ease, pulse 2s infinite;
-      }
-    `;
-    document.head.appendChild(style);
-    
-    // Event listeners
-    document.getElementById('update-now-btn').addEventListener('click', function() {
-      forceUpdate();
-      updateDiv.style.display = 'none';
-    });
-    
-    document.getElementById('update-later-btn').addEventListener('click', function() {
-      updateDiv.style.display = 'none';
-      updateNotificationShown = false;
-    });
-  }
-  
-  // Mostra a notificação
-  updateDiv.style.display = 'block';
-  updateNotificationShown = true;
-  
-  // Auto-esconde após 30 segundos
-  setTimeout(() => {
-    if (updateDiv.style.display === 'block') {
-      updateDiv.style.display = 'none';
-      updateNotificationShown = false;
-    }
-  }, 30000);
-}
-
-// ==================== ATUALIZAÇÃO FORÇADA ====================
-function forceUpdate() {
-  console.log('🔄 Forçando atualização...');
-  
-  if ('serviceWorker' in navigator) {
-    // Envia comando para pular espera
-    if (navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage('SKIP_WAITING');
-    }
-    
-    // Limpa caches
-    if ('caches' in window) {
-      caches.keys().then(function(cacheNames) {
-        cacheNames.forEach(function(cacheName) {
-          caches.delete(cacheName);
-          console.log('🗑️ Cache removido:', cacheName);
-        });
-      });
-    }
-    
-    // Atualiza versão no localStorage
-    localStorage.setItem('app_version', APP_VERSION);
-    
-    // Recarrega a página após um curto delay
-    setTimeout(function() {
-      console.log('🔄 Recarregando página...');
-      window.location.reload(true);
-      
-      // Fallback se não recarregar
-      setTimeout(function() {
-        window.location.href = window.location.href + '?v=' + Date.now();
-      }, 1000);
-    }, 800);
-  } else {
-    // Fallback simples
-    window.location.reload(true);
-  }
-}
-
-// ==================== VERIFICAÇÃO INICIAL ====================
-// Verifica se há nova versão ao carregar
-document.addEventListener('DOMContentLoaded', function() {
-  // Verifica se o Service Worker está registrado
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistration().then(function(registration) {
-      if (registration) {
-        registration.update();
-      }
-    });
-  }
-  
-  // Verifica versão salva
-  setTimeout(function() {
-    const savedVersion = localStorage.getItem('app_version');
-    if (savedVersion && savedVersion !== APP_VERSION) {
-      console.log('🔄 Versão anterior detectada:', savedVersion, '-> Nova:', APP_VERSION);
-      setTimeout(() => showUpdateNotification(), 3000);
-    }
-  }, 1000);
-});
-
-// ==================== BOTÃO MANUAL DE ATUALIZAÇÃO ====================
-// Adiciona botão no menu lateral (opcional)
-function addUpdateButtonToMenu() {
-  const sidebar = document.getElementById('sidebar');
-  const updateItem = document.createElement('a');
-  updateItem.href = '#';
-  updateItem.className = 'sidebar-item';
-  updateItem.innerHTML = '<i class="fas fa-sync-alt"></i> Verificar Atualizações';
-  updateItem.onclick = function(e) {
-    e.preventDefault();
-    checkForUpdates();
-    fecharSidebar();
-  };
-  
-  // Insere após o item de configurações
-  const settingsItem = document.querySelector('.sidebar-item');
-  if (settingsItem) {
-    settingsItem.parentNode.insertBefore(updateItem, settingsItem.nextSibling);
-  }
-}
-
-function checkForUpdates() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistration().then(function(registration) {
-      if (registration) {
-        registration.update().then(function() {
-          alert('✅ Verificação de atualizações concluída!');
-          showUpdateNotification();
-        });
-      }
-    });
-  } else {
-    alert('⚠️ Service Worker não suportado neste navegador.');
-  }
-}
-
-// Adiciona o botão ao menu (opcional)
-setTimeout(addUpdateButtonToMenu, 1000);
-  </script>
+    </script>
 </body>
 </html>
