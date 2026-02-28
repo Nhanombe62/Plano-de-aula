@@ -678,311 +678,220 @@
                     doc.setFont("times", "bold");
                     doc.text("SCHOOL:", 148, 100, { align: "center" });
                     doc.setFont("times", "normal");
-                    doc.text(dados.escola || "___________________", 148, 107, { align: "center" });
+                    doc.text(dados.escola, 148, 107, { align: "center" });
                     
                     doc.setFont("times", "bold");
-                    doc.text("TEACHER:", 148, 117, { align: "center" });
+                    doc.text("DATE:", 148, 117, { align: "center" });
                     doc.setFont("times", "normal");
-                    doc.text(dados.professor || "___________________", 148, 124, { align: "center" });
+                    doc.text(dataFormatada, 148, 124, { align: "center" });
                     
                     doc.setFont("times", "bold");
-                    doc.text("SUBJECT:", 148, 134, { align: "center" });
+                    doc.text("TEACHER:", 148, 134, { align: "center" });
                     doc.setFont("times", "normal");
-                    doc.text("English Language", 148, 141, { align: "center" });
+                    doc.text(dados.professor, 148, 141, { align: "center" });
                     
                     doc.setFont("times", "bold");
-                    doc.text("GRADE:", 148, 151, { align: "center" });
+                    doc.text("SUBJECT:", 148, 151, { align: "center" });
                     doc.setFont("times", "normal");
-                    doc.text(dados.classe || "___________________", 148, 158, { align: "center" });
+                    doc.text("English Language", 148, 158, { align: "center" });
                     
-                    let infoAulas = `LESSON PLAN WITH ${dados.numAulas} LESSONS`;
-                    if (dados.muralAdicionado) infoAulas += ` WITH BOARD PLAN`;
-                    doc.text(infoAulas, 148, 175, { align: "center" });
-                    doc.text(`Generation date: ${dataFormatada}`, 148, 190, { align: "center" });
+                    doc.setFont("times", "bold");
+                    doc.text("GRADE:", 148, 168, { align: "center" });
+                    doc.setFont("times", "normal");
+                    doc.text(dados.classe, 148, 175, { align: "center" });
                     
-                    // PAGE 2 - PEDAGOGICAL DECLARATION
-                    doc.addPage();
-                    doc.setLineWidth(1.5);
-                    doc.rect(marginLeft, marginTop, usableWidth, usableHeight);
-                    doc.setLineWidth(0.8);
-                    doc.rect(marginLeft + 2, marginTop + 2, usableWidth - 4, usableHeight - 4);
+                    doc.setFont("times", "bold");
+                    doc.text("DURATION:", 148, 185, { align: "center" });
+                    doc.setFont("times", "normal");
+                    doc.text("45 minutes", 148, 192, { align: "center" });
+                    
+                    // PAGE 2 - LESSON PLAN (PRE-LESSON INFORMATION)
+                    doc.addPage('a4', 'l');
                     
                     doc.setFontSize(12);
-                    doc.setFont("times", "bold");
-                    doc.text("PEDAGOGICAL DECLARATION", 148, 30, { align: "center" });
-                    
                     doc.setFont("times", "normal");
-                    let yPos = 40;
-                    const textoDeclaracao = [
-                        "This document is an official teaching planning instrument, prepared in accordance with national curriculum guidelines and the pedagogical principles established by the Ministry of Education of Mozambique.",
-                        "",
-                        `This lesson plan is for the exclusive and personal use of Teacher ${dados.professor || "___________________"}, intended solely for professional teaching practice.`,
-                        "",
-                        "The content herein reflects the teacher's pedagogical planning, based on the current curriculum, and should be used with ethics, responsibility and commitment to educational quality.",
-                        "",
-                        "The reproduction, distribution, sharing or use by unauthorized third parties is expressly prohibited.",
-                        "",
-                        `This declaration attests to the authenticity and educational purpose of this document, which may be requested for pedagogical supervision purposes.`
-                    ];
                     
-                    textoDeclaracao.forEach(linha => {
-                        if (yPos > 170) { doc.addPage(); yPos = 35; }
-                        if (linha === "") yPos += 4;
-                        else {
-                            const lines = doc.splitTextToSize(linha, usableWidth - 30);
-                            doc.text(lines, marginLeft + 10, yPos);
-                            yPos += lines.length * 5;
-                        }
+                    // School and basic info at top
+                    doc.setFont("times", "bold");
+                    doc.text("LESSON PLAN", 148, 15, { align: "center" });
+                    
+                    // PRE-LESSON INFORMATION - exactly like in the image
+                    let y = 25;
+                    
+                    doc.setFont("times", "bold");
+                    doc.text("School:", 15, y);
+                    doc.setFont("times", "normal");
+                    doc.text(dados.escola, 45, y);
+                    
+                    doc.setFont("times", "bold");
+                    doc.text("Date:", 120, y);
+                    doc.setFont("times", "normal");
+                    doc.text(dataFormatada, 150, y);
+                    
+                    y += 7;
+                    doc.setFont("times", "bold");
+                    doc.text("Unit:", 15, y);
+                    doc.setFont("times", "normal");
+                    doc.text("", 45, y); // Empty
+                    
+                    doc.setFont("times", "bold");
+                    doc.text("Topic:", 120, y);
+                    doc.setFont("times", "normal");
+                    doc.text("", 150, y); // Empty
+                    
+                    y += 7;
+                    doc.setFont("times", "bold");
+                    doc.text("Grade:", 15, y);
+                    doc.setFont("times", "normal");
+                    doc.text(dados.classe, 45, y);
+                    
+                    doc.setFont("times", "bold");
+                    doc.text("Subject:", 120, y);
+                    doc.setFont("times", "normal");
+                    doc.text("English Language", 150, y);
+                    
+                    y += 7;
+                    doc.setFont("times", "bold");
+                    doc.text("Prerequisite:", 15, y);
+                    doc.setFont("times", "normal");
+                    doc.text("", 45, y); // Empty
+                    
+                    doc.setFont("times", "bold");
+                    doc.text("No. of Students:", 120, y);
+                    doc.setFont("times", "normal");
+                    doc.text("", 150, y); // Empty
+                    
+                    y += 7;
+                    doc.setFont("times", "bold");
+                    doc.text("Duration:", 15, y);
+                    doc.setFont("times", "normal");
+                    doc.text("45 minutes", 45, y);
+                    
+                    doc.setFont("times", "bold");
+                    doc.text("Period:", 120, y);
+                    doc.setFont("times", "normal");
+                    doc.text(dados.periodo, 150, y);
+                    
+                    y += 7;
+                    doc.setFont("times", "bold");
+                    doc.text("Method:", 15, y);
+                    doc.setFont("times", "normal");
+                    doc.text("", 45, y); // Empty
+                    
+                    doc.setFont("times", "bold");
+                    doc.text("References:", 120, y);
+                    doc.setFont("times", "normal");
+                    doc.text("", 150, y); // Empty
+                    
+                    y += 10;
+                    doc.setFont("times", "bold");
+                    doc.text("Objectives:", 15, y);
+                    y += 5;
+                    doc.setFont("times", "normal");
+                    doc.text("By the end of the lesson, students should be able to:", 20, y);
+                    y += 5;
+                    doc.text("-", 25, y);
+                    y += 5;
+                    doc.text("-", 25, y);
+                    y += 5;
+                    doc.text("-", 25, y);
+                    y += 5;
+                    doc.text("-", 25, y);
+                    
+                    // TABLE - exactly like in the image (empty)
+                    const tableY = y + 10;
+                    
+                    const colWidths = [35, 80, 70, 25];
+                    const totalWidth = colWidths.reduce((a, b) => a + b, 0);
+                    const scaleFactor = 267 / totalWidth;
+                    const scaledWidths = colWidths.map(w => w * scaleFactor);
+                    const tableStartX = (297 - 267) / 2;
+                    
+                    // Table headers
+                    doc.setFont("times", "bold");
+                    doc.setFontSize(12);
+                    let xPos = tableStartX;
+                    const headerY = tableY;
+                    const headers = ["STAGES", "TEACHER'S ACTIVITIES", "LEARNER'S ACTIVITIES", "TIME"];
+                    
+                    headers.forEach((header, index) => {
+                        doc.setFillColor(240, 240, 240);
+                        doc.rect(xPos, headerY, scaledWidths[index], 12, 'F');
+                        doc.setDrawColor(0, 0, 0);
+                        doc.setLineWidth(0.2);
+                        doc.rect(xPos, headerY, scaledWidths[index], 12);
+                        doc.text(header, xPos + 2, headerY + 7);
+                        xPos += scaledWidths[index];
                     });
                     
-                    yPos += 10;
-                    doc.text("TEACHER'S SIGNATURE:", marginLeft + 10, yPos);
-                    yPos += 8;
-                    doc.text("_________________________________________", marginLeft + 10, yPos);
-                    yPos += 8;
-                    doc.text(dados.professor || "___________________", marginLeft + 10, yPos);
-                    doc.text(`Date: ${dataFormatada}`, 148, 185, { align: "center" });
+                    // ROW 1: INTRODUCTION - EMPTY
+                    const row1Y = headerY + 12;
+                    xPos = tableStartX;
                     
-                    // LESSON PLAN PAGES - EMPTY TABLES (only form data filled)
-                    for (let i = 1; i <= dados.numAulas; i++) {
-                        const totalPagesAula = dados.muralAdicionado ? 3 : 2;
-                        
-                        // PAGE 1 OF LESSON
-                        doc.addPage('a4', 'l');
-                        
-                        doc.setFontSize(12);
+                    doc.setFont("times", "bold");
+                    doc.text("INTRODUCTION", xPos + 2, row1Y + 7);
+                    xPos += scaledWidths[0];
+                    
+                    for (let j = 1; j < 4; j++) {
                         doc.setFont("times", "normal");
-                        doc.text(`Lesson ${i} - Page 1/${totalPagesAula}`, 270, 12, { align: "right" });
-                        
-                        // Title
-                        doc.setFont("times", "bold");
-                        doc.text("LESSON PLAN", 148, 22, { align: "center" });
-                        
-                        // Initial information - ONLY FORM DATA FILLED, rest empty
+                        doc.rect(xPos, row1Y, scaledWidths[j], 30);
+                        xPos += scaledWidths[j];
+                    }
+                    
+                    // ROW 2: PRESENTATION - EMPTY
+                    const row2Y = row1Y + 30;
+                    xPos = tableStartX;
+                    
+                    doc.setFont("times", "bold");
+                    doc.text("PRESENTATION", xPos + 2, row2Y + 7);
+                    xPos += scaledWidths[0];
+                    
+                    for (let j = 1; j < 4; j++) {
                         doc.setFont("times", "normal");
-                        
-                        let leftY = 30;
-                        doc.text(`School: ${dados.escola || "___________________"}`, 15, leftY);
-                        leftY += 6;
-                        doc.text(`Date: __________/__________/__________`, 15, leftY);
-                        leftY += 6;
-                        doc.text(`Teacher: ${dados.professor || "___________________"}`, 15, leftY);
-                        leftY += 6;
-                        doc.text(`Subject: English Language`, 15, leftY);
-                        leftY += 6;
-                        doc.text(`Unit: ___________________`, 15, leftY);
-                        leftY += 6;
-                        doc.text(`Topic: ________________________________________`, 15, leftY);
-                        leftY += 8;
-                        doc.setFont("times", "bold");
-                        doc.text(`General Objective: ________________________________________`, 15, leftY);
-                        leftY += 10;
-                        
-                        let rightY = 30;
-                        doc.setFont("times", "bold");
-                        doc.text(`Grade: ${dados.classe || "__________"}`, 170, rightY);
+                        doc.rect(xPos, row2Y, scaledWidths[j], 30);
+                        xPos += scaledWidths[j];
+                    }
+                    
+                    // ROW 3: PRACTICE - EMPTY
+                    const row3Y = row2Y + 30;
+                    xPos = tableStartX;
+                    
+                    doc.setFont("times", "bold");
+                    doc.text("PRACTICE", xPos + 2, row3Y + 7);
+                    xPos += scaledWidths[0];
+                    
+                    for (let j = 1; j < 4; j++) {
                         doc.setFont("times", "normal");
-                        rightY += 6;
-                        doc.text(`Class: __________`, 170, rightY);
-                        rightY += 6;
-                        doc.text(`Lesson No: ${i}`, 170, rightY);
-                        rightY += 6;
-                        doc.text(`Duration: 45 minutes`, 170, rightY);
-                        rightY += 6;
-                        doc.text(`Period: ${dados.periodo || "__________"}`, 170, rightY);
-                        rightY += 6;
-                        doc.text(`Lesson Type: __________`, 170, rightY);
-                        rightY += 6;
-                        doc.text(`Number of students: __________`, 170, rightY);
-                        
-                        let objY = Math.max(leftY, rightY) + 5;
-                        doc.setFont("times", "bold");
-                        doc.text("SPECIFIC OBJECTIVES:", 15, objY);
+                        doc.rect(xPos, row3Y, scaledWidths[j], 30);
+                        xPos += scaledWidths[j];
+                    }
+                    
+                    // ROW 4: PRODUCTION - EMPTY
+                    const row4Y = row3Y + 30;
+                    xPos = tableStartX;
+                    
+                    doc.setFont("times", "bold");
+                    doc.text("PRODUCTION", xPos + 2, row4Y + 7);
+                    xPos += scaledWidths[0];
+                    
+                    for (let j = 1; j < 4; j++) {
                         doc.setFont("times", "normal");
-                        objY += 6;
-                        doc.text("1. Cognitive: ___________________________________________________", 20, objY);
-                        objY += 6;
-                        doc.text("2. Psychomotor: ___________________________________________________", 20, objY);
-                        objY += 6;
-                        doc.text("3. Affective: ___________________________________________________", 20, objY);
-                        
-                        const tableY = objY + 10;
-                        
-                        // TABLE WITH 4 COLUMNS AS SHOWN IN THE IMAGE
-                        const colWidths = [35, 80, 70, 25];
-                        const totalWidth = colWidths.reduce((a, b) => a + b, 0);
-                        const scaleFactor = 267 / totalWidth;
-                        const scaledWidths = colWidths.map(w => w * scaleFactor);
-                        const tableStartX = (297 - 267) / 2;
-                        
-                        doc.setFont("times", "bold");
-                        doc.setFontSize(12);
-                        let xPos = tableStartX;
-                        const headerY = tableY;
-                        const headers = ["STAGES", "TEACHER'S ACTIVITIES", "LEARNER'S ACTIVITIES", "TIME"];
-                        
-                        headers.forEach((header, index) => {
-                            doc.setFillColor(240, 240, 240);
-                            doc.rect(xPos, headerY, scaledWidths[index], 14, 'F');
-                            doc.setDrawColor(0, 0, 0);
-                            doc.setLineWidth(0.2);
-                            doc.rect(xPos, headerY, scaledWidths[index], 14);
-                            doc.text(header, xPos + 2, headerY + 7);
-                            xPos += scaledWidths[index];
-                        });
-                        
-                        // ROW 1: INTRODUCTION - EMPTY
-                        const row1Y = headerY + 14;
-                        xPos = tableStartX;
-                        
-                        doc.setFont("times", "bold");
-                        doc.text("INTRODUCTION", xPos + 2, row1Y + 7);
-                        xPos += scaledWidths[0];
-                        
-                        for (let j = 1; j < 4; j++) {
-                            doc.setFont("times", "normal");
-                            doc.rect(xPos, row1Y, scaledWidths[j], 30);
-                            xPos += scaledWidths[j];
-                        }
-                        
-                        // ROW 2: PRESENTATION - EMPTY
-                        const row2Y = row1Y + 30;
-                        xPos = tableStartX;
-                        
-                        doc.setFont("times", "bold");
-                        doc.text("PRESENTATION", xPos + 2, row2Y + 7);
-                        xPos += scaledWidths[0];
-                        
-                        for (let j = 1; j < 4; j++) {
-                            doc.setFont("times", "normal");
-                            doc.rect(xPos, row2Y, scaledWidths[j], 30);
-                            xPos += scaledWidths[j];
-                        }
-                        
-                        // PAGE 2 OF LESSON
-                        doc.addPage('a4', 'l');
-                        
-                        doc.setFontSize(12);
+                        doc.rect(xPos, row4Y, scaledWidths[j], 30);
+                        xPos += scaledWidths[j];
+                    }
+                    
+                    // ROW 5: CONCLUSION - EMPTY
+                    const row5Y = row4Y + 30;
+                    xPos = tableStartX;
+                    
+                    doc.setFont("times", "bold");
+                    doc.text("CONCLUSION", xPos + 2, row5Y + 7);
+                    xPos += scaledWidths[0];
+                    
+                    for (let j = 1; j < 4; j++) {
                         doc.setFont("times", "normal");
-                        doc.text(`Lesson ${i} - Page 2/${totalPagesAula}`, 270, 12, { align: "right" });
-                        
-                        // ROW 3: PRACTICE - EMPTY
-                        const row3Y = 25;
-                        xPos = tableStartX;
-                        
-                        doc.setFont("times", "bold");
-                        doc.text("PRACTICE", xPos + 2, row3Y + 7);
-                        xPos += scaledWidths[0];
-                        
-                        for (let j = 1; j < 4; j++) {
-                            doc.setFont("times", "normal");
-                            doc.rect(xPos, row3Y, scaledWidths[j], 30);
-                            xPos += scaledWidths[j];
-                        }
-                        
-                        // ROW 4: PRODUCTION - EMPTY
-                        const row4Y = row3Y + 30;
-                        xPos = tableStartX;
-                        
-                        doc.setFont("times", "bold");
-                        doc.text("PRODUCTION", xPos + 2, row4Y + 7);
-                        xPos += scaledWidths[0];
-                        
-                        for (let j = 1; j < 4; j++) {
-                            doc.setFont("times", "normal");
-                            doc.rect(xPos, row4Y, scaledWidths[j], 30);
-                            xPos += scaledWidths[j];
-                        }
-                        
-                        // ROW 5: CONCLUSION - EMPTY
-                        const row5Y = row4Y + 30;
-                        xPos = tableStartX;
-                        
-                        doc.setFont("times", "bold");
-                        doc.text("CONCLUSION", xPos + 2, row5Y + 7);
-                        xPos += scaledWidths[0];
-                        
-                        for (let j = 1; j < 4; j++) {
-                            doc.setFont("times", "normal");
-                            doc.rect(xPos, row5Y, scaledWidths[j], 30);
-                            xPos += scaledWidths[j];
-                        }
-                        
-                        // OBJECTIVES SECTION (already filled above)
-                        let obsY = row5Y + 35;
-                        doc.setFont("times", "bold");
-                        doc.text("PREREQUISITES:", 15, obsY);
-                        doc.setFont("times", "normal");
-                        obsY += 6;
-                        doc.text("_________________________________________________________________", 20, obsY);
-                        obsY += 6;
-                        doc.text("_________________________________________________________________", 20, obsY);
-                        
-                        obsY += 6;
-                        doc.setFont("times", "bold");
-                        doc.text("MATERIALS:", 15, obsY);
-                        doc.setFont("times", "normal");
-                        obsY += 6;
-                        doc.text("_________________________________________________________________", 20, obsY);
-                        obsY += 6;
-                        doc.text("_________________________________________________________________", 20, obsY);
-                        
-                        obsY += 6;
-                        doc.setFont("times", "bold");
-                        doc.text("REFERENCES:", 15, obsY);
-                        doc.setFont("times", "normal");
-                        obsY += 6;
-                        doc.text("_________________________________________________________________", 20, obsY);
-                        obsY += 6;
-                        doc.text("_________________________________________________________________", 20, obsY);
-                        
-                        // BOARD PLAN (if not added as extra page)
-                        if (!dados.muralAdicionado) {
-                            obsY += 10;
-                            doc.setFont("times", "bold");
-                            doc.text("BOARD PLAN", 148, obsY, { align: "center" });
-                            obsY += 8;
-                            for (let j = 0; j < 5; j++) {
-                                doc.line(30, obsY, 267, obsY);
-                                obsY += 6;
-                            }
-                        }
-                        
-                        // PAGE 3 (BOARD PLAN) if added
-                        if (dados.muralAdicionado) {
-                            doc.addPage('a4', 'p');
-                            
-                            doc.setFontSize(12);
-                            doc.setFont("times", "normal");
-                            doc.text(`Lesson ${i} - Page 3/${totalPagesAula}`, 200, 12, { align: "right" });
-                            
-                            doc.setFont("times", "bold");
-                            doc.text("BOARD PLAN", 105, 25, { align: "center" });
-                            
-                            doc.setFont("times", "bold");
-                            doc.text("1. KEY POINTS:", 20, 45);
-                            let y = 52;
-                            for (let j = 0; j < 15; j++) {
-                                doc.line(20, y, 190, y);
-                                y += 6;
-                            }
-                            
-                            doc.setFont("times", "bold");
-                            doc.text("2. EXAMPLES:", 20, y + 5);
-                            y += 12;
-                            for (let j = 0; j < 8; j++) {
-                                doc.line(20, y, 190, y);
-                                y += 6;
-                            }
-                            
-                            doc.setFont("times", "bold");
-                            doc.text("3. EXERCISES:", 20, y + 5);
-                            y += 12;
-                            for (let j = 0; j < 8; j++) {
-                                doc.line(20, y, 190, y);
-                                y += 6;
-                            }
-                        }
+                        doc.rect(xPos, row5Y, scaledWidths[j], 30);
+                        xPos += scaledWidths[j];
                     }
                     
                     pdfDoc = doc;
