@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Plano de Aula">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes, maximum-scale=1.0, user-scalable=no">
 
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icon-192x192.png">
@@ -33,6 +33,44 @@
       transition: background-color 0.3s, color 0.3s;
     }
 
+    /* Bloquear PC - apenas mobile/tablet */
+    @media screen and (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+      body::before {
+        content: "Este aplicativo só pode ser usado em dispositivos móveis ou tablets 📱";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: white;
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        z-index: 99999;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+      
+      body > *:not(style):not(script) {
+        display: none !important;
+      }
+    }
+
+    /* Bloquear inspeção */
+    body {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
     .navbar {
       display: flex;
       justify-content: space-between;
@@ -47,8 +85,7 @@
     }
     .navbar h1 { font-size: 1.3rem; font-weight: 600; }
     .menu-toggle, .btn-phone {
-      background: none;
-      border: none;
+      background: none;      border: none;
       color: white;
       font-size: 1.5rem;
       cursor: pointer;
@@ -97,8 +134,7 @@
     .overlay {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 0;      left: 0;
       width: 100%;
       height: 100%;
       background: rgba(0,0,0,0.5);
@@ -133,10 +169,11 @@
     }
     .btn-vip      { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); }
     .btn-gratis   { background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); }
-    .btn-ingles   { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); }
+    .btn-linguas  { background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%); }
     .btn-quinzenal{ background: #3498db; }
     .btn-doacoes  { background: #e74c3c; }
     .btn-historico{ background: #2ecc71; }
+    .btn-instrucoes{ background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); }
     .btn-bloco    { background: linear-gradient(135deg, #16a085 0%, #1abc9c 100%); }
     .btn-sorte-link{ 
       background: #9b59b6; 
@@ -146,8 +183,7 @@
 
     .modal {
       display: none;
-      position: fixed;
-      top: 0;
+      position: fixed;      top: 0;
       left: 0;
       width: 100%;
       height: 100%;
@@ -196,8 +232,7 @@
     }
 
     ul.historico-lista { 
-      list-style: none; 
-      max-height: 250px; 
+      list-style: none;       max-height: 250px; 
       overflow-y: auto; 
       padding: 0; 
       margin-top: 10px;
@@ -246,8 +281,7 @@
 
     body.dark {
       --cor-fundo: #121212;
-      --cor-texto: #e0e0e0;
-      background-color: var(--cor-fundo);
+      --cor-texto: #e0e0e0;      background-color: var(--cor-fundo);
       color: var(--cor-texto);
     }
     body.dark .navbar { background: #1a1a1a; }
@@ -277,6 +311,24 @@
         grid-column: span 3;
       }
     }
+
+    /* Botões do modal de Bloco */
+    .btn-bloco-opcao {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: var(--sombra);
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
@@ -296,8 +348,7 @@
   <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
       Desenvolvido pelo Prof: Edmilson
-    </div>
-    <a href="#" class="sidebar-item" onclick="mostrarEstatisticas()">
+    </div>    <a href="#" class="sidebar-item" onclick="mostrarEstatisticas()">
       <i class="fas fa-cog"></i> Definições
     </a>
     <div class="sidebar-item" onclick="toggleDarkMode()" style="cursor: pointer;">
@@ -337,19 +388,22 @@
     <button class="btn btn-gratis" onclick="window.location.href='planogratis.html'">
       <i class="fas fa-ad"></i> Plano Gratuito
     </button>
-    <button class="btn btn-ingles" onclick="window.location.href='ingles.html'">
-      <i class="fas fa-language"></i> Plano de Inglês
+    <button class="btn btn-linguas" onclick="mostrarEscolhaLinguas()">
+      <i class="fas fa-language"></i> Plano de Línguas
     </button>
-    <button class="btn btn-quinzenal" onclick="window.open('https://profbenjanuario-4d854.web.app/plano_quinzenal.html', '_blank')">
+    <button class="btn btn-quinzenal" onclick="window.location.href='quin.html'">
       <i class="fas fa-calendar-alt"></i> Plano Quinzenal
     </button>
     <button class="btn btn-doacoes" onclick="mostrarDoacoes()">
       <i class="fas fa-heart"></i> Doações
     </button>
-    <button class="btn btn-historico" onclick="mostrarHistorico()">
-      <i class="fas fa-history"></i> Histórico
+    <button class="btn btn-historico" onclick="mostrarHistorico()">      <i class="fas fa-history"></i> Histórico
     </button>
-    <button class="btn btn-bloco" onclick="window.location.href='bloco.html'">
+    <button class="btn btn-instrucoes" onclick="window.location.href='instrucoes-apk.html'">
+      <i class="fas fa-book"></i> Instruções do APK
+    </button>
+    <!-- BOTÃO BLOCO DE PLANIFICAÇÃO ALTERADO -->
+    <button class="btn btn-bloco" onclick="mostrarEscolhaBloco()">
       <i class="fas fa-calendar-check"></i> Bloco de Planificação
     </button>
     <a href="abano.html" class="btn-sorte-link">
@@ -364,7 +418,7 @@
       <a href="tel:+258876393961" class="ligar">
         <i class="fas fa-phone"></i> Ligar (87 639 3961)
       </a>
-      <a href="https://chat.whatsapp.com/CD6USSJ0IPf8Z0X7cxFLvX" target="_blank" class="whatsapp">
+      <a href="https://chat.whatsapp.com/CD6USSJ0IPf8Z0X7xFLvp" target="_blank" class="whatsapp">
         <i class="fab fa-whatsapp"></i> Grupo WhatsApp
       </a>
       <a href="mailto:edmilsonnhanombe62@gmail.com" class="email">
@@ -393,8 +447,7 @@
 
       <div style="margin:12px 0;">
         <strong>💳 m-Pesa</strong><br>
-        <code id="numMPesa">846393962</code>
-        <button class="copiar" onclick="copiarNumero('846393962')">Copiar</button>
+        <code id="numMPesa">846393962</code>        <button class="copiar" onclick="copiarNumero('846393962')">Copiar</button>
       </div>
 
       <small style="display:block; text-align:center; margin-top:10px; color:#777;">
@@ -431,7 +484,7 @@
     </div>
   </div>
 
-  <!-- NOVO MODAL: ESCOLHA DO VIP -->
+  <!-- Modal: Escolha do VIP -->
   <div class="modal" id="modalEscolhaVip">
     <div class="modal-content">
       <h3>Plano VIP (Disciplinas Gerais)</h3>
@@ -443,8 +496,7 @@
           border: none;
           padding: 16px;
           border-radius: 12px;
-          cursor: pointer;
-          font-weight: bold;
+          cursor: pointer;          font-weight: bold;
           font-size: 0.95rem;
           display: flex;
           align-items: center;
@@ -475,7 +527,65 @@
     </div>
   </div>
 
-  <!-- NOVO MODAL: PARTILHA -->
+  <!-- Modal: Escolha de Línguas -->
+  <div class="modal" id="modalEscolhaLinguas">
+    <div class="modal-content">
+      <h3>🌍 Escolha o Idioma</h3>
+      <div style="display:flex; flex-direction:column; gap:15px; margin-top:15px;">
+        <button onclick="window.location.href='ingles.html'" style="
+          background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+          color: white;
+          border: none;
+          padding: 16px;
+          border-radius: 12px;
+          cursor: pointer;
+          font-weight: bold;
+          font-size: 0.95rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          box-shadow: var(--sombra);        ">
+          <i class="fas fa-language"></i> Plano de Inglês
+        </button>
+        <button onclick="window.location.href='frances.html'" style="
+          background: linear-gradient(135deg, #e91e63 0%, #9c27b0 100%);
+          color: white;
+          border: none;
+          padding: 16px;
+          border-radius: 12px;
+          cursor: pointer;
+          font-weight: bold;
+          font-size: 0.95rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          box-shadow: var(--sombra);
+        ">
+          <i class="fas fa-flag"></i> Plano de Francês
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOVO MODAL: ESCOLHA DO BLOCO DE PLANIFICAÇÃO -->
+  <div class="modal" id="modalEscolhaBloco">
+    <div class="modal-content">
+      <h3>📚 Bloco de Planificação</h3>
+      <p style="text-align:center; margin-bottom:20px;">Escolha o tipo de bloco:</p>
+      <div style="display:flex; flex-direction:column; gap:15px;">
+        <button onclick="window.location.href='blocoingles.html'" class="btn-bloco-opcao" style="background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);">
+          <i class="fas fa-language"></i> Bloco de Inglês
+        </button>
+        <button onclick="window.location.href='bloco.html'" class="btn-bloco-opcao" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+          <i class="fas fa-book-open"></i> Bloco de Disciplinas Gerais
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Partilha -->
   <div class="modal" id="modalPartilha">
     <div class="modal-content">
       <h3>📤 Partilhar Aplicativo</h3>
@@ -501,6 +611,26 @@
   </div>
 
   <script>
+    // Bloquear inspeção
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.addEventListener('keydown', event => {
+      if (event.key === 'F12' || 
+          (event.ctrlKey && event.shiftKey && event.key === 'I') ||
+          (event.ctrlKey && event.shiftKey && event.key === 'J') ||
+          (event.ctrlKey && event.key === 'U') ||
+          (event.ctrlKey && event.shiftKey && event.key === 'C')) {
+        event.preventDefault();
+        return false;
+      }
+    });
+
+    // Detectar DevTools
+    setInterval(function() {
+      if (window.outerHeight - window.innerHeight > 200 || window.outerWidth - window.innerWidth > 200) {
+        document.body.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 1.5rem; text-align: center; padding: 20px;">🚫 Inspeção desativada neste aplicativo</div>';
+      }
+    }, 1000);
+
     // ✅ Histórico simples por usuário
     function getUsuarioID() {
       let id = localStorage.getItem('usuario_id');
@@ -519,38 +649,44 @@
 
     // ✅ Funções básicas
     function mostrarContatoAdmin() { 
-      fecharSidebar(); // Fecha sidebar se aberta
+      fecharSidebar();
       abrirModal('modalAdmin');
     }
     
     function mostrarDoacoes() { 
-      fecharSidebar(); // Fecha sidebar se aberta
+      fecharSidebar();
       abrirModal('modalDoacoes');
     }
     
     function mostrarEstatisticas() { 
-      fecharSidebar(); // Fecha sidebar se aberta
+      fecharSidebar();
       abrirModal('modalEstatisticas');
     }
 
-    // NOVA FUNÇÃO: Mostrar escolha do VIP
     function mostrarEscolhaVip() { 
-      fecharSidebar(); // Fecha sidebar se aberta
+      fecharSidebar();
       abrirModal('modalEscolhaVip');
     }
 
-    // NOVA FUNÇÃO: Mostrar partilha
+    function mostrarEscolhaLinguas() { 
+      fecharSidebar();
+      abrirModal('modalEscolhaLinguas');
+    }
+
+    // NOVA FUNÇÃO: Mostrar escolha do Bloco
+    function mostrarEscolhaBloco() { 
+      fecharSidebar();
+      abrirModal('modalEscolhaBloco');
+    }
+
     function mostrarPartilha() { 
-      console.log('Mostrar partilha chamada');
-      fecharSidebar(); // Fecha sidebar se aberta
+      fecharSidebar();
       abrirModal('modalPartilha');
     }
     
     function abrirModal(id) {
-      // Fecha modal anterior se existir
       if (modalAberto) {
-        document.getElementById(modalAberto).style.display = 'none';
-      }
+        document.getElementById(modalAberto).style.display = 'none';      }
       
       document.getElementById(id).style.display = 'flex';
       modalAberto = id;
@@ -564,7 +700,7 @@
     }
 
     function abrirSidebar() {
-      fecharModal(); // Fecha modal se aberto
+      fecharModal();
       document.getElementById('sidebar').classList.add('active');
       document.getElementById('overlay').classList.add('active');
       sidebarAberta = true;
@@ -578,13 +714,12 @@
 
     // ✅ Histórico funcional
     function mostrarHistorico() {
-      fecharSidebar(); // Fecha sidebar se aberta
+      fecharSidebar();
       abrirModal('modalHistorico');
       carregarHistorico();
     }
 
     function carregarHistorico() {
-      // Limpa itens com mais de 15 dias
       limparHistoricoAntigo();
       
       const historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
@@ -595,14 +730,12 @@
         return;
       }
       
-      // Ordena do mais recente para o mais antigo
       historico.sort((a, b) => new Date(b.data) - new Date(a.data));
       
       lista.innerHTML = historico.map((item, i) => {
         const data = new Date(item.data);
         const dataFormatada = `${data.getDate().toString().padStart(2, '0')}/${(data.getMonth() + 1).toString().padStart(2, '0')}`;
-        
-        return `
+                return `
           <li>
             <i class="fas fa-file-pdf"></i> 
             <span style="flex-grow:1; margin-left:8px; font-size:0.85rem;">${item.nome}</span>
@@ -636,7 +769,6 @@
       
       if (!item) return;
       
-      // Simula download do PDF
       const link = document.createElement('a');
       link.href = '#';
       link.download = nome;
@@ -647,14 +779,12 @@
       alert(`PDF "${nome}" baixado com sucesso!`);
     }
 
-    // ✅ Esta função deve ser chamada nas outras páginas quando um PDF é gerado
     function salvarNoHistorico(nomeDoPlano) {
       let historico = JSON.parse(localStorage.getItem(`historico_${USUARIO_ATUAL}`) || '[]');
       
       historico.push({
         nome: nomeDoPlano,
-        data: new Date().toISOString()
-      });
+        data: new Date().toISOString()      });
       
       localStorage.setItem(`historico_${USUARIO_ATUAL}`, JSON.stringify(historico));
     }
@@ -666,7 +796,7 @@
       }
     }
 
-    // ✅ NOVAS FUNÇÕES DE PARTILHA
+    // ✅ Funções de partilha
     function partilharWhatsApp() {
       const texto = `Baixe o app Plano de Aula MZ: https://nhanomb3.github.io/Planodeaula-/`;
       const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
@@ -689,7 +819,6 @@
       navigator.clipboard.writeText(link).then(() => {
         alert('✅ Link copiado para a área de transferência!');
       }).catch(() => {
-        // Fallback para navegadores antigos
         const input = document.createElement('input');
         input.value = link;
         document.body.appendChild(input);
@@ -700,36 +829,31 @@
       });
     }
 
-    // ✅ Dark Mode - Função corrigida
+    // ✅ Dark Mode
     function toggleDarkMode() {
       const toggle = document.getElementById('toggleDarkMode');
       toggle.checked = !toggle.checked;
-      
-      document.body.classList.toggle('dark', toggle.checked);
+            document.body.classList.toggle('dark', toggle.checked);
       localStorage.setItem('temaEscuro', toggle.checked);
       
-      // Adiciona uma pequena animação ao slider
       const slider = document.querySelector('.slider');
       slider.style.transform = toggle.checked ? 'translateX(20px)' : 'translateX(2px)';
     }
 
-    // ✅ Verifica e aplica o tema ao carregar
     function aplicarTemaInicial() {
       const temaEscuro = localStorage.getItem('temaEscuro') === 'true';
       document.body.classList.toggle('dark', temaEscuro);
       document.getElementById('toggleDarkMode').checked = temaEscuro;
       
-      // Posiciona o slider corretamente
       const slider = document.querySelector('.slider');
       if (slider) {
         slider.style.transform = temaEscuro ? 'translateX(20px)' : 'translateX(2px)';
       }
     }
 
-    // ✅ Menu Lateral - Corrigido para funcionar corretamente
+    // ✅ Event listeners
     document.getElementById('menuToggle').addEventListener('click', abrirSidebar);
     
-    // Adicionar event listener para o botão de partilha no menu
     document.getElementById('btnPartilha').addEventListener('click', function(e) {
       e.preventDefault();
       mostrarPartilha();
@@ -740,25 +864,15 @@
       fecharModal();
     });
 
-    // ✅ Adicionar event listeners para os botões de partilha no modal
     document.addEventListener('DOMContentLoaded', function() {
-      // Aplicar tema inicial
       aplicarTemaInicial();
       
-      // Botão WhatsApp
       document.getElementById('whatsappShare').addEventListener('click', partilharWhatsApp);
-      
-      // Botão Facebook
       document.getElementById('facebookShare').addEventListener('click', partilharFacebook);
-      
-      // Botão Email
       document.getElementById('emailShare').addEventListener('click', partilharEmail);
-      
-      // Botão Copiar Link
       document.getElementById('copyLink').addEventListener('click', copiarLink);
     });
 
-    // ✅ Fechar modais ao clicar fora
     document.querySelectorAll('.modal').forEach(modal => {
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {
@@ -767,32 +881,20 @@
       });
     });
 
-    // ✅ Sistema de botão voltar do celular
-    // Impede que o botão voltar feche o app
-    window.addEventListener('popstate', function(event) {
-      // Não faz nada - impede comportamento padrão de fechar app
-    });
-
-    // Adiciona estado inicial para impedir que o primeiro back feche o app
-    if (window.history && window.history.pushState) {
+    // ✅ Botão voltar do celular
+    window.addEventListener('popstate', function(event) {});    if (window.history && window.history.pushState) {
       window.history.pushState({page: 'main'}, '', '');
-      
       window.addEventListener('popstate', function(e) {
-        // Se tem modal aberto, fecha ele
         if (modalAberto) {
           fecharModal();
           e.preventDefault();
           return;
         }
-        
-        // Se tem sidebar aberta, fecha ela
         if (sidebarAberta) {
           fecharSidebar();
           e.preventDefault();
           return;
         }
-        
-        // Se não tem nada aberto, adiciona estado novamente para impedir fechar app
         window.history.pushState({page: 'main'}, '', '');
       });
     }
@@ -802,7 +904,6 @@
       navigator.clipboard.writeText(numero).then(() => {
         alert(`✅ Número ${numero} copiado!`);
       }).catch(() => {
-        // Fallback para navegadores antigos
         const input = document.createElement('input');
         input.value = numero;
         document.body.appendChild(input);
@@ -830,40 +931,31 @@
       aplicarTemaInicial();
     });
     
-    // =============================================
-    // CONTROLE DO SERVICE WORKER E ATUALIZAÇÕES
+    // =============================================    // CONTROLE DO SERVICE WORKER E ATUALIZAÇÕES
     // =============================================
 
-    // Versão do app (deve corresponder ao service worker)
     const APP_VERSION = 'v2.3.0';
     let newServiceWorker = null;
     let updateNotificationShown = false;
 
-    // Registra e gerencia o Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
-        // Salva versão atual
         localStorage.setItem('app_version', APP_VERSION);
-        
-        // Registra Service Worker
         navigator.serviceWorker.register('/service-worker.js')
           .then(function(registration) {
             console.log('✅ Service Worker registrado:', registration.scope);
             
-            // Verifica versão salva
             const savedVersion = localStorage.getItem('app_version');
             if (savedVersion !== APP_VERSION) {
               console.log('🔄 Nova versão detectada!');
               setTimeout(() => showUpdateNotification(), 2000);
             }
             
-            // Verifica atualizações a cada 30 minutos
             setInterval(() => {
               registration.update();
               console.log('🔄 Verificando atualizações...');
             }, 30 * 60 * 1000);
             
-            // Detecta nova versão disponível
             registration.addEventListener('updatefound', () => {
               console.log('🔄 Nova versão do Service Worker encontrada!');
               newServiceWorker = registration.installing;
@@ -871,7 +963,6 @@
               newServiceWorker.addEventListener('statechange', () => {
                 if (newServiceWorker.state === 'installed') {
                   if (navigator.serviceWorker.controller) {
-                    // Nova versão instalada
                     console.log('🆕 Nova versão pronta!');
                     showUpdateNotification();
                   }
@@ -883,25 +974,20 @@
             console.log('❌ Falha no registro do Service Worker:', error);
           });
         
-        // Escuta mensagens do Service Worker
         navigator.serviceWorker.addEventListener('message', function(event) {
           if (event.data.type === 'SW_UPDATED') {
             console.log('📢 Service Worker atualizado:', event.data.version);
             showUpdateNotification();
           }
         });
-      });
-    }
+      });    }
 
-    // ==================== NOTIFICAÇÃO DE ATUALIZAÇÃO ====================
     function showUpdateNotification() {
       if (updateNotificationShown) return;
       
-      // Verifica se já tem a notificação
       let updateDiv = document.getElementById('update-notification');
       
       if (!updateDiv) {
-        // Cria a notificação
         updateDiv = document.createElement('div');
         updateDiv.id = 'update-notification';
         updateDiv.style.cssText = `
@@ -943,8 +1029,7 @@
                 <button id="update-later-btn" style="
                   background: rgba(255,255,255,0.2);
                   color: white;
-                  border: 1px solid rgba(255,255,255,0.3);
-                  padding: 8px 16px;
+                  border: 1px solid rgba(255,255,255,0.3);                  padding: 8px 16px;
                   border-radius: 6px;
                   cursor: pointer;
                   font-size: 0.85rem;
@@ -956,7 +1041,6 @@
         
         document.body.appendChild(updateDiv);
         
-        // Estilo de animação
         const style = document.createElement('style');
         style.textContent = `
           @keyframes slideIn {
@@ -974,7 +1058,6 @@
         `;
         document.head.appendChild(style);
         
-        // Event listeners
         document.getElementById('update-now-btn').addEventListener('click', function() {
           forceUpdate();
           updateDiv.style.display = 'none';
@@ -986,11 +1069,9 @@
         });
       }
       
-      // Mostra a notificação
       updateDiv.style.display = 'block';
       updateNotificationShown = true;
       
-      // Auto-esconde após 30 segundos
       setTimeout(() => {
         if (updateDiv.style.display === 'block') {
           updateDiv.style.display = 'none';
@@ -998,18 +1079,14 @@
         }
       }, 30000);
     }
-
-    // ==================== ATUALIZAÇÃO FORÇADA ====================
     function forceUpdate() {
       console.log('🔄 Forçando atualização...');
       
       if ('serviceWorker' in navigator) {
-        // Envia comando para pular espera
         if (navigator.serviceWorker.controller) {
           navigator.serviceWorker.controller.postMessage('SKIP_WAITING');
         }
         
-        // Limpa caches
         if ('caches' in window) {
           caches.keys().then(function(cacheNames) {
             cacheNames.forEach(function(cacheName) {
@@ -1019,29 +1096,21 @@
           });
         }
         
-        // Atualiza versão no localStorage
         localStorage.setItem('app_version', APP_VERSION);
         
-        // Recarrega a página após um curto delay
         setTimeout(function() {
           console.log('🔄 Recarregando página...');
           window.location.reload(true);
-          
-          // Fallback se não recarregar
           setTimeout(function() {
             window.location.href = window.location.href + '?v=' + Date.now();
           }, 1000);
         }, 800);
       } else {
-        // Fallback simples
         window.location.reload(true);
       }
     }
 
-    // ==================== VERIFICAÇÃO INICIAL ====================
-    // Verifica se há nova versão ao carregar
     document.addEventListener('DOMContentLoaded', function() {
-      // Verifica se o Service Worker está registrado
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistration().then(function(registration) {
           if (registration) {
@@ -1050,7 +1119,6 @@
         });
       }
       
-      // Verifica versão salva
       setTimeout(function() {
         const savedVersion = localStorage.getItem('app_version');
         if (savedVersion && savedVersion !== APP_VERSION) {
@@ -1059,9 +1127,6 @@
         }
       }, 1000);
     });
-
-    // ==================== BOTÃO MANUAL DE ATUALIZAÇÃO ====================
-    // Adiciona botão no menu lateral (opcional)
     function addUpdateButtonToMenu() {
       const sidebar = document.getElementById('sidebar');
       const updateItem = document.createElement('a');
@@ -1074,7 +1139,6 @@
         fecharSidebar();
       };
       
-      // Insere após o item de configurações
       const settingsItem = document.querySelector('.sidebar-item');
       if (settingsItem) {
         settingsItem.parentNode.insertBefore(updateItem, settingsItem.nextSibling);
@@ -1096,7 +1160,6 @@
       }
     }
 
-    // Adiciona o botão ao menu (opcional)
     setTimeout(addUpdateButtonToMenu, 1000);
   </script>
 </body>
