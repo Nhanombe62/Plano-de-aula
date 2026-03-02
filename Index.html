@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bloco de Planificação - English</title>
+    <title>Lesson Plan Generator</title>
     <style>
         * {
             margin: 0;
@@ -186,42 +187,11 @@
             background-color: #e8f8f0;
         }
 
-        .btn-mural-added {
-            background-color: #27ae60 !important;
-            color: white !important;
-            border: none !important;
-        }
-
-        .btn-mural-added:hover {
-            background-color: #219a52 !important;
-        }
-
         .btn-disabled {
             background-color: #e2e8f0 !important;
             color: #a0aec0 !important;
             cursor: not-allowed !important;
             pointer-events: none;
-        }
-
-        .language-tip {
-            background-color: #f0f9ff;
-            border-left: 4px solid #3498db;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-size: 14px;
-            text-align: left;
-        }
-
-        .language-tip h4 {
-            color: #2c3e50;
-            margin-bottom: 8px;
-            font-size: 16px;
-        }
-
-        .language-tip ul {
-            margin-left: 20px;
-            color: #4a5568;
         }
 
         @media (max-width: 600px) {
@@ -248,15 +218,6 @@
             <!-- STEP 1 - Basic Information -->
             <div class="step active" id="step1">
                 <h2>📋 School & Teacher Information</h2>
-                
-                <div class="language-tip">
-                    <h4>🇬🇧 Teaching Tips</h4>
-                    <ul>
-                        <li>Use communicative approach in your lessons</li>
-                        <li>Include all four skills: Listening, Speaking, Reading, Writing</li>
-                        <li>Add pronunciation practice in every lesson</li>
-                    </ul>
-                </div>
 
                 <div class="form-row">
                     <div class="form-group">
@@ -272,16 +233,16 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="disciplina">Subject</label>
-                        <input type="text" id="disciplina" value="English Language" readonly />
+                        <input type="text" id="disciplina" value="English" readonly />
                     </div>
                     <div class="form-group">
                         <label for="classe">Grade / Class</label>
                         <select id="classe">
-                            <option value="8ª Classe">8ª Classe</option>
-                            <option value="9ª Classe">9ª Classe</option>
-                            <option value="10ª Classe">10ª Classe</option>
-                            <option value="11ª Classe">11ª Classe</option>
-                            <option value="12ª Classe">12ª Classe</option>
+                            <option value="8th Grade">8th Grade</option>
+                            <option value="9th Grade">9th Grade</option>
+                            <option value="10th Grade">10th Grade</option>
+                            <option value="11th Grade">11th Grade</option>
+                            <option value="12th Grade">12th Grade</option>
                         </select>
                     </div>
                 </div>
@@ -289,17 +250,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="anoLectivo">Academic Year</label>
-                        <input type="text" id="anoLectivo" placeholder="e.g., 2026" />
-                    </div>
-                    <div class="form-group">
-                        <label for="nivel">English Level</label>
-                        <select id="nivel">
-                            <option value="Beginner">Beginner (Iniciante)</option>
-                            <option value="Elementary">Elementary (Básico)</option>
-                            <option value="Pre-Intermediate">Pre-Intermediate (Pré-Intermediário)</option>
-                            <option value="Intermediate">Intermediate (Intermediário)</option>
-                            <option value="Upper-Intermediate">Upper-Intermediate (Intermediário Superior)</option>
-                        </select>
+                        <input type="text" id="anoLectivo" placeholder="e.g., 2025-2026" />
                     </div>
                 </div>
 
@@ -321,9 +272,9 @@
                         <label for="periodo">Period</label>
                         <select id="periodo">
                             <option value="">Select (optional)</option>
-                            <option value="Morning">Morning / Manhã</option>
-                            <option value="Afternoon">Afternoon / Tarde</option>
-                            <option value="Evening">Evening / Noite</option>
+                            <option value="Morning">Morning</option>
+                            <option value="Afternoon">Afternoon</option>
+                            <option value="Evening">Evening</option>
                         </select>
                     </div>
                 </div>
@@ -341,30 +292,22 @@
                             <option value="60">60 lessons (120 pages)</option>
                         </select>
                     </div>
-                    <div class="form-group" style="display: flex; align-items: flex-end; min-width: auto;">
-                        <button type="button" id="muralBtn" class="btn btn-outline" style="height: fit-content; padding: 8px 12px; font-size: 14px; white-space: nowrap;">
-                            + Add Board Plan (+5 MZN)
-                        </button>
-                    </div>
                 </div>
 
-                <div class="language-tip">
-                    <h4>🎯 Common English Topics Included:</h4>
-                    <ul>
-                        <li>Verb tenses (Present, Past, Future)</li>
-                        <li>Modal verbs (Can, Must, Should)</li>
-                        <li>Conditional sentences</li>
-                        <li>Passive voice</li>
-                        <li>Reported speech</li>
-                        <li>Vocabulary themes</li>
-                        <li>Pronunciation practice</li>
-                    </ul>
+                <!-- Wall Chart Option -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="muralAdicionado">Add Wall Chart?</label>
+                        <select id="muralAdicionado">
+                            <option value="0">No (+0 MZN)</option>
+                            <option value="1">Yes (+5 MZN per lesson)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="price-info" id="priceInfo" style="display: none;">
                     <p>Total Amount:</p>
                     <div class="price-value" id="priceValue">0 MZN</div>
-                    <div id="muralInfo" style="font-size: 14px; margin-top: 5px; color: #2d3748;"></div>
                 </div>
 
                 <div class="btn-group">
@@ -388,20 +331,23 @@
                 dataGeracaoInput.value = formattedDate;
             }
 
+            // Set default academic year to current year
+            const anoLectivoInput = document.getElementById('anoLectivo');
+            if (anoLectivoInput && !anoLectivoInput.value) {
+                const currentYear = today.getFullYear();
+                anoLectivoInput.value = currentYear + '-' + (currentYear + 1);
+            }
+
             // Elements
             const step1 = document.getElementById('step1');
             const step2 = document.getElementById('step2');
             const nextBtn = document.getElementById('nextBtn');
             const prevBtn = document.getElementById('prevBtn');
             const numAulasSelect = document.getElementById('numAulas');
+            const muralAdicionadoSelect = document.getElementById('muralAdicionado');
             const priceInfo = document.getElementById('priceInfo');
             const priceValue = document.getElementById('priceValue');
             const pdfLink = document.getElementById('pdfLink');
-            const muralBtn = document.getElementById('muralBtn');
-            const muralInfo = document.getElementById('muralInfo');
-
-            let muralAdicionado = false;
-            const precoMural = 5;
 
             function goToStep2() {
                 const escola = document.getElementById('escola')?.value?.trim() || '';
@@ -422,33 +368,17 @@
             if (nextBtn) nextBtn.addEventListener('click', e => { e.preventDefault(); goToStep2(); });
             if (prevBtn) prevBtn.addEventListener('click', e => { e.preventDefault(); goToStep1(); });
 
-            if (muralBtn) {
-                muralBtn.addEventListener('click', function () {
-                    if (confirm('Add Board Plan page?\n\nThis will add 1 vertical page for board notes and add 5 MZN to the total.')) {
-                        muralAdicionado = true;
-                        this.classList.remove('btn-outline');
-                        this.classList.add('btn-mural-added');
-                        this.innerHTML = '✓ Board Plan Added';
-                        this.disabled = true;
-                        
-                        updatePrice();
-                        updatePdfLink();
-                    }
-                });
-            }
-
             function updatePrice() {
                 const numAulas = parseInt(numAulasSelect.value);
+                const muralAdicionado = document.getElementById('muralAdicionado')?.value === '1';
+                
                 if (numAulas) {
+                    // Base price: 12 MZN per 10 lessons
                     let total = Math.ceil(numAulas / 10) * 12;
                     
+                    // Add wall chart if selected
                     if (muralAdicionado) {
-                        total += 5;
-                        muralInfo.textContent = `Includes Board Plan page (+5 MZN)`;
-                        muralInfo.style.display = 'block';
-                    } else {
-                        muralInfo.textContent = '';
-                        muralInfo.style.display = 'none';
+                        total += numAulas * 5;
                     }
                     
                     priceValue.textContent = total + ' MZN';
@@ -467,21 +397,37 @@
                 });
             }
 
+            if (muralAdicionadoSelect) {
+                muralAdicionadoSelect.addEventListener('change', function () {
+                    updatePrice();
+                    updatePdfLink();
+                });
+            }
+
             function getFormData() {
                 const numAulas = document.getElementById('numAulas')?.value || '';
+                const muralAdicionado = document.getElementById('muralAdicionado')?.value === '1' ? '1' : '0';
                 const valorTotal = updatePrice();
+                
+                // Format classe values to match what PDF expects
+                let classe = document.getElementById('classe')?.value || '';
+                // Convert English grades back to Portuguese format if needed
+                if (classe === '8th Grade') classe = '8ª Classe';
+                else if (classe === '9th Grade') classe = '9ª Classe';
+                else if (classe === '10th Grade') classe = '10ª Classe';
+                else if (classe === '11th Grade') classe = '11ª Classe';
+                else if (classe === '12th Grade') classe = '12ª Classe';
                 
                 return {
                     escola: document.getElementById('escola')?.value?.trim() || '',
                     professor: document.getElementById('professor')?.value?.trim() || '',
-                    disciplina: 'English Language',
-                    classe: document.getElementById('classe')?.value || '',
+                    disciplina: 'English',
+                    classe: classe,
                     anoLectivo: document.getElementById('anoLectivo')?.value?.trim() || '',
-                    nivel: document.getElementById('nivel')?.value || 'Beginner',
                     numAulas: numAulas,
                     periodo: document.getElementById('periodo')?.value || '',
                     dataGeracao: document.getElementById('dataGeracao')?.value || '',
-                    muralAdicionado: muralAdicionado ? '1' : '0',
+                    muralAdicionado: muralAdicionado,
                     valorTotal: valorTotal
                 };
             }
@@ -491,7 +437,8 @@
                 if (data.escola && data.professor && data.numAulas) {
                     const params = new URLSearchParams(data).toString();
                     if (pdfLink) {
-                        pdfLink.href = `pdf-ingles.html?${params}`;
+                        // Link para o arquivo PDF em inglês (renomeie para pdf-english.html)
+                        pdfLink.href = `pdf-english.html?${params}`;
                         pdfLink.classList.remove('disabled');
                     }
                 } else {
@@ -502,7 +449,7 @@
                 }
             }
 
-            const fieldIds = ['escola', 'professor', 'classe', 'anoLectivo', 'periodo', 'nivel'];
+            const fieldIds = ['escola', 'professor', 'classe', 'anoLectivo', 'periodo'];
             fieldIds.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -520,6 +467,7 @@
                         alert('Please fill in all required fields before preview.');
                         return;
                     }
+                    // Replace with your actual sample link
                     window.open('https://drive.google.com/file/d/1xampleEnglishLessonPlan/view?usp=drivesdk', '_blank');
                 });
             }
