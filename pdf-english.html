@@ -345,7 +345,7 @@
                 numAulas: parseInt(urlParams.get('numAulas')) || 0,
                 dataGeracao: urlParams.get('dataGeracao') || '',
                 periodo: urlParams.get('periodo') || '',
-                muralAdicionado: false,
+                muralAdicionado: false, // Always false for English version
                 valorTotal: urlParams.get('valorTotal') || 0
             };
             
@@ -756,44 +756,45 @@
                 }
             });
             
-            function loadImage(url) {
+            function loadImageWithProxy(url) {
                 return new Promise((resolve, reject) => {
+                    // Tenta carregar a imagem diretamente
                     const img = new Image();
-                    img.crossOrigin = 'anonymous';
+                    img.crossOrigin = 'Anonymous';
+                    
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
                         canvas.width = img.width;
                         canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0);
-                        const dataUrl = canvas.toDataURL('image/png');
-                        resolve(dataUrl);
+                        const dataURL = canvas.toDataURL('image/png');
+                        resolve(dataURL);
                     };
-                    img.onerror = reject;
+                    
+                    img.onerror = function() {
+                        // Se falhar, tenta com um proxy CORS
+                        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                        const img2 = new Image();
+                        img2.crossOrigin = 'Anonymous';
+                        img2.onload = function() {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = img2.width;
+                            canvas.height = img2.height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img2, 0, 0);
+                            const dataURL = canvas.toDataURL('image/png');
+                            resolve(dataURL);
+                        };
+                        img2.onerror = reject;
+                        img2.src = proxyUrl + url;
+                    };
+                    
                     img.src = url;
                 });
             }
             
-            // Função auxiliar para carregar imagem com proxy CORS
-            async function loadImageWithProxy(url) {
-                return new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.crossOrigin = 'anonymous';
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        ctx.drawImage(img, 0, 0);
-                        resolve(canvas.toDataURL('image/png'));
-                    };
-                    img.onerror = reject;
-                    
-                    // Usar proxy CORS para evitar problemas de cross-origin
-                    img.src = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-                });
-            }
-            
+            // NOVA FUNÇÃO generatePDF SUBSTITUÍDA
             async function generatePDF(dados, dataFormatada) {
                 try {
                     const { jsPDF } = window.jspdf;
@@ -802,339 +803,124 @@
                         unit: 'mm',
                         format: 'a4'
                     });
-                    
+
                     doc.setProperties({
                         title: `Lesson Plan Block - ${dados.professor}`,
                         subject: 'Lesson Plan',
                         author: 'Lesson Plan Generator',
                         creator: 'Block Generation System'
                     });
-                    
-                    // Set Times New Roman font
+
                     doc.setFont("times", "normal");
-                    
-                    // ========== PAGE 1 - COVER (Imagem como fundo APENAS NA CAPA) ==========
-                    
-                    // CARREGAR A IMAGEM PARA PREENCHER A FOLHA INTEIRA APENAS NA CAPA
+
+                    // =====================================================
+                    // ===============  PÁGINA 1 - CAPA  ===================
+                    // =====================================================
+
                     try {
-                        // URL da imagem que você quer como fundo da capa
-                        const imgUrl = 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Emblem_of_Mozambique.svg';
-                        
-                        // Carregar imagem
+                        const imgUrl = "https://raw.githubusercontent.com/Nhanombe62/Plano-de-aula/b2d288a169831e5b08ee3d1fd3653c0fde1e034d/1772357067823.png";
                         const imgData = await loadImageWithProxy(imgUrl);
-                        
-                        // Adicionar imagem para preencher a página A4 inteira (210mm x 297mm) - APENAS NA CAPA
+                        // Preenche A4 inteira (210mm x 297mm)
                         doc.addImage(imgData, 'PNG', 0, 0, 210, 297);
-                        
                     } catch (error) {
-                        console.log('Erro ao carregar imagem de fundo:', error);
-                        // Fallback: fundo branco com borda
+                        console.log("Erro ao carregar imagem:", error);
                         doc.setFillColor(255, 255, 255);
                         doc.rect(0, 0, 210, 297, 'F');
-                        doc.setLineWidth(0.5);
-                        doc.rect(10, 10, 190, 277);
                     }
-                    
-                    // Configurar cor do texto (preto para contrastar com o fundo)
-                    doc.setTextColor(0, 0, 0);
-                    
-                    // REPÚBLICA DE MOÇAMBIQUE
-                    doc.setFontSize(16);
-                    doc.setFont("times", "bold");
-                    doc.text("REPÚBLICA DE MOÇAMBIQUE", 105, 40, { align: "center" });
-                    
-                    doc.setFontSize(14);
-                    doc.setFont("times", "normal");
-                    doc.text("MINISTÉRIO DA EDUCAÇÃO", 105, 50, { align: "center" });
-                    
-                    doc.setFontSize(16);
-                    doc.setFont("times", "bold");
-                    doc.text("BLOCO DE PLANIFICAÇÃO", 105, 70, { align: "center" });
-                    
-                    // Linha divisória
-                    doc.setLineWidth(0.5);
-                    doc.line(50, 80, 160, 80);
-                    
-                    // ESCOLA:
-                    doc.setFontSize(14);
-                    doc.setFont("times", "bold");
-                    doc.text("ESCOLA:", 40, 100);
-                    doc.setFont("times", "normal");
-                    doc.text(dados.escola || "______________________________", 80, 100);
-                    
-                    // PROFESSOR:
-                    doc.setFont("times", "bold");
-                    doc.text("PROFESSOR:", 40, 120);
-                    doc.setFont("times", "normal");
-                    doc.text(dados.professor || "______________________________", 85, 120);
-                    
-                    // DISCIPLINA:
-                    doc.setFont("times", "bold");
-                    doc.text("DISCIPLINA:", 40, 140);
-                    doc.setFont("times", "normal");
-                    doc.text(dados.disciplina || "English Language", 85, 140);
-                    
-                    // CLASSE:
-                    doc.setFont("times", "bold");
-                    doc.text("CLASSE:", 40, 160);
-                    doc.setFont("times", "normal");
-                    doc.text(dados.classe || "8ª Classe", 75, 160);
-                    
-                    // CADERNO DE PLANIFICAÇÃO
-                    doc.setFontSize(18);
-                    doc.setFont("times", "bold");
-                    doc.text("CADERNO DE PLANIFICAÇÃO", 105, 190, { align: "center" });
-                    
-                    // REPÚBLICA DE MOÇAMBIQUE - MOÇAMBIQUE
-                    doc.setFontSize(14);
-                    doc.setFont("times", "normal");
-                    doc.text("REPÚBLICA DE MOÇAMBIQUE", 105, 220, { align: "center" });
-                    doc.text("MOÇAMBIQUE", 105, 235, { align: "center" });
-                    
-                    // BLOCO COM [X] AULAS
-                    doc.setFontSize(18);
-                    doc.setFont("times", "bold");
-                    doc.text(`BLOCO COM ${dados.numAulas} AULAS`, 105, 260, { align: "center" });
-                    
-                    // Data de geração
-                    doc.setFontSize(12);
-                    doc.setFont("times", "normal");
-                    doc.text(`Data de geração: ${dataFormatada}`, 105, 280, { align: "center" });
-                    
-                    // ========== PÁGINA 2 - DECLARAÇÃO PEDAGÓGICA (SEM IMAGEM DE FUNDO) ==========
+
+                    // =====================================================
+                    // ========== PÁGINA 2 - DECLARAÇÃO ====================
+                    // =====================================================
+
                     doc.addPage();
-                    
-                    // Fundo branco simples para a página 2
+
                     doc.setFillColor(255, 255, 255);
                     doc.rect(0, 0, 210, 297, 'F');
                     doc.setLineWidth(0.5);
                     doc.rect(10, 10, 190, 277);
-                    
+
                     doc.setTextColor(0, 0, 0);
-                    
+
                     doc.setFontSize(16);
                     doc.setFont("times", "bold");
                     doc.text("DECLARAÇÃO PEDAGÓGICA", 105, 30, { align: "center" });
-                    
+
                     doc.setFont("times", "normal");
                     doc.setFontSize(12);
+
                     let yPos = 50;
+
                     const declarationText = [
-                        "Este documento constitui um instrumento oficial de planeamento didáctico, elaborado conforme as directrizes curriculares nacionais e os princípios pedagógicos estabelecidos pelo Ministério da Educação de Moçambique.",
+                        "Este documento constitui um instrumento oficial de planeamento didáctico.",
                         "",
-                        `O presente bloco de planificação é de uso exclusivo e pessoal do Professor ${dados.professor || "___________________"}, destinando-se unicamente ao exercício profissional da actividade docente, com vista à organização, execução e avaliação do processo de ensino-aprendizagem.`,
+                        `O presente bloco pertence ao Professor ${dados.professor}.`,
                         "",
-                        "O conteúdo aqui presente reflecte o planeamento pedagógico do Professor, baseado no currículo em vigor, devendo ser utilizado com ética, responsabilidade e compromisso com a qualidade educacional.",
-                        "",
-                        "É expressamente proibida a reprodução, distribuição, partilha ou utilização por terceiros não autorizados, salvaguardando-se os direitos de propriedade intelectual e as normas deontológicas da profissão.",
-                        "",
-                        `Esta declaração atesta a autenticidade e finalidade educativa do presente documento, que poderá ser solicitado para efeitos de supervisão pedagógica e avaliação do desempenho do Professor ${dados.professor || "___________________"}, nos termos legais aplicáveis.`
+                        "É proibida a reprodução sem autorização."
                     ];
-                    
+
                     declarationText.forEach(line => {
-                        if (yPos > 250) {
-                            doc.addPage();
-                            // Fundo branco para páginas extras
-                            doc.setFillColor(255, 255, 255);
-                            doc.rect(0, 0, 210, 297, 'F');
-                            doc.setLineWidth(0.5);
-                            doc.rect(10, 10, 190, 277);
-                            doc.setTextColor(0, 0, 0);
-                            yPos = 30;
-                        }
                         if (line === "") {
-                            yPos += 5;
+                            yPos += 6;
                         } else {
                             const lines = doc.splitTextToSize(line, 170);
                             doc.text(lines, 20, yPos);
                             yPos += lines.length * 7;
                         }
                     });
-                    
-                    yPos += 15;
+
+                    yPos += 20;
                     doc.text("ASSINATURA DO PROFESSOR:", 20, yPos);
                     yPos += 10;
                     doc.text("_________________________________________", 20, yPos);
-                    yPos += 10;
-                    doc.text(dados.professor || "___________________", 20, yPos);
-                    doc.text(`Data: ${dataFormatada}`, 150, yPos);
-                    
-                    // ========== PÁGINAS DAS AULAS (SEM IMAGEM DE FUNDO) ==========
+
+                    // =====================================================
+                    // ============= PÁGINAS DAS AULAS =====================
+                    // =====================================================
+
                     for (let i = 1; i <= dados.numAulas; i++) {
+
                         doc.addPage();
-                        
-                        // Fundo branco para páginas de aula
+
                         doc.setFillColor(255, 255, 255);
                         doc.rect(0, 0, 210, 297, 'F');
                         doc.setLineWidth(0.5);
                         doc.rect(10, 10, 190, 277);
-                        
-                        doc.setTextColor(0, 0, 0);
-                        
-                        // ===== CABEÇALHO DA AULA =====
-                        doc.setFontSize(10);
-                        doc.setFont("times", "normal");
-                        doc.text(`Aula ${i}`, 190, 15, { align: "right" });
-                        
+
                         doc.setFontSize(16);
                         doc.setFont("times", "bold");
-                        doc.text('PLANO DE AULA', 105, 25, { align: 'center' });
-                        
-                        let y = 35;
-                        
-                        // LINHA 1: ESCOLA E DATA
+                        doc.text(`PLANO DE AULA ${i}`, 105, 25, { align: 'center' });
+
                         doc.setFontSize(12);
-                        doc.setFont("times", "bold");
-                        doc.text('Escola:', 20, y);
                         doc.setFont("times", "normal");
-                        doc.text(dados.escola || '______________________________________', 40, y);
-                        
-                        doc.setFont("times", "bold");
-                        doc.text('Data:', 130, y);
-                        doc.setFont("times", "normal");
-                        doc.text('________________________', 150, y);
-                        
-                        y += 8;
-                        
-                        // LINHA 2: PROFESSOR E DISCIPLINA
-                        doc.setFont("times", "bold");
-                        doc.text('Professor:', 20, y);
-                        doc.setFont("times", "normal");
-                        doc.text(dados.professor || '____________________________________', 45, y);
-                        
-                        doc.setFont("times", "bold");
-                        doc.text('Disciplina:', 130, y);
-                        doc.setFont("times", "normal");
-                        doc.text(dados.disciplina || '________________________', 160, y);
-                        
-                        y += 8;
-                        
-                        // LINHA 3: UNIDADE TEMÁTICA E TEMA
-                        doc.setFont("times", "bold");
-                        doc.text('Unidade Temática:', 20, y);
-                        doc.setFont("times", "normal");
-                        doc.text('______________________________________', 60, y);
-                        
-                        doc.setFont("times", "bold");
-                        doc.text('Tema:', 130, y);
-                        doc.setFont("times", "normal");
-                        doc.text('________________________', 150, y);
-                        
-                        y += 10;
-                        
-                        // LINHA 4: CLASSE, DURAÇÃO, PERÍODO, Nº DE ALUNOS
-                        doc.setFont("times", "bold");
-                        doc.text('Classe:', 20, y);
-                        doc.setFont("times", "normal");
-                        doc.text(dados.classe || '_________', 40, y);
-                        
-                        doc.setFont("times", "bold");
-                        doc.text('Duração:', 70, y);
-                        doc.setFont("times", "normal");
-                        doc.text('_________', 95, y);
-                        
-                        doc.setFont("times", "bold");
-                        doc.text('Período:', 125, y);
-                        doc.setFont("times", "normal");
-                        doc.text(dados.periodo || '_________', 150, y);
-                        
-                        doc.setFont("times", "bold");
-                        doc.text('Nº de Alunos:', 20, y + 10);
-                        doc.setFont("times", "normal");
-                        doc.text('_________', 60, y + 10);
-                        
-                        y += 20;
-                        
-                        // LINHA 5: PRÉ-REQUISITOS E MÉTODOS
-                        // PRÉ-REQUISITOS
-                        doc.setFont("times", "bold");
-                        doc.text('Pré-requisitos:', 20, y);
-                        
-                        doc.setFont("times", "normal");
-                        for(let j = 0; j < 4; j++) {
-                            doc.text('___________________________________________________________', 20, y + 6 + (j * 7));
-                        }
-                        
-                        // MÉTODOS
-                        doc.setFont("times", "bold");
-                        doc.text('Métodos:', 120, y);
-                        doc.setFont("times", "normal");
-                        
-                        for(let j = 0; j < 4; j++) {
-                            doc.text('_________________________________________', 135, y + 6 + (j * 7));
-                        }
-                        
-                        y += 40;
-                        
-                        // LINHA 6: COMPETÊNCIAS ESPECÍFICAS E BIBLIOGRAFIA
-                        doc.setFont("times", "bold");
-                        doc.text('Competências Específicas:', 20, y);
-                        
-                        doc.setFont("times", "normal");
-                        for(let j = 0; j < 4; j++) {
-                            doc.text('___________________________________________________________', 20, y + 6 + (j * 7));
-                        }
-                        
-                        doc.setFont("times", "bold");
-                        doc.text('Bibliografia:', 120, y);
-                        doc.setFont("times", "normal");
-                        
-                        for(let j = 0; j < 4; j++) {
-                            doc.text('_________________________________________', 135, y + 6 + (j * 7));
-                        }
-                        
-                        y += 35;
-                        
-                        // TABELA
-                        const tableData = [
-                            ['INTRODUÇÃO', '', '', '_____ min'],
-                            ['APRESENTAÇÃO', '', '', '_____ min'],
-                            ['PRÁTICA', '', '', '_____ min'],
-                            ['PRODUÇÃO', '', '', '_____ min'],
-                            ['CONCLUSÃO', '', '', '_____ min']
-                        ];
-                        
+
+                        doc.text(`Escola: ${dados.escola}`, 20, 40);
+                        doc.text(`Professor: ${dados.professor}`, 20, 50);
+                        doc.text(`Disciplina: ${dados.disciplina}`, 20, 60);
+                        doc.text(`Classe: ${dados.classe}`, 20, 70);
+
                         doc.autoTable({
-                            startY: y,
+                            startY: 90,
                             head: [['ETAPAS', 'ACTIVIDADES DO PROFESSOR', 'ACTIVIDADES DO ALUNO', 'TEMPO']],
-                            body: tableData,
+                            body: [
+                                ['INTRODUÇÃO', '', '', ''],
+                                ['DESENVOLVIMENTO', '', '', ''],
+                                ['CONCLUSÃO', '', '', '']
+                            ],
                             theme: 'grid',
-                            styles: { 
-                                font: 'times',
-                                fontSize: 11,
-                                lineColor: [0, 0, 0],
-                                lineWidth: 0.2,
-                                textColor: [0, 0, 0]
-                            },
-                            headStyles: { 
-                                fillColor: [43, 93, 171],
-                                textColor: [255, 255, 255],
-                                fontStyle: 'bold',
-                                halign: 'center'
-                            },
-                            bodyStyles: {
-                                cellPadding: 12,
-                                minCellHeight: 25
-                            },
-                            columnStyles: {
-                                0: { cellWidth: 40, halign: 'center', fontStyle: 'bold' },
-                                1: { cellWidth: 70, halign: 'left' },
-                                2: { cellWidth: 70, halign: 'left' },
-                                3: { cellWidth: 30, halign: 'center' }
-                            },
+                            styles: { font: 'times', fontSize: 11 },
                             margin: { left: 20, right: 20 }
                         });
                     }
-                    
+
                     pdfDoc = doc;
                     pdfGenerated = true;
-                    
+
                     if (currentPercentage >= 100) {
                         completeGeneration();
                     }
-                    
+
                 } catch (error) {
-                    console.error("Error generating PDF:", error);
+                    console.error("Erro ao gerar PDF:", error);
                     showStatus("Process Error", "An error occurred while generating the PDF.");
                     setTimeout(() => {
                         processingOverlay.classList.remove('active');
