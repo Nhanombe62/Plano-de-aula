@@ -794,12 +794,12 @@
                 });
             }
             
-            // NOVA FUNÇÃO generatePDF SUBSTITUÍDA
+            // FUNÇÃO generatePDF MODIFICADA - HORIZONTAL COM FUNDO COMO MARCA D'ÁGUA
             async function generatePDF(dados, dataFormatada) {
                 try {
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF({
-                        orientation: 'portrait',
+                        orientation: 'landscape', // HORIZONTAL
                         unit: 'mm',
                         format: 'a4'
                     });
@@ -820,13 +820,37 @@
                     try {
                         const imgUrl = "https://raw.githubusercontent.com/Nhanombe62/Plano-de-aula/b2d288a169831e5b08ee3d1fd3653c0fde1e034d/1772357067823.png";
                         const imgData = await loadImageWithProxy(imgUrl);
-                        // Preenche A4 inteira (210mm x 297mm)
-                        doc.addImage(imgData, 'PNG', 0, 0, 210, 297);
+                        
+                        // Adicionar imagem como fundo com baixa opacidade (marca d'água)
+                        doc.setGState(new doc.GState({ opacity: 0.3 })); // 30% de opacidade
+                        doc.addImage(imgData, 'PNG', 0, 0, 297, 210); // 297mm x 210mm para landscape
+                        doc.setGState(new doc.GState({ opacity: 1 })); // Voltar à opacidade normal para texto
+                        
                     } catch (error) {
                         console.log("Erro ao carregar imagem:", error);
                         doc.setFillColor(255, 255, 255);
-                        doc.rect(0, 0, 210, 297, 'F');
+                        doc.rect(0, 0, 297, 210, 'F');
                     }
+
+                    // TEXTO SOBREPOSTO À IMAGEM (CAPA)
+                    doc.setTextColor(0, 0, 0); // Preto para melhor visibilidade
+                    doc.setFontSize(22);
+                    doc.setFont("times", "bold");
+                    doc.text("REPÚBLICA DE MOÇAMBIQUE", 148.5, 40, { align: "center" });
+                    doc.text("MINISTÉRIO DA EDUCAÇÃO", 148.5, 55, { align: "center" });
+                    
+                    doc.setFontSize(28);
+                    doc.text("BLOCO DE PLANOS DE AULA", 148.5, 80, { align: "center" });
+                    
+                    doc.setFontSize(18);
+                    doc.text(dados.disciplina, 148.5, 100, { align: "center" });
+                    
+                    doc.setFontSize(16);
+                    doc.text(`Escola: ${dados.escola}`, 148.5, 130, { align: "center" });
+                    doc.text(`Professor: ${dados.professor}`, 148.5, 145, { align: "center" });
+                    doc.text(`Classe: ${dados.classe}`, 148.5, 160, { align: "center" });
+                    doc.text(`Ano Lectivo: ${dados.anoLectivo}`, 148.5, 175, { align: "center" });
+                    doc.text(`Período: ${dados.periodo}`, 148.5, 190, { align: "center" });
 
                     // =====================================================
                     // ========== PÁGINA 2 - DECLARAÇÃO ====================
@@ -834,44 +858,58 @@
 
                     doc.addPage();
 
-                    doc.setFillColor(255, 255, 255);
-                    doc.rect(0, 0, 210, 297, 'F');
+                    // Fundo da declaração com a mesma imagem como marca d'água
+                    try {
+                        const imgUrl = "https://raw.githubusercontent.com/Nhanombe62/Plano-de-aula/b2d288a169831e5b08ee3d1fd3653c0fde1e034d/1772357067823.png";
+                        const imgData = await loadImageWithProxy(imgUrl);
+                        doc.setGState(new doc.GState({ opacity: 0.2 })); // 20% de opacidade para declaração
+                        doc.addImage(imgData, 'PNG', 0, 0, 297, 210);
+                        doc.setGState(new doc.GState({ opacity: 1 }));
+                    } catch (error) {
+                        doc.setFillColor(255, 255, 255);
+                        doc.rect(0, 0, 297, 210, 'F');
+                    }
+
+                    // Moldura
                     doc.setLineWidth(0.5);
-                    doc.rect(10, 10, 190, 277);
+                    doc.rect(15, 15, 267, 180);
 
                     doc.setTextColor(0, 0, 0);
 
-                    doc.setFontSize(16);
+                    doc.setFontSize(20);
                     doc.setFont("times", "bold");
-                    doc.text("DECLARAÇÃO PEDAGÓGICA", 105, 30, { align: "center" });
+                    doc.text("DECLARAÇÃO PEDAGÓGICA", 148.5, 35, { align: "center" });
 
                     doc.setFont("times", "normal");
-                    doc.setFontSize(12);
+                    doc.setFontSize(14);
 
-                    let yPos = 50;
+                    let yPos = 55;
 
                     const declarationText = [
-                        "Este documento constitui um instrumento oficial de planeamento didáctico.",
+                        "Eu, ________________________________________________________, Professor(a) de",
+                        `${dados.disciplina}, na Escola ${dados.escola}, declaro para os devidos fins que o presente`,
+                        `Bloco de Planos de Aula, contendo ${dados.numAulas} planos, é de minha autoria e será utilizado`,
+                        "para fins exclusivamente pedagógicos durante o ano lectivo de " + dados.anoLectivo + ".",
                         "",
-                        `O presente bloco pertence ao Professor ${dados.professor}.`,
+                        "Esta declaração é emitida para comprovar a autenticidade e finalidade educativa deste",
+                        "documento, estando ciente das responsabilidades éticas e legais inerentes ao seu uso.",
                         "",
-                        "É proibida a reprodução sem autorização."
+                        "O presente bloco está em conformidade com o currículo nacional e as diretrizes",
+                        "pedagógicas estabelecidas pelo Ministério da Educação."
                     ];
 
                     declarationText.forEach(line => {
-                        if (line === "") {
-                            yPos += 6;
-                        } else {
-                            const lines = doc.splitTextToSize(line, 170);
-                            doc.text(lines, 20, yPos);
-                            yPos += lines.length * 7;
-                        }
+                        const lines = doc.splitTextToSize(line, 250);
+                        doc.text(lines, 20, yPos);
+                        yPos += lines.length * 8;
                     });
 
-                    yPos += 20;
-                    doc.text("ASSINATURA DO PROFESSOR:", 20, yPos);
+                    yPos += 15;
+                    doc.text("Local e Data: _____________________________________________________", 20, yPos);
+                    yPos += 15;
+                    doc.text("Assinatura do Professor: ___________________________________________", 20, yPos);
                     yPos += 10;
-                    doc.text("_________________________________________", 20, yPos);
+                    doc.text(dados.professor, 90, yPos + 2);
 
                     // =====================================================
                     // ============= PÁGINAS DAS AULAS =====================
@@ -881,25 +919,45 @@
 
                         doc.addPage();
 
-                        doc.setFillColor(255, 255, 255);
-                        doc.rect(0, 0, 210, 297, 'F');
-                        doc.setLineWidth(0.5);
-                        doc.rect(10, 10, 190, 277);
+                        // Fundo da página de aula com a mesma imagem como marca d'água
+                        try {
+                            const imgUrl = "https://raw.githubusercontent.com/Nhanombe62/Plano-de-aula/b2d288a169831e5b08ee3d1fd3653c0fde1e034d/1772357067823.png";
+                            const imgData = await loadImageWithProxy(imgUrl);
+                            doc.setGState(new doc.GState({ opacity: 0.15 })); // 15% de opacidade para páginas de aula
+                            doc.addImage(imgData, 'PNG', 0, 0, 297, 210);
+                            doc.setGState(new doc.GState({ opacity: 1 }));
+                        } catch (error) {
+                            doc.setFillColor(255, 255, 255);
+                            doc.rect(0, 0, 297, 210, 'F');
+                        }
 
-                        doc.setFontSize(16);
+                        // Moldura
+                        doc.setLineWidth(0.5);
+                        doc.rect(10, 10, 277, 190);
+
+                        doc.setFontSize(20);
                         doc.setFont("times", "bold");
-                        doc.text(`PLANO DE AULA ${i}`, 105, 25, { align: 'center' });
+                        doc.text(`PLANO DE AULA Nº ${i}`, 148.5, 25, { align: 'center' });
 
                         doc.setFontSize(12);
                         doc.setFont("times", "normal");
 
+                        // Cabeçalho com dados
                         doc.text(`Escola: ${dados.escola}`, 20, 40);
+                        doc.text(`Data: ${dataFormatada}`, 200, 40);
+                        
                         doc.text(`Professor: ${dados.professor}`, 20, 50);
-                        doc.text(`Disciplina: ${dados.disciplina}`, 20, 60);
-                        doc.text(`Classe: ${dados.classe}`, 20, 70);
+                        doc.text(`Disciplina: ${dados.disciplina}`, 200, 50);
+                        
+                        doc.text(`Classe: ${dados.classe}`, 20, 60);
+                        doc.text(`Duração: 45 minutos`, 200, 60);
+                        
+                        doc.text(`Unidade Temática: _________________________`, 20, 75);
+                        doc.text(`Tema da Aula: _____________________________`, 20, 85);
 
+                        // Tabela da aula
                         doc.autoTable({
-                            startY: 90,
+                            startY: 100,
                             head: [['ETAPAS', 'ACTIVIDADES DO PROFESSOR', 'ACTIVIDADES DO ALUNO', 'TEMPO']],
                             body: [
                                 ['INTRODUÇÃO', '', '', ''],
@@ -907,8 +965,23 @@
                                 ['CONCLUSÃO', '', '', '']
                             ],
                             theme: 'grid',
-                            styles: { font: 'times', fontSize: 11 },
-                            margin: { left: 20, right: 20 }
+                            styles: { 
+                                font: 'times', 
+                                fontSize: 11,
+                                textColor: [0, 0, 0],
+                                lineColor: [0, 0, 0]
+                            },
+                            headStyles: {
+                                fillColor: [70, 70, 70],
+                                textColor: [255, 255, 255]
+                            },
+                            margin: { left: 20, right: 20 },
+                            columnStyles: {
+                                0: { cellWidth: 45 },
+                                1: { cellWidth: 85 },
+                                2: { cellWidth: 85 },
+                                3: { cellWidth: 30 }
+                            }
                         });
                     }
 
