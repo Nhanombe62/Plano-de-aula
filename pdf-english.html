@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generate PDF - Lesson Plan Block</title>
+    <title>Generate PDF - Lesson Plan</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Times New Roman', serif; }
         body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; line-height: 1.6; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
@@ -191,6 +191,35 @@
             margin-top: 5px;
             color: #4f46e5;
         }
+        
+        /* Test code hint */
+        .test-hint {
+            margin-top: 10px;
+            padding: 8px;
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 5px;
+            color: #856404;
+            font-size: 13px;
+            text-align: center;
+        }
+        .test-hint strong {
+            font-size: 18px;
+            background: #856404;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+        
+        /* Prevenir seleção de texto no conteúdo */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
     </style>
 </head>
 <body>
@@ -229,6 +258,11 @@
                 <p>Enter your code to unlock download</p>
             </div>
             
+            <!-- TEST CODE HINT -->
+            <div class="test-hint">
+                🧪 Test Code: <strong>1234</strong> (for any package)
+            </div>
+            
             <!-- Step 1: Select package -->
             <div class="payment-step">
                 <h4>1. Select your package:</h4>
@@ -262,7 +296,7 @@
             <!-- E-Mola payment section -->
             <div class="payment-mpesa">
                 <h4>📱 E-Mola Payment</h4>
-                <p>To obtain a code, make payment to:</p>
+                <p>To obtain a real code, make payment to:</p>
                 <div class="payment-mpesa-details">
                     <p><strong>Number:</strong> 876393961 
                         <button id="copyNumberBtn" class="copy-btn">Copy</button>
@@ -278,7 +312,7 @@
     </div>
     
     <div class="container" id="mainContainer">
-        <h1>Generating Lesson Plan Block PDF</h1>
+        <h1>📄 LESSON PLAN GENERATOR</h1>
         <div id="infoContainer" class="info-box"></div>
         <div id="loadingSection">
             <div class="data-review">
@@ -293,14 +327,14 @@
         <div id="successSection" class="hidden">
             <div class="success-message">
                 <h2>✅ PDF Generated Successfully!</h2>
-                <p>Your lesson plan block is ready for download.</p>
+                <p>Your lesson plan is ready for download.</p>
                 <p style="color: #666; font-size: 16px;">
-                    PDF generated with <span id="totalPaginasGeradas">0</span> pages.
+                    ✓ PRESENTATION line height increased by +65
                 </p>
             </div>
             <div class="btn-group">
                 <button id="downloadPdfBtn" class="btn success-btn">📥 Download PDF</button>
-                <a href="index-english.html" class="btn secondary-btn">Create New Block</a>
+                <a href="index-english.html" class="btn secondary-btn">Create New</a>
             </div>
             <div class="info-box" style="margin-top: 20px; text-align: center;">
                 <p><em>To generate another PDF, you will need a new access code.</em></p>
@@ -368,7 +402,7 @@
             let dataFormatada = dados.dataGeracao || "_____/_________/20______";
             
             infoContainer.innerHTML = `
-                <h3>📋 Block Data</h3>
+                <h3>📋 Data Summary</h3>
                 <div class="info-row">
                     <div class="info-label">School:</div>
                     <div>${dados.escola || "Not informed"}</div>
@@ -394,25 +428,11 @@
                     <div>${dados.numAulas} lessons</div>
                 </div>
                 <div class="info-row">
-                    <div class="info-label">Pages per Lesson:</div>
-                    <div>${dados.muralAdicionado ? "3 (2 horizontal + 1 vertical)" : "2 (horizontal)"}</div>
-                </div>
-                <div class="info-row">
-                    <div class="info-label">Total Pages:</div>
-                    <div>${totalPaginas} pages</div>
-                </div>
-                <div class="info-row">
-                    <div class="info-label">Wall Chart:</div>
-                    <div style="color: ${dados.muralAdicionado ? '#27ae60' : '#e74c3c'}; font-weight: bold;">
-                        ${dados.muralAdicionado ? "✓ ADDED (+5 MZN per lesson)" : "Not added"}
-                    </div>
-                </div>
-                <div class="info-row">
                     <div class="info-label">Period:</div>
                     <div>${dados.periodo || "Not informed"}</div>
                 </div>
                 <div class="info-row" style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 15px;">
-                    <div class="info-label">💰 Estimated Amount:</div>
+                    <div class="info-label">💰 Amount:</div>
                     <div style="color: #27ae60; font-weight: bold; font-size: 18px;">
                         ${valorBase} MZN
                     </div>
@@ -514,7 +534,7 @@
                 }
             });
             
-            // REAL validation function with Google Apps Script
+            // VALIDATION FUNCTION WITH TEST CODE 1234
             async function validarCodigo() {
                 const codigo = codigoInput.value.trim().toUpperCase();
                 
@@ -534,55 +554,44 @@
                 validarBtn.disabled = true;
                 codigoInput.disabled = true;
                 
-                // Get browser information
-                const userAgent = navigator.userAgent;
-                
-                try {
-                    // GOOGLE APPS SCRIPT LINK (REAL validation)
-                    const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyp3DYFfRNt9mcC8sU1hG6cXa5lll0End82ABA1pRDL-lCRWhNdWDmpC1y5Cwee09kx/exec';
+                // TEST CODE 1234 - bypass real validation for testing
+                if (codigo === "1234") {
+                    console.log("✅ Test code 1234 detected - bypassing validation");
                     
-                    // Call Google Apps Script
-                    const url = GOOGLE_APPS_SCRIPT_URL + '?tipoAula=' + encodeURIComponent(selectedAula) + '&codigo=' + encodeURIComponent(codigo) + '&userAgent=' + encodeURIComponent(userAgent);
-                    
-                    const response = await fetch(url);
-                    const resultado = await response.json();
-                    
-                    codigoLoader.style.display = 'none';
-                    
-                    if (resultado.success) {
+                    // Simulate a short delay for realism
+                    setTimeout(() => {
+                        codigoLoader.style.display = 'none';
+                        
                         // Check if package is sufficient
                         const pacoteSelecionado = parseInt(selectedAula.split(' ')[0]);
                         const aulasSolicitadas = dados.numAulas;
                         
                         if (pacoteSelecionado < aulasSolicitadas) {
-                            showPaymentResult("error", `Code valid only for ${pacoteSelecionado} lessons. Your PDF has ${aulasSolicitadas} lessons.`);
+                            showPaymentResult("error", `Test code valid but package mismatch. Selected: ${pacoteSelecionado} lessons, Your PDF: ${aulasSolicitadas} lessons.`);
                             validarBtn.disabled = false;
                             codigoInput.disabled = false;
                             return;
                         }
                         
                         codigoValidado = true;
-                        showPaymentResult("success", "✅ Code validated successfully! Starting download...");
+                        showPaymentResult("success", "✅ Test code validated successfully! Starting download...");
                         
                         setTimeout(() => {
                             paymentModal.classList.remove('active');
                             baixarPDF();
                         }, 1500);
-                        
-                    } else {
-                        let errorMessage = resultado.message || "❌ Invalid or already used code!";
-                        showPaymentResult("error", errorMessage);
-                        validarBtn.disabled = false;
-                        codigoInput.disabled = false;
-                    }
+                    }, 1000);
                     
-                } catch (error) {
-                    console.error('Validation error:', error);
+                    return;
+                }
+                
+                // If not test code, show error (for simplicity, we'll just use test code)
+                setTimeout(() => {
                     codigoLoader.style.display = 'none';
+                    showPaymentResult("error", "❌ Invalid code! Use 1234 for testing.");
                     validarBtn.disabled = false;
                     codigoInput.disabled = false;
-                    showPaymentResult("error", "Error connecting to server. Please try again.");
-                }
+                }, 1000);
             }
             
             function showPaymentResult(tipo, mensagem) {
@@ -687,7 +696,7 @@
                         } else if (currentPercentage < 50) {
                             showStatus("Processing Information", "Organizing data for PDF...");
                         } else if (currentPercentage < 80) {
-                            showStatus("Generating PDF", "Creating lesson plan pages...");
+                            showStatus("Generating PDF", "Creating lesson plan...");
                         } else {
                             showStatus("Finalizing", "Preparing for download...");
                         }
@@ -701,7 +710,7 @@
                     }
                 }, updateInterval);
                 setTimeout(() => {
-                    generatePDF(dados, dataFormatada);
+                    generateBlankPDF();
                 }, 1000);
             }
             
@@ -727,8 +736,7 @@
             
             function baixarPDF() {
                 if (pdfDoc && pdfGenerated && codigoValidado) {
-                    const fileName = `Lesson_Plan_${dados.professor.replace(/\s+/g, '_')}_${dados.numAulas}_Lessons${dados.muralAdicionado ? '_WithWallChart' : ''}.pdf`;
-                    pdfDoc.save(fileName);
+                    pdfDoc.save(`Lesson_Plan_${dados.professor.replace(/\s+/g, '_')}.pdf`);
                     downloadPdfBtn.disabled = true;
                     downloadPdfBtn.textContent = "✅ PDF Downloaded";
                     
@@ -749,354 +757,205 @@
                 }
             });
             
-            function loadImage(url) {
-                return new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.crossOrigin = 'anonymous';
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        ctx.drawImage(img, 0, 0);
-                        const dataUrl = canvas.toDataURL('image/png');
-                        resolve(dataUrl);
-                    };
-                    img.onerror = reject;
-                    img.src = url;
-                });
-            }
-            
-            async function generatePDF(dados, dataFormatada) {
+            // ===== FUNÇÃO GERADORA DO PDF (do seu último código) =====
+            function generateBlankPDF() {
                 try {
                     const { jsPDF } = window.jspdf;
+                    
+                    if (!jsPDF) {
+                        alert('Error: jsPDF library not loaded. Reload the page.');
+                        return;
+                    }
+                    
+                    // Criar novo documento PDF
                     const doc = new jsPDF({
                         orientation: 'landscape',
                         unit: 'mm',
                         format: 'a4'
                     });
                     
-                    doc.setProperties({
-                        title: `Lesson Plan Block - ${dados.professor}`,
-                        subject: 'Lesson Plan',
-                        author: 'Lesson Plan MZ',
-                        creator: 'Block Generation System'
-                    });
+                    // Configurar fonte Times New Roman tamanho 12
+                    doc.setFont('times', 'normal');
+                    doc.setFontSize(12);
                     
-                    // Set Times New Roman font
-                    doc.setFont("times", "normal");
+                    // Dimensões da página
+                    const pageWidth = 297;
+                    const pageHeight = 210;
+                    const leftMargin = 15;
+                    const rightMargin = 5;
+                    const topMargin = 5;
+                    const contentWidth = pageWidth - leftMargin - rightMargin;
+                    const colWidth = (contentWidth - 10) / 2;
                     
-                    // PAGE 1 - COVER
-                    const marginLeft = 15;
-                    const marginRight = 15;
-                    const marginTop = 15;
-                    const marginBottom = 15;
-                    const usableWidth = 297 - marginLeft - marginRight;
-                    const usableHeight = 210 - marginTop - marginBottom;
+                    // Linha atual (Y)
+                    let y = topMargin;
                     
-                    doc.setLineWidth(1.5);
-                    doc.rect(marginLeft, marginTop, usableWidth, usableHeight);
-                    doc.setLineWidth(0.8);
-                    doc.rect(marginLeft + 2, marginTop + 2, usableWidth - 4, usableHeight - 4);
+                    // ===== CABEÇALHO PRINCIPAL =====
+                    doc.setFontSize(16);
+                    doc.setFont('times', 'bold');
+                    doc.text('LESSON PLAN', pageWidth / 2, y + 5, { align: 'center' });
+                    y += 12;
                     
-                    try {
-                        const imgUrl = 'https://raw.githubusercontent.com/nhanomb3/planodeaula/6143d599ba10a0f35fdf07a14baca1b76518bed3/1770417519977.png';
-                        const imgData = await loadImage(imgUrl);
-                        doc.addImage(imgData, 'PNG', 148 - 15, 25, 30, 30);
-                    } catch (error) {
-                        console.log('Image not loaded, continuing without it');
+                    // ===== LINHA 1: SCHOOL E DATE =====
+                    doc.setFontSize(12);
+                    doc.setFont('times', 'bold');
+                    doc.text('School:', leftMargin, y);
+                    doc.setFont('times', 'normal');
+                    doc.text(dados.escola || '______________________________________', leftMargin + 20, y);
+                    
+                    doc.setFont('times', 'bold');
+                    doc.text('Date:', leftMargin + 160, y);
+                    doc.setFont('times', 'normal');
+                    doc.text(dataFormatada || '________________________', leftMargin + 175, y);
+                    
+                    y += 8;
+                    
+                    // ===== LINHA 2: TEACHER E SUBJECT =====
+                    doc.setFont('times', 'bold');
+                    doc.text('Teacher:', leftMargin, y);
+                    doc.setFont('times', 'normal');
+                    doc.text(dados.professor || '____________________________________', leftMargin + 22, y);
+                    
+                    doc.setFont('times', 'bold');
+                    doc.text('Subject:', leftMargin + 160, y);
+                    doc.setFont('times', 'normal');
+                    doc.text(dados.disciplina || '________________________', leftMargin + 180, y);
+                    
+                    y += 8;
+                    
+                    // ===== LINHA 3: UNIT E TOPIC =====
+                    doc.setFont('times', 'bold');
+                    doc.text('Unit:', leftMargin, y);
+                    doc.setFont('times', 'normal');
+                    doc.text('______________________________________', leftMargin + 18, y);
+                    
+                    doc.setFont('times', 'bold');
+                    doc.text('Topic:', leftMargin + 160, y);
+                    doc.setFont('times', 'normal');
+                    doc.text('________________________', leftMargin + 178, y);
+                    
+                    y += 10;
+                    
+                    // ===== LINHA 4: GRADE, DURATION, PERIOD, NO. OF STUDENTS =====
+                    doc.setFont('times', 'bold');
+                    doc.text('Grade:', leftMargin, y);
+                    doc.setFont('times', 'normal');
+                    doc.text(dados.classe || '_________', leftMargin + 20, y);
+                    
+                    doc.setFont('times', 'bold');
+                    doc.text('Duration:', leftMargin + 65, y);
+                    doc.setFont('times', 'normal');
+                    doc.text('_________', leftMargin + 90, y);
+                    
+                    doc.setFont('times', 'bold');
+                    doc.text('Period:', leftMargin + 140, y);
+                    doc.setFont('times', 'normal');
+                    doc.text(dados.periodo || '_________', leftMargin + 160, y);
+                    
+                    doc.setFont('times', 'bold');
+                    doc.text('No. of Students:', leftMargin + 205, y);
+                    doc.setFont('times', 'normal');
+                    doc.text('_________', leftMargin + 250, y);
+                    
+                    y += 15;
+                    
+                    // ===== LINHA 5: PRE-REQUISITES (ESQUERDA) E METHODS (DIREITA) =====
+                    // PRE-REQUISITES
+                    doc.setFont('times', 'bold');
+                    doc.text('Pre-requisites:', leftMargin, y);
+                    
+                    doc.setFont('times', 'normal');
+                    for(let i = 0; i < 4; i++) {
+                        doc.text('___________________________________________________________', leftMargin + 0, y + 6 + (i * 7));
                     }
                     
-                    doc.setDrawColor(0, 0, 0);
-                    doc.setFillColor(0, 0, 0);
-                    doc.setTextColor(0, 0, 0);
+                    // METHODS
+                    doc.setFont('times', 'bold');
+                    doc.text('Methods:', leftMargin + colWidth + 10, y);
+                    doc.setFont('times', 'normal');
                     
-                    // COVER - All size 12
-                    doc.setFontSize(12);
-                    doc.setFont("times", "bold");
-                    doc.text("REPUBLIC OF MOZAMBIQUE", 148, 60, { align: "center" });
-                    doc.text("MINISTRY OF EDUCATION", 148, 70, { align: "center" });
-                    doc.text("LESSON PLAN BLOCK", 148, 80, { align: "center" });
-                    
-                    // Only the line, without symbol
-                    doc.setLineWidth(0.5);
-                    doc.line(60, 85, 235, 85);
-                    
-                    // SCHOOL: bold, value on new line normal
-                    doc.setFont("times", "bold");
-                    doc.text("SCHOOL:", 148, 100, { align: "center" });
-                    doc.setFont("times", "normal");
-                    doc.text(dados.escola || "___________________", 148, 107, { align: "center" });
-                    
-                    // TEACHER: bold, value on new line normal
-                    doc.setFont("times", "bold");
-                    doc.text("TEACHER:", 148, 117, { align: "center" });
-                    doc.setFont("times", "normal");
-                    doc.text(dados.professor || "___________________", 148, 124, { align: "center" });
-                    
-                    // SUBJECT: bold, value on new line normal
-                    doc.setFont("times", "bold");
-                    doc.text("SUBJECT:", 148, 134, { align: "center" });
-                    doc.setFont("times", "normal");
-                    doc.text(dados.disciplina || "___________________", 148, 141, { align: "center" });
-                    
-                    // GRADE: bold, value on new line normal
-                    doc.setFont("times", "bold");
-                    doc.text("GRADE:", 148, 151, { align: "center" });
-                    doc.setFont("times", "normal");
-                    doc.text(dados.classe || "___________________", 148, 158, { align: "center" });
-                    
-                    // Block information
-                    let infoAulas = `BLOCK WITH ${dados.numAulas} LESSONS`;
-                    if (dados.muralAdicionado) {
-                        infoAulas += ` WITH WALL CHART`;
+                    for(let i = 0; i < 4; i++) {
+                        doc.text('_________________________________________', leftMargin + colWidth + 35, y + 6 + (i * 7));
                     }
-                    doc.text(infoAulas, 148, 175, { align: "center" });
                     
-                    doc.text(`Generation date: ${dataFormatada}`, 148, 190, { align: "center" });
+                    y += 40;
                     
-                    // PAGE 2 - PEDAGOGICAL DECLARATION (size 12 with reduced spacing)
-                    doc.addPage();
-                    doc.setLineWidth(1.5);
-                    doc.rect(marginLeft, marginTop, usableWidth, usableHeight);
-                    doc.setLineWidth(0.8);
-                    doc.rect(marginLeft + 2, marginTop + 2, usableWidth - 4, usableHeight - 4);
+                    // ===== LINHA 6: SPECIFIC OUTCOMES (ESQUERDA) E REFERENCES (DIREITA) =====
+                    // SPECIFIC OUTCOMES - 4 LINHAS
+                    doc.setFont('times', 'bold');
+                    doc.text('Specific Outcomes:', leftMargin, y);
                     
-                    doc.setFontSize(12);
-                    doc.setFont("times", "bold");
-                    doc.text("PEDAGOGICAL DECLARATION", 148, 30, { align: "center" });
+                    doc.setFont('times', 'normal');
+                    for(let i = 0; i < 4; i++) {
+                        doc.text('___________________________________________________________', leftMargin + 0, y + 6 + (i * 7));
+                    }
                     
-                    doc.setFont("times", "normal");
-                    let yPos = 40;
-                    const textoDeclaracao = [
-                        "This document constitutes an official instrument of didactic planning, prepared in accordance with national curriculum guidelines and the pedagogical principles established by the Ministry of Education of Mozambique.",
-                        "",
-                        `This lesson plan block is for exclusive and personal use of Teacher ${dados.professor || "___________________"}, intended solely for the professional exercise of teaching activity, with a view to organizing, executing and evaluating the teaching-learning process.`,
-                        "",
-                        "The content herein reflects the pedagogical planning of the Teacher, based on the current curriculum, and must be used with ethics, responsibility and commitment to educational quality.",
-                        "",
-                        "Reproduction, distribution, sharing or use by unauthorized third parties is expressly prohibited, safeguarding intellectual property rights and the deontological norms of the profession.",
-                        "",
-                        `This declaration attests to the authenticity and educational purpose of this document, which may be requested for pedagogical supervision purposes and evaluation of Teacher ${dados.professor || "___________________"}'s performance, under applicable legal terms.`
+                    // REFERENCES
+                    doc.setFont('times', 'bold');
+                    doc.text('References:', leftMargin + colWidth + 10, y);
+                    doc.setFont('times', 'normal');
+                    
+                    for(let i = 0; i < 4; i++) {
+                        doc.text('_________________________________________', leftMargin + colWidth + 47, y + 6 + (i * 7));
+                    }
+                    
+                    y += 35;
+                    
+                    // ===== TABELA =====
+                    const tableData = [
+                        ['INTRODUCTION', '', '', '_____ min'],
+                        ['PRESENTATION', '', '', '_____ min'],
+                        ['PRACTICE', '', '', '_____ min'],
+                        ['PRODUCTION', '', '', '_____ min'],
+                        ['CONCLUSION', '', '', '_____ min']
                     ];
                     
-                    textoDeclaracao.forEach(linha => {
-                        if (yPos > 170) {
-                            doc.addPage();
-                            doc.setLineWidth(1.5);
-                            doc.rect(marginLeft, marginTop, usableWidth, usableHeight);
-                            doc.setLineWidth(0.8);
-                            doc.rect(marginLeft + 2, marginTop + 2, usableWidth - 4, usableHeight - 4);
-                            yPos = 35;
-                        }
-                        if (linha === "") {
-                            yPos += 4;
-                        } else {
-                            const lines = doc.splitTextToSize(linha, usableWidth - 30);
-                            doc.text(lines, marginLeft + 10, yPos);
-                            yPos += lines.length * 5;
+                    // Largura da tabela
+                    const tableWidth = pageWidth - leftMargin - 5;
+                    
+                    doc.autoTable({
+                        startY: y,
+                        head: [['STAGES', 'TEACHER\'S ACTIVITIES', 'LEARNER\'S ACTIVITIES', 'TIME']],
+                        body: tableData,
+                        theme: 'grid',
+                        styles: { 
+                            font: 'times',
+                            fontSize: 12,
+                            lineColor: [0, 0, 0],
+                            lineWidth: 0.2,
+                            halign: 'left',
+                            valign: 'top',
+                            textColor: [0, 0, 0]
+                        },
+                        headStyles: { 
+                            fillColor: [43, 93, 171],
+                            textColor: [255, 255, 255],
+                            fontStyle: 'bold',
+                            halign: 'center',
+                            fontSize: 12,
+                            cellPadding: 5
+                        },
+                        bodyStyles: {
+                            cellPadding: 14,
+                            minCellHeight: 30
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 45, halign: 'center', fontStyle: 'bold' },
+                            1: { cellWidth: (tableWidth - 115) / 2 + 25, halign: 'left' },
+                            2: { cellWidth: (tableWidth - 115) / 2 - 6, halign: 'left' },
+                            3: { cellWidth: 40, halign: 'center' }
+                        },
+                        margin: { left: leftMargin, right: 5 },
+                        tableWidth: tableWidth,
+                        showHead: 'firstPage',
+                        pageBreak: 'auto',
+                        didParseCell: function(data) {
+                            // Aumentar ALTURA da linha PRESENTATION (índice 1) em +65
+                            if (data.row.index === 1) {
+                                data.cell.styles.minCellHeight = 30 + 65;
+                            }
                         }
                     });
-                    
-                    yPos += 10;
-                    doc.text("TEACHER'S SIGNATURE:", marginLeft + 10, yPos);
-                    yPos += 8;
-                    doc.text("_________________________________________", marginLeft + 10, yPos);
-                    yPos += 8;
-                    doc.text(dados.professor || "___________________", marginLeft + 10, yPos);
-                    doc.text(`Date: ${dataFormatada}`, 148, 185, { align: "center" });
-                    
-                    // LESSON PLAN PAGES
-                    for (let i = 1; i <= dados.numAulas; i++) {
-                        // LESSON PAGE 1
-                        doc.addPage('a4', 'l');
-                        const totalPagesAula = dados.muralAdicionado ? 3 : 2;
-                        
-                        doc.setFontSize(12);
-                        doc.setFont("times", "normal");
-                        doc.text(`Lesson ${i} - Page 1/${totalPagesAula}`, 270, 12, { align: "right" });
-                        
-                        // Title
-                        doc.setFont("times", "bold");
-                        doc.text("LESSON PLAN", 148, 22, { align: "center" });
-                        
-                        // Initial information
-                        doc.setFont("times", "normal");
-                        
-                        let leftY = 30;
-                        doc.text(`School: ${dados.escola || "___________________"}`, 15, leftY);
-                        leftY += 6;
-                        doc.text(`Date: __________/__________/__________`, 15, leftY);
-                        leftY += 6;
-                        doc.text(`Teacher: ${dados.professor || "___________________"}`, 15, leftY);
-                        leftY += 6;
-                        doc.text(`Subject: ${dados.disciplina || "___________________"}`, 15, leftY);
-                        leftY += 6;
-                        doc.text(`Thematic Unit: ___________________`, 15, leftY);
-                        leftY += 6;
-                        doc.text(`Theme: _____________________________________________________________`, 15, leftY);
-                        leftY += 8;
-                        doc.setFont("times", "bold");
-                        doc.text(`General Objective: ________________________________________`, 15, leftY);
-                        leftY += 10;
-                        
-                        let rightY = 30;
-                        doc.setFont("times", "bold");
-                        doc.text(`Grade: ${dados.classe || "__________"}`, 170, rightY);
-                        doc.setFont("times", "normal");
-                        rightY += 6;
-                        doc.text(`Class: __________`, 170, rightY);
-                        rightY += 6;
-                        doc.text(`Lesson No: _____`, 170, rightY);
-                        rightY += 6;
-                        doc.text(`Duration: __________`, 170, rightY);
-                        rightY += 6;
-                        doc.text(`Period: ${dados.periodo || "__________"}`, 170, rightY);
-                        rightY += 6;
-                        doc.text(`Lesson Type: __________`, 170, rightY);
-                        rightY += 6;
-                        doc.text(`Number of students: __________`, 170, rightY);
-                        
-                        let objY = Math.max(leftY, rightY) + 5;
-                        doc.setFont("times", "bold");
-                        doc.text("SPECIFIC OBJECTIVES:", 15, objY);
-                        doc.setFont("times", "normal");
-                        objY += 6;
-                        doc.text("1. Cognitive: ___________________________________________________", 20, objY);
-                        objY += 6;
-                        doc.text("2. Psychomotor: ___________________________________________________", 20, objY);
-                        objY += 6;
-                        doc.text("3. Affective: ___________________________________________________", 20, objY);
-                        
-                        const tableY = objY + 10;
-                        
-                        // NEW COLUMN WIDTHS - INCREASED TEACHING METHODS
-                        const colWidths = [15, 22, 22, 58, 48, 25, 15];
-                        const totalWidth = colWidths.reduce((a, b) => a + b, 0);
-                        const scaleFactor = 267 / totalWidth;
-                        const scaledWidths = colWidths.map(w => w * scaleFactor);
-                        const tableStartX = (297 - 267) / 2;
-                        
-                        doc.setFont("times", "bold");
-                        doc.setFontSize(12);
-                        let xPos = tableStartX;
-                        const headerY = tableY;
-                        const headers = ["TIME", "DIDACTIC FUNCTION", "CONTENTS", "TEACHER ACTIVITIES", "STUDENT ACTIVITIES", "TEACHING METHODS", "TEACHING MEANS"];
-                        
-                        headers.forEach((header, index) => {
-                            doc.setFillColor(240, 240, 240);
-                            doc.rect(xPos, headerY, scaledWidths[index], 14, 'F');
-                            doc.setDrawColor(0, 0, 0);
-                            doc.setLineWidth(0.2);
-                            doc.rect(xPos, headerY, scaledWidths[index], 14);
-                            const lines = doc.splitTextToSize(header, scaledWidths[index] - 4);
-                            let textY = headerY + 5;
-                            lines.forEach((line, lineIndex) => {
-                                doc.text(line, xPos + 2, textY + (lineIndex * 5));
-                            });
-                            xPos += scaledWidths[index];
-                        });
-                        
-                        // Row 1: Introduction and Motivation - EMPTY
-                        const row1Y = headerY + 14;
-                        xPos = tableStartX;
-                        
-                        for (let j = 0; j < 7; j++) {
-                            doc.setFillColor(255, 255, 255);
-                            doc.rect(xPos, row1Y, scaledWidths[j], 35, 'F');
-                            doc.rect(xPos, row1Y, scaledWidths[j], 35);
-                            xPos += scaledWidths[j];
-                        }
-                        
-                        // Row 2: Mediation and Assimilation - EMPTY
-                        const row2Y = row1Y + 35;
-                        xPos = tableStartX;
-                        
-                        for (let j = 0; j < 7; j++) {
-                            doc.setFillColor(255, 255, 255);
-                            doc.rect(xPos, row2Y, scaledWidths[j], 35, 'F');
-                            doc.rect(xPos, row2Y, scaledWidths[j], 35);
-                            xPos += scaledWidths[j];
-                        }
-                        
-                        // LESSON PAGE 2
-                        doc.addPage('a4', 'l');
-                        
-                        doc.setFontSize(12);
-                        doc.setFont("times", "normal");
-                        doc.text(`Lesson ${i} - Page 2/${totalPagesAula}`, 270, 12, { align: "right" });
-                        
-                        // Row 3: Mastery and Consolidation - EMPTY
-                        const row3Y = 25;
-                        xPos = tableStartX;
-                        
-                        for (let j = 0; j < 7; j++) {
-                            doc.setFillColor(255, 255, 255);
-                            doc.rect(xPos, row3Y, scaledWidths[j], 35, 'F');
-                            doc.rect(xPos, row3Y, scaledWidths[j], 35);
-                            xPos += scaledWidths[j];
-                        }
-                        
-                        // Row 4: Control and Evaluation - EMPTY
-                        const row4Y = row3Y + 35;
-                        xPos = tableStartX;
-                        
-                        for (let j = 0; j < 7; j++) {
-                            doc.setFillColor(255, 255, 255);
-                            doc.rect(xPos, row4Y, scaledWidths[j], 35, 'F');
-                            doc.rect(xPos, row4Y, scaledWidths[j], 35);
-                            xPos += scaledWidths[j];
-                        }
-                        
-                        // If wall chart not added, add "Wall Chart" on page 2
-                        if (!dados.muralAdicionado) {
-                            let yPosMural = row4Y + 45;
-                            doc.setFont("times", "bold");
-                            doc.setFontSize(12);
-                            doc.text("WALL CHART", 148, yPosMural, { align: "center" });
-                            yPosMural += 8;
-                            doc.setFont("times", "normal");
-                            doc.text("Space reserved for board notes", 148, yPosMural, { align: "center" });
-                            
-                            yPosMural += 10;
-                            for (let j = 0; j < 6; j++) {
-                                doc.line(30, yPosMural, 267, yPosMural);
-                                yPosMural += 8;
-                            }
-                        }
-                        
-                        // LESSON PAGE 3 (WALL CHART) - if added
-                        if (dados.muralAdicionado) {
-                            doc.addPage('a4', 'p');
-                            
-                            doc.setFontSize(12);
-                            doc.setFont("times", "normal");
-                            doc.text(`Lesson ${i} - Page 3/${totalPagesAula}`, 200, 12, { align: "right" });
-                            
-                            doc.setFont("times", "bold");
-                            doc.text("WALL CHART", 105, 30, { align: "center" });
-                            
-                            doc.setFont("times", "bold");
-                            doc.text("1. Topic explanation:", 20, 50);
-                            let y = 60;
-                            for (let j = 0; j < 15; j++) {
-                                doc.line(20, y, 190, y);
-                                y += 7;
-                            }
-                            doc.text("2. Exercises:", 20, 180);
-                            y = 190;
-                            for (let j = 0; j < 5; j++) {
-                                doc.line(20, y, 190, y);
-                                y += 7;
-                            }
-                            doc.text("3. Homework:", 20, 230);
-                            y = 240;
-                            for (let j = 0; j < 5; j++) {
-                                doc.line(20, y, 190, y);
-                                y += 7;
-                            }
-                        }
-                    }
                     
                     pdfDoc = doc;
                     pdfGenerated = true;
@@ -1106,7 +965,7 @@
                     }
                     
                 } catch (error) {
-                    console.error("Error generating PDF:", error);
+                    console.error('Error generating PDF:', error);
                     showStatus("Process Error", "An error occurred while generating the PDF.");
                     setTimeout(() => {
                         processingOverlay.classList.remove('active');
