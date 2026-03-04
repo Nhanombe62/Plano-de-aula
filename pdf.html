@@ -890,7 +890,7 @@
                     // Posição 180 (mais abaixo) e com 5mm de distância entre eles
                     
                     // Bloco de aulas em itálico
-                    doc.setFont("Great Vibes", "italic");
+                    doc.setFont("Great Vibes", "Great Vibes");
                     doc.setFontSize(16);
                     let infoAulas = `Bloco com ${dados.numAulas} Aulas`;
                     if (dados.muralAdicionado) {
@@ -898,12 +898,12 @@
                     } else {
                         infoAulas += ` `;
                     }
-                    doc.text(infoAulas, pageWidth/2, 200, { align: "center" });
+                    doc.text(infoAulas, pageWidth/2, 190, { align: "center" });
                     
                     // Data em itálico, 5mm abaixo
                     doc.setFontSize(14);
-                    doc.setFont("Great Vibes", "italic");
-                    doc.text(`Data: ${dataFormatada}`, pageWidth/2, 210, { align: "center" });
+                    doc.setFont("Great Vibes", "Great Vibes");
+                    doc.text(`Data: ${dataFormatada}`, pageWidth/2, 200, { align: "center" });
                     
                     // PÁGINA 2 - DECLARAÇÃO PEDAGÓGICA COM BORDAS
                     doc.addPage();
