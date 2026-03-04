@@ -762,52 +762,12 @@
                         const dataUrl = canvas.toDataURL('image/png');
                         resolve(dataUrl);
                     };
-                    img.onerror = reject;
-                    img.src = url;
+                    img.onerror = (error) => {
+                        console.error('Erro ao carregar imagem:', error);
+                        reject(error);
+                    };
+                    img.src = url + '?t=' + new Date().getTime(); // Adicionar timestamp para evitar cache
                 });
-            }
-            
-            // Função para adicionar marca d'água em todas as páginas
-            async function addWatermarkToAllPages(doc) {
-                try {
-                    const imgUrl = 'https://raw.githubusercontent.com/nhanomb3/planodeaula/6143d599ba10a0f35fdf07a14baca1b76518bed3/1000030979.png';
-                    const imgData = await loadImage(imgUrl);
-                    
-                    // Salvar estado atual
-                    doc.saveGraphicsState();
-                    
-                    // Configurar opacidade para marca d'água (15% para ser sutil)
-                    doc.setGState(new doc.GState({ opacity: 0.15 }));
-                    
-                    // Para cada página, adicionar a marca d'água
-                    const totalPages = doc.internal.getNumberOfPages();
-                    
-                    for (let i = 1; i <= totalPages; i++) {
-                        doc.setPage(i);
-                        
-                        // Posicionar a marca d'água no centro da página
-                        // Ajustar o tamanho conforme a orientação da página
-                        const pageWidth = doc.internal.pageSize.getWidth();
-                        const pageHeight = doc.internal.pageSize.getHeight();
-                        
-                        // Tamanho da imagem (proporcional à página)
-                        const imgWidth = 100; // mm
-                        const imgHeight = 40; // mm (aproximado para o texto)
-                        
-                        // Calcular posição central
-                        const xPos = (pageWidth - imgWidth) / 2;
-                        const yPos = (pageHeight - imgHeight) / 2;
-                        
-                        // Adicionar a imagem como marca d'água
-                        doc.addImage(imgData, 'PNG', xPos, yPos, imgWidth, imgHeight);
-                    }
-                    
-                    // Restaurar estado
-                    doc.restoreGraphicsState();
-                    
-                } catch (error) {
-                    console.log('Erro ao adicionar marca d\'água:', error);
-                }
             }
             
             async function generatePDF(dados, dataFormatada) {
@@ -836,6 +796,39 @@
                     const marginBottom = 15;
                     const usableWidth = 297 - marginLeft - marginRight;
                     const usableHeight = 210 - marginTop - marginBottom;
+                    
+                    // ADICIONAR MARCA D'ÁGUA NA CAPA COM 95% DE OPACIDADE
+                    try {
+                        const watermarkUrl = 'https://raw.githubusercontent.com/Nhanombe62/Plano-de-aula/34c0329c608676ae47864a9677346c7251c54f78/1772556070724.png';
+                        const watermarkData = await loadImage(watermarkUrl);
+                        
+                        // Salvar estado atual
+                        doc.saveGraphicsState();
+                        
+                        // Configurar opacidade para 95% (quase opaca)
+                        doc.setGState(new doc.GState({ opacity: 0.95 }));
+                        
+                        // Calcular tamanho proporcional para a marca d'água (ocupar boa parte da página)
+                        const pageWidth = doc.internal.pageSize.getWidth();
+                        const pageHeight = doc.internal.pageSize.getHeight();
+                        
+                        // Tamanho da imagem (70% da largura da página para ser bem visível)
+                        const imgWidth = pageWidth * 0.7; // 70% da largura
+                        const imgHeight = (imgWidth * 60) / 297; // Proporção aproximada da imagem original
+                        
+                        // Posicionar no centro da página
+                        const xPos = (pageWidth - imgWidth) / 2;
+                        const yPos = (pageHeight - imgHeight) / 2;
+                        
+                        // Adicionar a imagem como marca d'água
+                        doc.addImage(watermarkData, 'PNG', xPos, yPos, imgWidth, imgHeight);
+                        
+                        // Restaurar estado (voltar à opacidade normal para o resto do conteúdo)
+                        doc.restoreGraphicsState();
+                        
+                    } catch (error) {
+                        console.log('Erro ao carregar marca d\'água, continuando sem ela:', error);
+                    }
                     
                     doc.setLineWidth(1.5);
                     doc.rect(marginLeft, marginTop, usableWidth, usableHeight);
@@ -1141,9 +1134,6 @@
                             }
                         }
                     }
-                    
-                    // ADICIONAR MARCA D'ÁGUA EM TODAS AS PÁGINAS
-                    await addWatermarkToAllPages(doc);
                     
                     pdfDoc = doc;
                     pdfGenerated = true;
