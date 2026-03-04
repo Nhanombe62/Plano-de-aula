@@ -861,13 +861,13 @@
                     
                     // ESCOLA - à esquerda com ícone de escola (Unicode)
                     doc.setFont("times", "bold");
-                    doc.text("🏫 ESCOLA:", 20, 100);
+                    doc.text("ESCOLA:", 20, 100);
                     doc.setFont("times", "normal");
-                    doc.text(dados.escola || "___________________", 20, 107);
+                    doc.text(dados.escola || "____________________", 20, 107);
                     
                     // PROFESSOR - à esquerda com ícone de professor (Unicode)
                     doc.setFont("times", "bold");
-                    doc.text("👨‍🏫 PROFESSOR:", 20, 117);
+                    doc.text("PROFESSOR:", 20, 117);
                     doc.setFont("times", "normal");
                     doc.text(dados.professor || "___________________", 20, 124);
                     
@@ -876,13 +876,13 @@
                     
                     // DISCIPLINA - à direita com ícone de livro (Unicode)
                     doc.setFont("times", "bold");
-                    doc.text("📚 DISCIPLINA:", direitaX, 100);
+                    doc.text("DISCIPLINA:", direitaX, 100);
                     doc.setFont("times", "normal");
-                    doc.text(dados.disciplina || "___________________", direitaX, 107);
+                    doc.text(dados.disciplina || "___________________________", direitaX, 107);
                     
                     // CLASSE - à direita com ícone de graduação (Unicode)
                     doc.setFont("times", "bold");
-                    doc.text("🎓 CLASSE:", direitaX, 117);
+                    doc.text("CLASSE:", direitaX, 117);
                     doc.setFont("times", "normal");
                     doc.text(dados.classe || "___________________", direitaX, 124);
                     
@@ -890,20 +890,20 @@
                     // Posição 180 (mais abaixo) e com 5mm de distância entre eles
                     
                     // Bloco de aulas em itálico
-                    doc.setFont("times", "italic");
+                    doc.setFont("Great Vibes", "italic");
                     doc.setFontSize(16);
-                    let infoAulas = `✦ Bloco com ${dados.numAulas} Aulas`;
+                    let infoAulas = `Bloco com ${dados.numAulas} Aulas`;
                     if (dados.muralAdicionado) {
-                        infoAulas += ` + Quadro Mural ✦`;
+                        infoAulas += ` + Quadro Mural`;
                     } else {
-                        infoAulas += ` ✦`;
+                        infoAulas += ` `;
                     }
-                    doc.text(infoAulas, pageWidth/2, 180, { align: "center" });
+                    doc.text(infoAulas, pageWidth/2, 200, { align: "center" });
                     
                     // Data em itálico, 5mm abaixo
                     doc.setFontSize(14);
-                    doc.setFont("times", "italic");
-                    doc.text(`📅 Data: ${dataFormatada}`, pageWidth/2, 190, { align: "center" });
+                    doc.setFont("Great Vibes", "italic");
+                    doc.text(`Data: ${dataFormatada}`, pageWidth/2, 210, { align: "center" });
                     
                     // PÁGINA 2 - DECLARAÇÃO PEDAGÓGICA COM BORDAS
                     doc.addPage();
