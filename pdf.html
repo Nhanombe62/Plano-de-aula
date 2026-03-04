@@ -797,82 +797,117 @@
                     const pageWidth = doc.internal.pageSize.getWidth(); // 297mm
                     const pageHeight = doc.internal.pageSize.getHeight(); // 210mm
                     
-                    // Imagem de fundo da capa (nova imagem com o brasão e texto "REPÚBLICA DE MOÇAMBIQUE")
+                    // ADICIONAR MARCA D'ÁGUA DE FUNDO (CADERNO DE PLANIFICAÇÃO)
                     try {
-                        const imgUrl = 'https://raw.githubusercontent.com/Nhanombe62/Plano-de-aula/a93da97e8e43606167d98be15c37f0d935d92ba1/1772633583981.png';
-                        const imgData = await loadImage(imgUrl);
-                        doc.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight, undefined, 'FAST');
-                    } catch (error) {
-                        console.log('Imagem de fundo não carregada, continuando sem ela');
+                        const watermarkUrl = 'https://raw.githubusercontent.com/Nhanombe62/Plano-de-aula/34c0329c608676ae47864a9677346c7251c54f78/1772556070724.png';
+                        const watermarkData = await loadImage(watermarkUrl);
                         
-                        // Fallback caso a imagem não carregue
-                        doc.setFontSize(20);
-                        doc.setFont("times", "bold");
-                        doc.text("REPÚBLICA DE MOÇAMBIQUE", pageWidth/2, 40, { align: "center" });
-                        doc.text("MINISTÉRIO DA EDUCAÇÃO", pageWidth/2, 50, { align: "center" });
+                        // Salvar estado atual
+                        doc.saveGraphicsState();
+                        
+                        // Configurar opacidade para 95%
+                        doc.setGState(new doc.GState({ opacity: 0.95 }));
+                        
+                        // Adicionar a imagem de fundo
+                        doc.addImage(watermarkData, 'PNG', 0, 0, pageWidth, pageHeight);
+                        
+                        // Restaurar estado
+                        doc.restoreGraphicsState();
+                        
+                    } catch (error) {
+                        console.log('Erro ao carregar marca d\'água, continuando sem ela:', error);
                     }
                     
-                    // CAPA - Títulos
-                    doc.setFontSize(15);
+                    // SEM BORDAS - removidas completamente
+                    
+                    // NOVA IMAGEM DO BRASÃO (substituída)
+                    try {
+                        const novaBrasaoUrl = 'https://raw.githubusercontent.com/Nhanombe62/Plano-de-aula/a93da97e8e43606167d98be15c37f0d935d92ba1/1772633583981.png';
+                        const novaBrasaoData = await loadImage(novaBrasaoUrl);
+                        
+                        // Adicionar o novo brasão no centro superior (mesma posição do anterior)
+                        doc.addImage(novaBrasaoData, 'PNG', (pageWidth/2) - 15, 20, 30, 30);
+                        
+                    } catch (error) {
+                        console.log('Nova imagem do brasão não carregada, tentando a original');
+                        
+                        // Fallback para a imagem original se a nova falhar
+                        try {
+                            const imgUrl = 'https://raw.githubusercontent.com/nhanomb3/planodeaula/6143d599ba10a0f35fdf07a14baca1b76518bed3/1770417519977.png';
+                            const imgData = await loadImage(imgUrl);
+                            doc.addImage(imgData, 'PNG', (pageWidth/2) - 15, 20, 30, 30);
+                        } catch (error2) {
+                            console.log('Imagem original também não carregada, continuando sem brasão');
+                        }
+                    }
+                    
+                    doc.setDrawColor(0, 0, 0);
+                    doc.setFillColor(0, 0, 0);
+                    doc.setTextColor(0, 0, 0);
+                    
+                    // CAPA - Títulos centrais
+                    doc.setFontSize(16);
                     doc.setFont("times", "bold");
-                    doc.text("BLOCO DE PLANIFICAÇÃO", pageWidth/2, 100, { align: "center" });
+                    doc.text("REPÚBLICA DE MOÇAMBIQUE", pageWidth/2, 55, { align: "center" });
+                    doc.text("MINISTÉRIO DA EDUCAÇÃO", pageWidth/2, 65, { align: "center" });
+                    doc.text("BLOCO DE PLANIFICAÇÃO", pageWidth/2, 75, { align: "center" });
                     
                     // Linha separadora
                     doc.setLineWidth(0.5);
-                    doc.line(60, 105, 237, 105);
+                    doc.line(70, 80, 227, 80);
                     
-                    // Informações à esquerda
-                    doc.setFontSize(12);
+                    // Informações à esquerda (ESCOLA e PROFESSOR)
+                    doc.setFontSize(13);
                     
                     // ESCOLA - à esquerda
                     doc.setFont("times", "bold");
-                    doc.text("ESCOLA:", 20, 120);
+                    doc.text("ESCOLA:", 20, 100);
                     doc.setFont("times", "normal");
-                    doc.text(dados.escola || "___________________", 20, 127);
+                    doc.text(dados.escola || "___________________", 20, 107);
                     
                     // PROFESSOR - à esquerda
                     doc.setFont("times", "bold");
-                    doc.text("PROFESSOR:", 20, 137);
+                    doc.text("PROFESSOR:", 20, 117);
                     doc.setFont("times", "normal");
-                    doc.text(dados.professor || "___________________", 20, 144);
+                    doc.text(dados.professor || "___________________", 20, 124);
                     
-                    // Informações à direita
-                    // DISCIPLINA - à direita
+                    // Informações à direita (DISCIPLINA e CLASSE)
                     doc.setFont("times", "bold");
-                    doc.text("DISCIPLINA:", 170, 120);
+                    doc.text("DISCIPLINA:", pageWidth - 100, 100);
                     doc.setFont("times", "normal");
-                    doc.text(dados.disciplina || "____________________________", 170, 127);
+                    doc.text(dados.disciplina || "___________________", pageWidth - 100, 107);
                     
-                    // CLASSE - à direita
                     doc.setFont("times", "bold");
-                    doc.text("CLASSE:", 170, 137);
+                    doc.text("CLASSE:", pageWidth - 100, 117);
                     doc.setFont("times", "normal");
-                    doc.text(dados.classe || "___________________", 170, 144);
+                    doc.text(dados.classe || "___________________", pageWidth - 100, 124);
                     
-                    // Informação do bloco mais para baixo
+                    // Informação do bloco mais abaixo (posição 145)
                     doc.setFont("times", "bold");
+                    doc.setFontSize(14);
                     let infoAulas = `BLOCO COM ${dados.numAulas} AULAS`;
                     if (dados.muralAdicionado) {
                         infoAulas += ` COM QUADRO MURAL`;
                     }
-                    doc.setFontSize(14);
-                    doc.text(infoAulas, pageWidth/2, 170, { align: "center" });
+                    doc.text(infoAulas, pageWidth/2, 145, { align: "center" });
                     
-                    // Data no centro inferior
-                    doc.setFontSize(11);
+                    // Data no centro (posição 160)
+                    doc.setFontSize(12);
                     doc.setFont("times", "normal");
-                    doc.text(`Data de geração: ${dataFormatada}`, pageWidth/2, pageHeight - 20, { align: "center" });
+                    doc.text(`Data de geração: ${dataFormatada}`, pageWidth/2, 160, { align: "center" });
                     
                     // PÁGINA 2 - DECLARAÇÃO PEDAGÓGICA
                     doc.addPage();
                     
+                    // SEM BORDAS
+                    
                     doc.setFontSize(14);
                     doc.setFont("times", "bold");
-                    doc.text("DECLARAÇÃO PEDAGÓGICA", pageWidth/2, 30, { align: "center" });
+                    doc.text("DECLARAÇÃO PEDAGÓGICA", pageWidth/2, 25, { align: "center" });
                     
                     doc.setFont("times", "normal");
                     doc.setFontSize(12);
-                    let yPos = 45;
+                    let yPos = 40;
                     const textoDeclaracao = [
                         "O presente documento constitui um instrumento oficial de planificação didática, elaborado em conformidade com as diretrizes curriculares nacionais e os princípios pedagógicos estabelecidos pelo Ministério da Educação de Moçambique.",
                         "",
@@ -894,26 +929,28 @@
                             yPos += 5;
                         } else {
                             const lines = doc.splitTextToSize(linha, pageWidth - 50);
-                            doc.text(lines, 15, yPos);
+                            doc.text(lines, 20, yPos);
                             yPos += lines.length * 6;
                         }
                     });
                     
                     yPos += 10;
                     doc.setFont("times", "bold");
-                    doc.text("ASSINATURA DO DOCENTE:", 15, yPos);
+                    doc.text("ASSINATURA DO DOCENTE:", 20, yPos);
                     yPos += 8;
                     doc.setFont("times", "normal");
-                    doc.text("_________________________________________", 15, yPos);
+                    doc.text("_________________________________________", 20, yPos);
                     yPos += 8;
-                    doc.text(dados.professor || "___________________", 15, yPos);
+                    doc.text(dados.professor || "___________________", 20, yPos);
                     doc.text(`Data: ${dataFormatada}`, pageWidth - 25, pageHeight - 15, { align: "right" });
                     
-                    // PÁGINAS DE PLANO DE AULA
+                    // PÁGINAS DE PLANO DE AULA (mantido igual)
                     for (let i = 1; i <= dados.numAulas; i++) {
                         // PÁGINA 1 DA AULA
                         doc.addPage('a4', 'l');
                         const totalPagesAula = dados.muralAdicionado ? 3 : 2;
+                        
+                        // SEM BORDAS
                         
                         doc.setFontSize(12);
                         doc.setFont("times", "normal");
@@ -1020,6 +1057,8 @@
                         // PÁGINA 2 DA AULA
                         doc.addPage('a4', 'l');
                         
+                        // SEM BORDAS
+                        
                         doc.setFontSize(12);
                         doc.setFont("times", "normal");
                         doc.text(`Aula ${i} - Página 2/${totalPagesAula}`, pageWidth - 25, 12, { align: "right" });
@@ -1058,6 +1097,8 @@
                         // PÁGINA 3 DA AULA (QUADRO MURAL) - se foi adicionado
                         if (dados.muralAdicionado) {
                             doc.addPage('a4', 'p');
+                            
+                            // SEM BORDAS
                             
                             doc.setFontSize(12);
                             doc.setFont("times", "normal");
