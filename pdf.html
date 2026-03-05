@@ -876,9 +876,9 @@
                     
                     // DISCIPLINA - à direita
                     doc.setFont("times", "bold");
-                    doc.text("DISCIPLINA:", direitaX, 100);
+                    doc.text("DISCIPLINA:", direitaX, 80);
                     doc.setFont("times", "normal");
-                    doc.text(dados.disciplina || "___________________________", direitaX, 107);
+                    doc.text(dados.disciplina || "___________________________", direitaX, 100);
                     
                     // CLASSE - à direita
                     doc.setFont("times", "bold");
@@ -901,7 +901,7 @@
                     // Data em Great Vibes, 5mm abaixo
                     doc.setFontSize(16);
                     doc.setFont("Great Vibes", "italic");
-                    doc.text(`Data: ${dataFormatada}`, pageWidth/2, 205, { align: "center" });
+                    doc.text(`Data: ${dataFormatada}`, pageWidth/2, 200, { align: "center" });
                     
                     // PÁGINA 2 - DECLARAÇÃO PEDAGÓGICA COM BORDAS
                     doc.addPage();
