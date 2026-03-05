@@ -790,7 +790,7 @@
                         creator: 'Sistema de Geração de Blocos'
                     });
                     
-                    // Configurar fonte Times New Roman
+                    // Configurar fonte Times New Roman (padrão)
                     doc.setFont("times", "normal");
                     
                     // PÁGINA 1 - CAPA
@@ -845,7 +845,7 @@
                     doc.setFillColor(0, 0, 0);
                     doc.setTextColor(0, 0, 0);
                     
-                    // CAPA - Títulos centrais com tamanho 16
+                    // CAPA - Títulos centrais com tamanho 16 (Times New Roman)
                     doc.setFontSize(16);
                     doc.setFont("times", "bold");
                     doc.text("REPÚBLICA DE MOÇAMBIQUE", pageWidth/2, 55, { align: "center" });
@@ -859,51 +859,49 @@
                     // Informações à esquerda (ESCOLA e PROFESSOR) com ícones Unicode
                     doc.setFontSize(14);
                     
-                    // ESCOLA - à esquerda com ícone de escola (Unicode)
+                    // ESCOLA - à esquerda
                     doc.setFont("times", "bold");
                     doc.text("ESCOLA:", 20, 100);
                     doc.setFont("times", "normal");
                     doc.text(dados.escola || "____________________", 20, 107);
                     
-                    // PROFESSOR - à esquerda com ícone de professor (Unicode)
+                    // PROFESSOR - à esquerda
                     doc.setFont("times", "bold");
                     doc.text("PROFESSOR:", 20, 117);
                     doc.setFont("times", "normal");
                     doc.text(dados.professor || "___________________", 20, 124);
                     
-                    // Informações à direita (DISCIPLINA e CLASSE) mais afastadas
-                    const direitaX = pageWidth - 130; // Mais à direita
+                    // Informações à direita (DISCIPLINA e CLASSE) - AFASTADAS PARA A MARGEM DIREITA
+                    const direitaX = pageWidth - 120; // Mais à direita (ajustado para 120mm da margem direita)
                     
-                    // DISCIPLINA - à direita com ícone de livro (Unicode)
+                    // DISCIPLINA - à direita
                     doc.setFont("times", "bold");
                     doc.text("DISCIPLINA:", direitaX, 100);
                     doc.setFont("times", "normal");
                     doc.text(dados.disciplina || "___________________________", direitaX, 107);
                     
-                    // CLASSE - à direita com ícone de graduação (Unicode)
+                    // CLASSE - à direita
                     doc.setFont("times", "bold");
                     doc.text("CLASSE:", direitaX, 117);
                     doc.setFont("times", "normal");
                     doc.text(dados.classe || "___________________", direitaX, 124);
                     
-                    // Bloco de aulas e data mais abaixo e próximos
+                    // Bloco de aulas e data em Great Vibes
                     // Posição 180 (mais abaixo) e com 5mm de distância entre eles
                     
-                    // Bloco de aulas em itálico
-                    doc.setFont("Great Vibes", "Great Vibes");
-                    doc.setFontSize(16);
+                    // Bloco de aulas em Great Vibes
+                    doc.setFont("Great Vibes", "italic");
+                    doc.setFontSize(20);
                     let infoAulas = `Bloco com ${dados.numAulas} Aulas`;
                     if (dados.muralAdicionado) {
                         infoAulas += ` + Quadro Mural`;
-                    } else {
-                        infoAulas += ` `;
                     }
                     doc.text(infoAulas, pageWidth/2, 190, { align: "center" });
                     
-                    // Data em itálico, 5mm abaixo
-                    doc.setFontSize(14);
-                    doc.setFont("Great Vibes", "Great Vibes");
-                    doc.text(`Data: ${dataFormatada}`, pageWidth/2, 200, { align: "center" });
+                    // Data em Great Vibes, 5mm abaixo
+                    doc.setFontSize(16);
+                    doc.setFont("Great Vibes", "italic");
+                    doc.text(`Data: ${dataFormatada}`, pageWidth/2, 205, { align: "center" });
                     
                     // PÁGINA 2 - DECLARAÇÃO PEDAGÓGICA COM BORDAS
                     doc.addPage();
