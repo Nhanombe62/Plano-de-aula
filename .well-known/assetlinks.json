@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.web.plano_de_aula_mz_928ce.twa",
+        "sha256_cert_fingerprints": ["3D:19:34:21:99:79:6E:7A:B0:A7:68:08:83:D4:4D:79:96:E1:83:46:AC:22:0D:30:34:0A:54:50:BD:43:5F:C2"]
+      }
+    }]
