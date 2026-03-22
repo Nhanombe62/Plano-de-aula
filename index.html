@@ -282,7 +282,6 @@
             color: var(--primary);
         }
         
-        /* Estilos para os campos que aparecem após validação */
         .restricted-fields {
             transition: all 0.5s ease;
         }
@@ -326,114 +325,116 @@
             <div class="card">
                 <h2>Novo Pedido de Permuta</h2>
                 
-                <!-- ETAPA 1: Validação do Documento -->
-                <div id="etapaValidacao">
-                    <div class="form-group">
-                        <label>Nome Completo (igual ao documento):</label>
-                        <input type="text" id="nome" required placeholder="Ex: João Manuel Alberto">
-                    </div>
-
-                    <div class="camera-section">
-                        <h3 style="margin:0 0 12px 0;">📸 Captura de Documento Oficial</h3>
-                        <p style="font-size:0.85rem; color:#555;">Tire uma foto do <strong>B.I, Passaporte, Espera BI ou Carta de Condução</strong>.<br>O sistema fará a leitura OCR e comparará o nome.</p>
-                        
-                        <video id="videoCamera" class="video-feed" autoplay playsinline></video>
-                        <canvas id="canvasCapture" style="display:none;"></canvas>
-                        <img id="imgPreview" class="camera-preview" alt="Pré-visualização">
-                        
-                        <div class="flex-btns">
-                            <button type="button" id="btnAbrirCamera" class="btn-camera primary">📷 Abrir Câmera</button>
-                            <button type="button" id="btnFlash" class="btn-camera warning" disabled>⚡ Flash</button>
-                            <button type="button" id="btnTirarFoto" class="btn-camera" disabled>📸 Capturar Documento</button>
-                            <button type="button" id="btnFecharCamera" class="btn-camera danger" style="display:none;">❌ Fechar Câmera</button>
+                <form id="permutaForm">
+                    <!-- ETAPA 1: Validação do Documento -->
+                    <div id="etapaValidacao">
+                        <div class="form-group">
+                            <label>Nome Completo (igual ao documento):</label>
+                            <input type="text" id="nome" required placeholder="Ex: João Manuel Alberto">
                         </div>
-                        <div id="ocrProgress" class="ocr-progress" style="display:none;"></div>
-                        <div id="validacaoDocMsg" class="doc-status" style="display:none;"></div>
-                    </div>
-                </div>
 
-                <!-- ETAPA 2: Campos restantes (aparecem apenas após validação) -->
-                <div id="etapaRestante" class="restricted-fields hidden">
-                    <div class="validation-badge" id="validationBadge">
-                        ✅ Documento validado com sucesso!
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Nível de Ensino:</label>
-                        <select id="nivel" required>
-                            <option value="" disabled selected>Selecione...</option>
-                            <option value="DN1">DN1</option>
-                            <option value="DN2">DN2</option>
-                            <option value="DN3">DN3</option>
-                            <option value="DN4">DN4</option>
-                        </select>
-                    </div>
-
-                    <hr>
-                    <h3>📍 Localização Actual</h3>
-
-                    <div class="form-group">
-                        <label>Província onde trabalha:</label>
-                        <select id="provAtual" required onchange="carregarDistritosAtuais()">
-                            <option value="" disabled selected>Selecione a Província...</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Distrito onde trabalha:</label>
-                        <select id="distritoAtual" required disabled onchange="habilitarLocalizacao()">
-                            <option value="" disabled selected>Selecione a Província primeiro...</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Localização da Escola:</label>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="localizacao" value="Dentro da Vila" id="radioDentro" disabled onchange="toggleDistancia()">
-                                Dentro da Vila
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="localizacao" value="Fora da Vila" id="radioFora" disabled onchange="toggleDistancia()">
-                                Fora da Vila
-                            </label>
+                        <div class="camera-section">
+                            <h3 style="margin:0 0 12px 0;">📸 Captura de Documento Oficial</h3>
+                            <p style="font-size:0.85rem; color:#555;">Tire uma foto do <strong>B.I, Passaporte, Espera BI ou Carta de Condução</strong>.<br>O sistema fará a leitura OCR e comparará o nome.</p>
+                            
+                            <video id="videoCamera" class="video-feed" autoplay playsinline></video>
+                            <canvas id="canvasCapture" style="display:none;"></canvas>
+                            <img id="imgPreview" class="camera-preview" alt="Pré-visualização">
+                            
+                            <div class="flex-btns">
+                                <button type="button" id="btnAbrirCamera" class="btn-camera primary">📷 Abrir Câmera</button>
+                                <button type="button" id="btnFlash" class="btn-camera warning" disabled>⚡ Flash</button>
+                                <button type="button" id="btnTirarFoto" class="btn-camera" disabled>📸 Capturar Documento</button>
+                                <button type="button" id="btnFecharCamera" class="btn-camera danger" style="display:none;">❌ Fechar Câmera</button>
+                            </div>
+                            <div id="ocrProgress" class="ocr-progress" style="display:none;"></div>
+                            <div id="validacaoDocMsg" class="doc-status" style="display:none;"></div>
                         </div>
                     </div>
 
-                    <div class="form-group hidden" id="distanciaGroup">
-                        <label>Quantos KM da vila para sua escola actual?</label>
-                        <input type="number" id="distancia" placeholder="Ex: 45">
+                    <!-- ETAPA 2: Campos restantes (aparecem apenas após validação) -->
+                    <div id="etapaRestante" class="restricted-fields hidden">
+                        <div class="validation-badge" id="validationBadge">
+                            ✅ Documento validado com sucesso!
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Nível de Ensino:</label>
+                            <select id="nivel" required>
+                                <option value="" disabled selected>Selecione...</option>
+                                <option value="DN1">DN1</option>
+                                <option value="DN2">DN2</option>
+                                <option value="DN3">DN3</option>
+                                <option value="DN4">DN4</option>
+                            </select>
+                        </div>
+
+                        <hr>
+                        <h3>📍 Localização Actual</h3>
+
+                        <div class="form-group">
+                            <label>Província onde trabalha:</label>
+                            <select id="provAtual" required onchange="carregarDistritosAtuais()">
+                                <option value="" disabled selected>Selecione a Província...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Distrito onde trabalha:</label>
+                            <select id="distritoAtual" required disabled onchange="habilitarLocalizacao()">
+                                <option value="" disabled selected>Selecione a Província primeiro...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Localização da Escola:</label>
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="localizacao" value="Dentro da Vila" id="radioDentro" disabled onchange="toggleDistancia()">
+                                    Dentro da Vila
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="localizacao" value="Fora da Vila" id="radioFora" disabled onchange="toggleDistancia()">
+                                    Fora da Vila
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group hidden" id="distanciaGroup">
+                            <label>Quantos KM da vila para sua escola actual?</label>
+                            <input type="number" id="distancia" placeholder="Ex: 45">
+                        </div>
+
+                        <hr>
+                        <h3>🚀 Destino Pretendido</h3>
+
+                        <div class="form-group">
+                            <label>Para qual Província pretende ir?</label>
+                            <select id="provDestino" required onchange="carregarDistritosDestino()">
+                                <option value="" disabled selected>Selecione a Província...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Para qual Distrito pretende ir?</label>
+                            <select id="distDestino" required disabled>
+                                <option value="" disabled selected>Selecione a Província primeiro...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Condições Especiais:</label>
+                            <textarea id="condicoes" rows="2" placeholder="Ex: Só aceito se tiver casa..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Seu Contacto:</label>
+                            <input type="tel" id="telefone" required placeholder="84/85 XXX XXXX">
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="btnRegistar">✅ Registar Permuta</button>
                     </div>
-
-                    <hr>
-                    <h3>🚀 Destino Pretendido</h3>
-
-                    <div class="form-group">
-                        <label>Para qual Província pretende ir?</label>
-                        <select id="provDestino" required onchange="carregarDistritosDestino()">
-                            <option value="" disabled selected>Selecione a Província...</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Para qual Distrito pretende ir?</label>
-                        <select id="distDestino" required disabled>
-                            <option value="" disabled selected>Selecione a Província primeiro...</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Condições Especiais:</label>
-                        <textarea id="condicoes" rows="2" placeholder="Ex: Só aceito se tiver casa..."></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Seu Contacto:</label>
-                        <input type="tel" id="telefone" required placeholder="84/85 XXX XXXX">
-                    </div>
-
-                    <button type="submit" class="btn-submit" id="btnRegistar">✅ Registar Permuta</button>
-                </div>
+                </form>
             </div>
         </div>
 
@@ -467,6 +468,7 @@
             "Sofala", "Manica", "Tete", "Zambézia", "Nampula", 
             "Cabo Delgado", "Niassa"
         ];
+        
         const distritosPorProvincia = {
             "Maputo Cidade": ["Maputo Cidade"],
             "Maputo Província": ["Matola", "Boane", "Marracuene", "Manhiça", "Magude", "Moamba", "Namaacha", "Matutuíne"],
@@ -502,8 +504,14 @@
         function showView(viewId) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
+            
             if(viewId === 'view-list') {
-                document.getElementById('filtroProvincia').value = "";
+                // Carregar províncias no filtro
+                const filtroSelect = document.getElementById('filtroProvincia');
+                filtroSelect.innerHTML = '<option value="" disabled selected>Selecione para ver resultados...</option>';
+                provinciasMoz.forEach(prov => {
+                    filtroSelect.add(new Option(prov, prov));
+                });
                 document.getElementById('resultadosArea').innerHTML = '<div class="no-results">👆 Selecione uma província acima para ver os pedidos disponíveis.</div>';
             } else if (viewId === 'view-form') {
                 resetForm();
@@ -511,7 +519,6 @@
                 documentoValidado = false;
                 document.getElementById('validacaoDocMsg').style.display = 'none';
                 imgPreview.style.display = 'none';
-                // Esconder campos restantes
                 document.getElementById('etapaRestante').classList.add('hidden');
                 document.getElementById('etapaValidacao').style.display = 'block';
             }
@@ -530,10 +537,14 @@
             }
             video.style.display = 'none';
             video.srcObject = null;
-            document.getElementById('btnAbrirCamera').style.display = 'inline-flex';
-            document.getElementById('btnTirarFoto').disabled = true;
-            document.getElementById('btnFecharCamera').style.display = 'none';
-            document.getElementById('btnFlash').disabled = true;
+            const btnAbrir = document.getElementById('btnAbrirCamera');
+            const btnTirar = document.getElementById('btnTirarFoto');
+            const btnFechar = document.getElementById('btnFecharCamera');
+            if (btnAbrir) btnAbrir.style.display = 'inline-flex';
+            if (btnTirar) btnTirar.disabled = true;
+            if (btnFechar) btnFechar.style.display = 'none';
+            const btnFlash = document.getElementById('btnFlash');
+            if (btnFlash) btnFlash.disabled = true;
             flashEnabled = false;
         }
 
@@ -541,42 +552,33 @@
             try {
                 if (stream) fecharCameraCompleta();
                 
-                const constraints = { video: { facingMode: { exact: "environment" } } };
+                const constraints = { video: { facingMode: "environment" } };
                 stream = await navigator.mediaDevices.getUserMedia(constraints);
                 currentTrack = stream.getVideoTracks()[0];
                 video.srcObject = stream;
                 video.style.display = 'block';
                 await video.play();
                 
-                document.getElementById('btnAbrirCamera').style.display = 'none';
-                document.getElementById('btnTirarFoto').disabled = false;
-                document.getElementById('btnFecharCamera').style.display = 'inline-flex';
+                const btnAbrir = document.getElementById('btnAbrirCamera');
+                const btnTirar = document.getElementById('btnTirarFoto');
+                const btnFechar = document.getElementById('btnFecharCamera');
+                if (btnAbrir) btnAbrir.style.display = 'none';
+                if (btnTirar) btnTirar.disabled = false;
+                if (btnFechar) btnFechar.style.display = 'inline-flex';
                 
+                const btnFlash = document.getElementById('btnFlash');
                 if (currentTrack && currentTrack.getCapabilities && currentTrack.getCapabilities().torch) {
-                    document.getElementById('btnFlash').disabled = false;
+                    if (btnFlash) btnFlash.disabled = false;
                 } else {
-                    document.getElementById('btnFlash').disabled = true;
+                    if (btnFlash) btnFlash.disabled = true;
                 }
                 
-                document.getElementById('validacaoDocMsg').style.display = 'none';
-                imgPreview.style.display = 'none';
+                const statusDiv = document.getElementById('validacaoDocMsg');
+                if (statusDiv) statusDiv.style.display = 'none';
+                if (imgPreview) imgPreview.style.display = 'none';
             } catch (err) {
-                try {
-                    const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    stream = fallbackStream;
-                    currentTrack = stream.getVideoTracks()[0];
-                    video.srcObject = stream;
-                    video.style.display = 'block';
-                    await video.play();
-                    document.getElementById('btnAbrirCamera').style.display = 'none';
-                    document.getElementById('btnTirarFoto').disabled = false;
-                    document.getElementById('btnFecharCamera').style.display = 'inline-flex';
-                    if (currentTrack && currentTrack.getCapabilities && currentTrack.getCapabilities().torch) {
-                        document.getElementById('btnFlash').disabled = false;
-                    }
-                } catch (fallbackErr) {
-                    alert("Erro ao acessar a câmera. Verifique permissões.");
-                }
+                alert("Erro ao acessar a câmera. Verifique permissões e tente novamente.");
+                console.error(err);
             }
         }
 
@@ -587,8 +589,11 @@
                 currentTrack.applyConstraints({
                     advanced: [{ torch: flashEnabled }]
                 });
-                document.getElementById('btnFlash').style.background = flashEnabled ? '#f1c40f' : '#2c3e50';
-                document.getElementById('btnFlash').style.color = flashEnabled ? '#2c3e50' : 'white';
+                const btnFlash = document.getElementById('btnFlash');
+                if (btnFlash) {
+                    btnFlash.style.background = flashEnabled ? '#f1c40f' : '#2c3e50';
+                    btnFlash.style.color = flashEnabled ? '#2c3e50' : 'white';
+                }
             } catch (err) {
                 alert("Flash não suportado neste dispositivo");
             }
@@ -666,7 +671,6 @@
                     statusDiv.innerHTML = `✅ VALIDAÇÃO APROVADA!<br>Nome detectado no documento: "${nomeEncontrado.toUpperCase()}"<br>Corresponde ao nome registado.`;
                     statusDiv.style.display = 'block';
                     
-                    // Mostrar os campos restantes após validação bem-sucedida
                     document.getElementById('etapaRestante').classList.remove('hidden');
                     document.getElementById('etapaValidacao').style.display = 'none';
                     
@@ -689,82 +693,145 @@
         }
 
         function resetForm() {
-            document.getElementById('permutaForm').reset();
-            document.getElementById('distritoAtual').disabled = true;
-            document.getElementById('distritoAtual').innerHTML = '<option value="" disabled selected>Selecione a Província primeiro...</option>';
-            document.getElementById('radioDentro').disabled = true;
-            document.getElementById('radioFora').disabled = true;
-            document.getElementById('distanciaGroup').classList.add('hidden');
-            document.getElementById('distDestino').disabled = true;
-            document.getElementById('distDestino').innerHTML = '<option value="" disabled selected>Selecione a Província primeiro...</option>';
+            const form = document.getElementById('permutaForm');
+            if (form) form.reset();
+            
+            const distritoAtual = document.getElementById('distritoAtual');
+            if (distritoAtual) {
+                distritoAtual.disabled = true;
+                distritoAtual.innerHTML = '<option value="" disabled selected>Selecione a Província primeiro...</option>';
+            }
+            
+            const radioDentro = document.getElementById('radioDentro');
+            const radioFora = document.getElementById('radioFora');
+            if (radioDentro) radioDentro.disabled = true;
+            if (radioFora) radioFora.disabled = true;
+            
+            const distanciaGroup = document.getElementById('distanciaGroup');
+            if (distanciaGroup) distanciaGroup.classList.add('hidden');
+            
+            const distDestino = document.getElementById('distDestino');
+            if (distDestino) {
+                distDestino.disabled = true;
+                distDestino.innerHTML = '<option value="" disabled selected>Selecione a Província primeiro...</option>';
+            }
+            
             documentoValidado = false;
-            document.getElementById('validacaoDocMsg').style.display = 'none';
-            document.getElementById('ocrProgress').style.display = 'none';
-            imgPreview.style.display = 'none';
+            
+            const validacaoMsg = document.getElementById('validacaoDocMsg');
+            if (validacaoMsg) validacaoMsg.style.display = 'none';
+            
+            const ocrProgress = document.getElementById('ocrProgress');
+            if (ocrProgress) ocrProgress.style.display = 'none';
+            
+            if (imgPreview) imgPreview.style.display = 'none';
+            
             fecharCameraCompleta();
             
-            // Garantir que etapa de validação fique visível e restante escondida
-            document.getElementById('etapaRestante').classList.add('hidden');
-            document.getElementById('etapaValidacao').style.display = 'block';
+            const etapaRestante = document.getElementById('etapaRestante');
+            const etapaValidacao = document.getElementById('etapaValidacao');
+            if (etapaRestante) etapaRestante.classList.add('hidden');
+            if (etapaValidacao) etapaValidacao.style.display = 'block';
         }
 
         function inicializarSelects() {
             const selectAtual = document.getElementById('provAtual');
             const selectDestino = document.getElementById('provDestino');
-            const selectFiltro = document.getElementById('filtroProvincia');
-            provinciasMoz.forEach(prov => {
-                selectAtual.add(new Option(prov, prov));
-                selectDestino.add(new Option(prov, prov));
-                selectFiltro.add(new Option(prov, prov));
-            });
+            
+            if (selectAtual) {
+                selectAtual.innerHTML = '<option value="" disabled selected>Selecione a Província...</option>';
+                provinciasMoz.forEach(prov => {
+                    selectAtual.add(new Option(prov, prov));
+                });
+            }
+            
+            if (selectDestino) {
+                selectDestino.innerHTML = '<option value="" disabled selected>Selecione a Província...</option>';
+                provinciasMoz.forEach(prov => {
+                    selectDestino.add(new Option(prov, prov));
+                });
+            }
         }
 
         function carregarDistritosAtuais() {
             const prov = document.getElementById('provAtual').value;
             const selectDist = document.getElementById('distritoAtual');
+            
             selectDist.innerHTML = '<option value="" disabled selected>Selecione o Distrito...</option>';
             selectDist.disabled = false;
-            document.getElementById('radioDentro').disabled = true;
-            document.getElementById('radioFora').disabled = true;
+            
+            const radioDentro = document.getElementById('radioDentro');
+            const radioFora = document.getElementById('radioFora');
+            if (radioDentro) radioDentro.disabled = true;
+            if (radioFora) radioFora.disabled = true;
+            
             if (prov && distritosPorProvincia[prov]) {
-                distritosPorProvincia[prov].forEach(d => selectDist.add(new Option(d, d)));
+                distritosPorProvincia[prov].forEach(d => {
+                    selectDist.add(new Option(d, d));
+                });
             }
         }
         
         function habilitarLocalizacao() {
-            document.getElementById('radioDentro').disabled = false;
-            document.getElementById('radioFora').disabled = false;
+            const radioDentro = document.getElementById('radioDentro');
+            const radioFora = document.getElementById('radioFora');
+            if (radioDentro) radioDentro.disabled = false;
+            if (radioFora) radioFora.disabled = false;
         }
         
         function toggleDistancia() {
-            const fora = document.getElementById('radioFora').checked;
-            document.getElementById('distanciaGroup').classList.toggle('hidden', !fora);
+            const radioFora = document.getElementById('radioFora');
+            const distanciaGroup = document.getElementById('distanciaGroup');
+            if (radioFora && radioFora.checked) {
+                distanciaGroup.classList.remove('hidden');
+            } else if (distanciaGroup) {
+                distanciaGroup.classList.add('hidden');
+            }
         }
         
         function carregarDistritosDestino() {
             const prov = document.getElementById('provDestino').value;
             const selectDist = document.getElementById('distDestino');
+            
             selectDist.innerHTML = '<option value="" disabled selected>Selecione o Distrito...</option>';
+            
             if (prov && distritosPorProvincia[prov]) {
                 selectDist.disabled = false;
-                distritosPorProvincia[prov].forEach(d => selectDist.add(new Option(d, d)));
-            } else selectDist.disabled = true;
+                distritosPorProvincia[prov].forEach(d => {
+                    selectDist.add(new Option(d, d));
+                });
+            } else {
+                selectDist.disabled = true;
+            }
         }
         
         function filtrarLista() {
             const prov = document.getElementById('filtroProvincia').value;
             const area = document.getElementById('resultadosArea');
-            if (!prov) { area.innerHTML = '<div class="no-results">👆 Selecione uma província acima</div>'; return; }
+            
+            if (!prov) {
+                area.innerHTML = '<div class="no-results">👆 Selecione uma província acima para ver os pedidos disponíveis.</div>';
+                return;
+            }
+            
             const filtrados = professores.filter(p => p.provDestino === prov);
-            if (filtrados.length === 0) { area.innerHTML = `<div class="no-results"><h3>😕 Sem resultados</h3><p>Nenhum professor quer ir para ${prov}.</p></div>`; return; }
+            
+            if (filtrados.length === 0) {
+                area.innerHTML = `<div class="no-results"><h3>😕 Sem resultados</h3><p>Nenhum professor quer ir para ${prov}.</p></div>`;
+                return;
+            }
+            
             let html = `<h3>📋 Professores interessados em ${prov}:</h3>`;
             filtrados.forEach(p => {
-                let localInfo = `${p.distritoAtual} (${p.tipoLocal})` + (p.tipoLocal === 'Fora da Vila' ? ` - ${p.distancia}km` : '');
-                html += `<div class="teacher-item"><h3>${p.nome} <span class="tag">${p.nivel}</span></h3>
-                <div><strong>📍 Actualmente:</strong> ${p.provAtual} > ${localInfo}</div>
-                <div><strong>🚀 Quer ir para:</strong> ${p.distDestino}</div>
-                <div><em>Obs: ${p.condicoes || 'Sem condições'}</em></div>
-                <div style="margin-top:10px;"><strong>📞 ${p.telefone}</strong></div></div>`;
+                let localInfo = `${p.distritoAtual} (${p.tipoLocal})`;
+                if(p.tipoLocal === 'Fora da Vila') localInfo += ` - ${p.distancia}km`;
+                html += `<div class="teacher-item">
+                    <h3>${p.nome} <span class="tag">${p.nivel}</span></h3>
+                    <div><strong>📍 Actualmente:</strong> ${p.provAtual} > ${localInfo}</div>
+                    <div><strong>🚀 Quer ir para:</strong> ${p.distDestino}</div>
+                    <div><em>Obs: ${p.condicoes || 'Sem condições'}</em></div>
+                    <div style="margin-top:10px;"><strong>📞 ${p.telefone}</strong></div>
+                </div>`;
             });
             area.innerHTML = html;
         }
@@ -772,32 +839,53 @@
         document.getElementById('permutaForm').addEventListener('submit', function(e) {
             e.preventDefault();
             if (!documentoValidado) {
-                alert("⚠️ A validação do documento é obrigatória!");
+                alert("⚠️ A validação do documento é obrigatória! Capture o documento e aguarde a aprovação.");
                 return;
             }
+            
             const tipoLocal = document.querySelector('input[name="localizacao"]:checked');
-            if (!tipoLocal) { alert("Selecione localização da escola."); return; }
+            if (!tipoLocal) {
+                alert("Selecione a localização da escola.");
+                return;
+            }
+            
             const novo = {
-                nome: document.getElementById('nome').value, nivel: document.getElementById('nivel').value,
-                provAtual: document.getElementById('provAtual').value, distritoAtual: document.getElementById('distritoAtual').value,
-                tipoLocal: tipoLocal.value, distancia: document.getElementById('distancia').value || 0,
-                provDestino: document.getElementById('provDestino').value, distDestino: document.getElementById('distDestino').value,
-                condicoes: document.getElementById('condicoes').value, telefone: document.getElementById('telefone').value
+                nome: document.getElementById('nome').value,
+                nivel: document.getElementById('nivel').value,
+                provAtual: document.getElementById('provAtual').value,
+                distritoAtual: document.getElementById('distritoAtual').value,
+                tipoLocal: tipoLocal.value,
+                distancia: document.getElementById('distancia').value || 0,
+                provDestino: document.getElementById('provDestino').value,
+                distDestino: document.getElementById('distDestino').value,
+                condicoes: document.getElementById('condicoes').value,
+                telefone: document.getElementById('telefone').value
             };
+            
             const matches = professores.filter(p => p.provDestino === novo.provAtual && p.nivel === novo.nivel);
             professores.push(novo);
             localStorage.setItem('professoresDB', JSON.stringify(professores));
+            
             if (matches.length > 0) {
                 let msg = "✅ PERMUTA POSSÍVEL!\nEncontrámos " + matches.length + " compatível(eis):\n";
                 matches.forEach(m => msg += `👤 ${m.nome} (${m.nivel}) → ${m.provDestino} / 📞 ${m.telefone}\n`);
                 alert(msg);
-            } else alert("Registo efetuado! ⚠️ Ainda não há ninguém com nível compatível para " + novo.provAtual);
+            } else {
+                alert("Registo efetuado! ⚠️ Ainda não há ninguém com nível compatível para " + novo.provAtual);
+            }
+            
             fecharCameraCompleta();
             showView('view-list');
         });
         
-        function limparDados() { if(confirm("Apagar todos os dados?")) { localStorage.removeItem('professoresDB'); location.reload(); } }
+        function limparDados() {
+            if(confirm("Apagar todos os dados?")) {
+                localStorage.removeItem('professoresDB');
+                location.reload();
+            }
+        }
         
+        // Event listeners
         document.getElementById('btnAbrirCamera').onclick = abrirCamera;
         document.getElementById('btnTirarFoto').onclick = capturarFotoEValidar;
         document.getElementById('btnFecharCamera').onclick = fecharCameraCompleta;
