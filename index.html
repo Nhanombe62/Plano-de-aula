@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Permuta de Professores - Moçambique | Validação com Documento</title>
-    <!-- Tesseract.js para OCR real -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
     <style>
         :root {
@@ -282,6 +281,24 @@
             margin-top: 8px;
             color: var(--primary);
         }
+        
+        /* Estilos para os campos que aparecem após validação */
+        .restricted-fields {
+            transition: all 0.5s ease;
+        }
+        .restricted-fields.hidden {
+            display: none;
+        }
+        
+        .validation-badge {
+            background: var(--success);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -308,7 +325,9 @@
             
             <div class="card">
                 <h2>Novo Pedido de Permuta</h2>
-                <form id="permutaForm">
+                
+                <!-- ETAPA 1: Validação do Documento -->
+                <div id="etapaValidacao">
                     <div class="form-group">
                         <label>Nome Completo (igual ao documento):</label>
                         <input type="text" id="nome" required placeholder="Ex: João Manuel Alberto">
@@ -331,7 +350,14 @@
                         <div id="ocrProgress" class="ocr-progress" style="display:none;"></div>
                         <div id="validacaoDocMsg" class="doc-status" style="display:none;"></div>
                     </div>
+                </div>
 
+                <!-- ETAPA 2: Campos restantes (aparecem apenas após validação) -->
+                <div id="etapaRestante" class="restricted-fields hidden">
+                    <div class="validation-badge" id="validationBadge">
+                        ✅ Documento validado com sucesso!
+                    </div>
+                    
                     <div class="form-group">
                         <label>Nível de Ensino:</label>
                         <select id="nivel" required>
@@ -406,10 +432,8 @@
                         <input type="tel" id="telefone" required placeholder="84/85 XXX XXXX">
                     </div>
 
-                    <input type="hidden" id="docValidado" value="false">
-                    
-                    <button type="submit" class="btn-submit" id="btnRegistar" disabled>Registar Permuta (Valide o documento primeiro)</button>
-                </form>
+                    <button type="submit" class="btn-submit" id="btnRegistar">✅ Registar Permuta</button>
+                </div>
             </div>
         </div>
 
@@ -485,10 +509,11 @@
                 resetForm();
                 fecharCameraCompleta();
                 documentoValidado = false;
-                document.getElementById('docValidado').value = "false";
                 document.getElementById('validacaoDocMsg').style.display = 'none';
                 imgPreview.style.display = 'none';
-                document.getElementById('btnRegistar').disabled = true;
+                // Esconder campos restantes
+                document.getElementById('etapaRestante').classList.add('hidden');
+                document.getElementById('etapaValidacao').style.display = 'block';
             }
         }
 
@@ -527,7 +552,6 @@
                 document.getElementById('btnTirarFoto').disabled = false;
                 document.getElementById('btnFecharCamera').style.display = 'inline-flex';
                 
-                // Verificar suporte a flash (torch)
                 if (currentTrack && currentTrack.getCapabilities && currentTrack.getCapabilities().torch) {
                     document.getElementById('btnFlash').disabled = false;
                 } else {
@@ -570,18 +594,14 @@
             }
         }
 
-        // Extrair nome do texto OCR
         function extrairNomeDoTexto(texto, nomeDigitado) {
-            // Normaliza e procura o nome digitado no texto OCR
             const nomeLower = nomeDigitado.toLowerCase().trim();
             const textoLower = texto.toLowerCase();
             
-            // Procura por correspondência exata ou parcial (nome completo)
             if (textoLower.includes(nomeLower)) {
                 return nomeDigitado;
             }
             
-            // Tenta encontrar palavras que correspondam
             const palavrasNome = nomeLower.split(/\s+/);
             let matches = 0;
             for (let palavra of palavrasNome) {
@@ -606,7 +626,6 @@
                 return;
             }
 
-            // Capturar foto
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
@@ -623,10 +642,8 @@
             statusDiv.style.display = 'none';
             
             try {
-                // Converter dataURL para blob
                 const blob = await (await fetch(imageDataUrl)).blob();
                 
-                // Usar Tesseract para OCR
                 const { data: { text } } = await Tesseract.recognize(
                     blob,
                     'por',
@@ -641,25 +658,25 @@
                 
                 ocrProgress.style.display = 'none';
                 
-                console.log("Texto extraído:", text);
                 const nomeEncontrado = extrairNomeDoTexto(text, nomeDigitado);
                 
                 if (nomeEncontrado) {
                     documentoValidado = true;
-                    document.getElementById('docValidado').value = "true";
                     statusDiv.className = 'doc-status success';
                     statusDiv.innerHTML = `✅ VALIDAÇÃO APROVADA!<br>Nome detectado no documento: "${nomeEncontrado.toUpperCase()}"<br>Corresponde ao nome registado.`;
                     statusDiv.style.display = 'block';
-                    document.getElementById('btnRegistar').disabled = false;
+                    
+                    // Mostrar os campos restantes após validação bem-sucedida
+                    document.getElementById('etapaRestante').classList.remove('hidden');
+                    document.getElementById('etapaValidacao').style.display = 'none';
+                    
                     fecharCameraCompleta();
                 } else {
                     documentoValidado = false;
-                    document.getElementById('docValidado').value = "false";
                     statusDiv.className = 'doc-status error';
                     const primeirasPalavras = text.substring(0, 100).replace(/\n/g, ' ');
                     statusDiv.innerHTML = `❌ VALIDAÇÃO REPROVADA!<br>Nome digitado: "${nomeDigitado}"<br>Não foi encontrado no documento.<br><br>Texto detectado: "${primeirasPalavras}..."<br><br>Certifique-se que o documento está bem iluminado e visível.`;
                     statusDiv.style.display = 'block';
-                    document.getElementById('btnRegistar').disabled = true;
                 }
             } catch (ocrError) {
                 console.error("OCR error:", ocrError);
@@ -668,7 +685,6 @@
                 statusDiv.innerHTML = `❌ ERRO NA LEITURA DO DOCUMENTO!<br>Não foi possível extrair o texto. Tente tirar uma foto mais nítida e com boa iluminação.`;
                 statusDiv.style.display = 'block';
                 documentoValidado = false;
-                document.getElementById('btnRegistar').disabled = true;
             }
         }
 
@@ -682,12 +698,14 @@
             document.getElementById('distDestino').disabled = true;
             document.getElementById('distDestino').innerHTML = '<option value="" disabled selected>Selecione a Província primeiro...</option>';
             documentoValidado = false;
-            document.getElementById('docValidado').value = "false";
             document.getElementById('validacaoDocMsg').style.display = 'none';
             document.getElementById('ocrProgress').style.display = 'none';
             imgPreview.style.display = 'none';
             fecharCameraCompleta();
-            document.getElementById('btnRegistar').disabled = true;
+            
+            // Garantir que etapa de validação fique visível e restante escondida
+            document.getElementById('etapaRestante').classList.add('hidden');
+            document.getElementById('etapaValidacao').style.display = 'block';
         }
 
         function inicializarSelects() {
@@ -754,7 +772,7 @@
         document.getElementById('permutaForm').addEventListener('submit', function(e) {
             e.preventDefault();
             if (!documentoValidado) {
-                alert("⚠️ A validação do documento é obrigatória! Capture o documento e aguarde a aprovação.");
+                alert("⚠️ A validação do documento é obrigatória!");
                 return;
             }
             const tipoLocal = document.querySelector('input[name="localizacao"]:checked');
