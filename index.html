@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Permuta de Professores - Moçambique | Validação com Documento</title>
+    <title>Permuta de Professores - Moçambique | Validação BI Oficial</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
     <style>
         :root {
@@ -15,7 +15,10 @@
             --success: #2ecc71;
             --danger: #e74c3c;
             --warning: #f1c40f;
+            --info: #3498db;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -128,7 +131,6 @@
             background-color: #fff;
         }
         input:focus, select:focus { border-color: var(--primary); outline: none; }
-        select:disabled { background-color: #e9ecef; cursor: not-allowed; }
 
         .btn-submit {
             background-color: var(--primary); color: white; border: none;
@@ -155,6 +157,13 @@
             margin: 0 auto 15px;
             background: #1e1e1e;
             display: none;
+            transform: scaleX(-1);
+        }
+        .video-feed.front {
+            transform: scaleX(-1);
+        }
+        .video-feed.back {
+            transform: none;
         }
         .camera-preview {
             width: 100%;
@@ -178,20 +187,12 @@
             font-weight: bold;
             transition: 0.2s;
         }
-        .btn-camera.primary {
-            background: var(--primary);
-        }
-        .btn-camera.danger {
-            background: var(--accent);
-        }
-        .btn-camera.warning {
-            background: var(--warning);
-            color: #2c3e50;
-        }
-        .btn-camera:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        .btn-camera.primary { background: var(--primary); }
+        .btn-camera.danger { background: var(--accent); }
+        .btn-camera.warning { background: var(--warning); color: #2c3e50; }
+        .btn-camera.info { background: var(--info); }
+        .btn-camera:disabled { opacity: 0.5; cursor: not-allowed; }
+        
         .doc-status {
             margin-top: 15px;
             padding: 12px;
@@ -199,104 +200,56 @@
             font-weight: bold;
             display: none;
         }
-        .doc-status.success {
-            background: #d5f5e3;
-            color: #1e6f3f;
-            border-left: 5px solid var(--success);
-            display: block;
-        }
-        .doc-status.error {
-            background: #fadbd7;
-            color: #a93226;
-            border-left: 5px solid var(--danger);
-            display: block;
-        }
-        .doc-status.info {
-            background: #d6eaf8;
-            color: #1f618d;
-            display: block;
-        }
-        .doc-status.loading {
-            background: #fef9e7;
-            color: #b7950b;
-            border-left: 5px solid var(--warning);
-            display: block;
-        }
-        .flex-btns {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .search-box {
-            background: #e8f6f3;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #b2dfdb;
-        }
+        .doc-status.success { background: #d5f5e3; color: #1e6f3f; border-left: 5px solid var(--success); display: block; }
+        .doc-status.error { background: #fadbd7; color: #a93226; border-left: 5px solid var(--danger); display: block; }
+        .doc-status.info { background: #d6eaf8; color: #1f618d; display: block; }
+        .doc-status.loading { background: #fef9e7; color: #b7950b; border-left: 5px solid var(--warning); display: block; }
+        
+        .flex-btns { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+        .search-box { background: #e8f6f3; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #b2dfdb; }
         .search-box label { color: var(--primary); font-size: 1.1em; }
-        .search-box select { font-size: 1.1em; font-weight: bold; border-color: var(--primary); }
-
+        
         .teacher-item {
             background: #f9f9f9; border-left: 5px solid var(--secondary);
             padding: 15px; margin-bottom: 15px; border-radius: 6px;
         }
-        .teacher-item h3 { margin: 0 0 10px 0; display: flex; justify-content: space-between; }
+        .teacher-item h3 { margin: 0 0 10px 0; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
         .tag { background: var(--dark); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.8em; }
-        
-        .no-results {
-            text-align: center;
-            padding: 40px;
-            color: #777;
-            background: #eee;
-            border-radius: 8px;
+        .tag-provisoria { background: var(--warning); color: #2c3e50; }
+        .tag-definitiva { background: var(--success); color: white; }
+        .teacher-photo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            margin-right: 15px;
         }
-
-        .reset-btn {
-            background: var(--accent); color: white; border: none;
-            padding: 10px; width: 100%; margin-top: 20px;
-            border-radius: 6px; cursor: pointer;
-        }
-        
-        .radio-group {
-            display: flex;
-            gap: 20px;
-            margin-top: 10px;
-        }
-        .radio-option {
+        .teacher-header {
             display: flex;
             align-items: center;
-            gap: 8px;
-            cursor: pointer;
+            gap: 15px;
+            flex-wrap: wrap;
         }
-        .radio-option input[type="radio"] {
-            width: auto;
-            margin: 0;
-        }
+        .no-results { text-align: center; padding: 40px; color: #777; background: #eee; border-radius: 8px; }
+        .reset-btn { background: var(--accent); color: white; border: none; padding: 10px; width: 100%; margin-top: 20px; border-radius: 6px; cursor: pointer; }
+        .radio-group { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
+        .radio-option { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .radio-option input[type="radio"] { width: auto; margin: 0; }
         .hidden { display: none; }
         hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
-        .ocr-progress {
-            font-size: 0.85rem;
-            margin-top: 8px;
+        .ocr-progress { font-size: 0.85rem; margin-top: 8px; color: var(--primary); }
+        .restricted-fields.hidden { display: none; }
+        .validation-badge { background: var(--success); color: white; padding: 8px 15px; border-radius: 20px; display: inline-block; font-size: 0.85rem; margin-bottom: 15px; }
+        .nomeacao-buttons { display: flex; gap: 15px; margin-top: 10px; }
+        .nomeacao-btn { flex: 1; padding: 12px; border: 2px solid var(--primary); background: white; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .nomeacao-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .nomeacao-btn.provisoria.selected { background: var(--warning); border-color: var(--warning); color: #2c3e50; }
+        .nomeacao-btn.definitiva.selected { background: var(--success); border-color: var(--success); color: white; }
+        .camera-loading {
+            padding: 20px;
             color: var(--primary);
-        }
-        
-        .restricted-fields {
-            transition: all 0.5s ease;
-        }
-        .restricted-fields.hidden {
-            display: none;
-        }
-        
-        .validation-badge {
-            background: var(--success);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            display: inline-block;
-            font-size: 0.85rem;
-            margin-bottom: 15px;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -304,59 +257,49 @@
 
     <header>
         <h1>🇲🇿 Portal de Permuta</h1>
-        <p>Validação com OCR - Leitura real do documento (BI/Passaporte/Carta Condução)</p>
+        <p>Validação oficial de B.I. Moçambicano + Foto do Rosto</p>
     </header>
 
     <div class="container">
         <div id="view-home" class="view active">
             <div class="menu-grid">
-                <button class="menu-btn" onclick="showView('view-form')">
-                    <span>📝</span> Registar Permuta
-                </button>
-                <button class="menu-btn secondary" onclick="showView('view-list')">
-                    <span>🔍</span> Pedidos Disponíveis
-                </button>
+                <button class="menu-btn" onclick="showView('view-form')"><span>📝</span> Registar Permuta</button>
+                <button class="menu-btn secondary" onclick="showView('view-list')"><span>🔍</span> Pedidos Disponíveis</button>
             </div>
         </div>
 
         <div id="view-form" class="view">
-            <button class="btn-back" onclick="fecharCameraEFecharForm()">← Voltar ao Menu</button>
-            
+            <button class="btn-back" onclick="fecharTodasCamerasEFechar()">← Voltar ao Menu</button>
             <div class="card">
                 <h2>Novo Pedido de Permuta</h2>
-                
                 <form id="permutaForm">
-                    <!-- ETAPA 1: Validação do Documento -->
                     <div id="etapaValidacao">
                         <div class="form-group">
-                            <label>Nome Completo (igual ao documento):</label>
-                            <input type="text" id="nome" required placeholder="Ex: João Manuel Alberto">
+                            <label>Nome Completo (igual ao B.I.):</label>
+                            <input type="text" id="nome" required placeholder="Ex: EDMILSON BARTOLOMEU NHANOMBE">
                         </div>
-
                         <div class="camera-section">
-                            <h3 style="margin:0 0 12px 0;">📸 Captura de Documento Oficial</h3>
-                            <p style="font-size:0.85rem; color:#555;">Tire uma foto do <strong>B.I, Passaporte, Espera BI ou Carta de Condução</strong>.<br>O sistema fará a leitura OCR e comparará o nome.</p>
-                            
-                            <video id="videoCamera" class="video-feed" autoplay playsinline></video>
-                            <canvas id="canvasCapture" style="display:none;"></canvas>
-                            <img id="imgPreview" class="camera-preview" alt="Pré-visualização">
-                            
+                            <h3>📸 Captura do B.I. Moçambicano</h3>
+                            <p>Tire uma foto do <strong>BILHETE DE IDENTIDADE</strong> (frente).<br>O sistema verifica o formato oficial.</p>
+                            <div id="cameraDocContainer">
+                                <video id="videoDoc" class="video-feed back" autoplay playsinline muted></video>
+                                <div id="cameraDocLoading" class="camera-loading" style="display:none;">📷 Iniciando câmera...</div>
+                            </div>
+                            <canvas id="canvasDoc" style="display:none;"></canvas>
+                            <img id="imgDocPreview" class="camera-preview" alt="BI">
                             <div class="flex-btns">
-                                <button type="button" id="btnAbrirCamera" class="btn-camera primary">📷 Abrir Câmera</button>
-                                <button type="button" id="btnFlash" class="btn-camera warning" disabled>⚡ Flash</button>
-                                <button type="button" id="btnTirarFoto" class="btn-camera" disabled>📸 Capturar Documento</button>
-                                <button type="button" id="btnFecharCamera" class="btn-camera danger" style="display:none;">❌ Fechar Câmera</button>
+                                <button type="button" id="btnAbrirCameraDoc" class="btn-camera primary">📷 Abrir Câmera</button>
+                                <button type="button" id="btnFlashDoc" class="btn-camera warning" disabled>⚡ Flash</button>
+                                <button type="button" id="btnTirarFotoDoc" class="btn-camera" disabled>📸 Capturar BI</button>
+                                <button type="button" id="btnFecharCameraDoc" class="btn-camera danger" style="display:none;">❌ Fechar</button>
                             </div>
                             <div id="ocrProgress" class="ocr-progress" style="display:none;"></div>
-                            <div id="validacaoDocMsg" class="doc-status" style="display:none;"></div>
+                            <div id="validacaoDocMsg" class="doc-status"></div>
                         </div>
                     </div>
 
-                    <!-- ETAPA 2: Campos restantes (aparecem apenas após validação) -->
                     <div id="etapaRestante" class="restricted-fields hidden">
-                        <div class="validation-badge" id="validationBadge">
-                            ✅ Documento validado com sucesso!
-                        </div>
+                        <div class="validation-badge">✅ B.I. validado com sucesso!</div>
                         
                         <div class="form-group">
                             <label>Nível de Ensino:</label>
@@ -369,54 +312,51 @@
                             </select>
                         </div>
 
+                        <div class="form-group">
+                            <label>Tipo de Nomeação:</label>
+                            <div class="nomeacao-buttons">
+                                <button type="button" id="btnProvisoria" class="nomeacao-btn provisoria">📄 Nomeação Provisória</button>
+                                <button type="button" id="btnDefinitiva" class="nomeacao-btn definitiva">✅ Nomeação Definitiva</button>
+                            </div>
+                            <input type="hidden" id="tipoNomeacao" value="">
+                        </div>
+
                         <hr>
                         <h3>📍 Localização Actual</h3>
-
                         <div class="form-group">
                             <label>Província onde trabalha:</label>
                             <select id="provAtual" required onchange="carregarDistritosAtuais()">
                                 <option value="" disabled selected>Selecione a Província...</option>
                             </select>
                         </div>
-
                         <div class="form-group">
                             <label>Distrito onde trabalha:</label>
-                            <select id="distritoAtual" required disabled onchange="habilitarLocalizacao()">
+                            <select id="distritoAtual" required disabled>
                                 <option value="" disabled selected>Selecione a Província primeiro...</option>
                             </select>
                         </div>
-
                         <div class="form-group">
                             <label>Localização da Escola:</label>
                             <div class="radio-group">
-                                <label class="radio-option">
-                                    <input type="radio" name="localizacao" value="Dentro da Vila" id="radioDentro" disabled onchange="toggleDistancia()">
-                                    Dentro da Vila
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="localizacao" value="Fora da Vila" id="radioFora" disabled onchange="toggleDistancia()">
-                                    Fora da Vila
-                                </label>
+                                <label class="radio-option"><input type="radio" name="localizacao" value="Dentro da Vila" id="radioDentro"> Dentro da Vila</label>
+                                <label class="radio-option"><input type="radio" name="localizacao" value="Fora da Vila" id="radioFora" onchange="toggleDistancia()"> Fora da Vila</label>
                             </div>
                         </div>
-
                         <div class="form-group hidden" id="distanciaGroup">
-                            <label>Quantos KM da vila para sua escola actual?</label>
+                            <label>Quantos KM da vila?</label>
                             <input type="number" id="distancia" placeholder="Ex: 45">
                         </div>
 
                         <hr>
                         <h3>🚀 Destino Pretendido</h3>
-
                         <div class="form-group">
-                            <label>Para qual Província pretende ir?</label>
+                            <label>Província de destino:</label>
                             <select id="provDestino" required onchange="carregarDistritosDestino()">
-                                <option value="" disabled selected>Selecione a Província...</option>
+                                <option value="" disabled selected>Selecione...</option>
                             </select>
                         </div>
-
                         <div class="form-group">
-                            <label>Para qual Distrito pretende ir?</label>
+                            <label>Distrito de destino:</label>
                             <select id="distDestino" required disabled>
                                 <option value="" disabled selected>Selecione a Província primeiro...</option>
                             </select>
@@ -428,8 +368,28 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Seu Contacto:</label>
+                            <label>Contacto:</label>
                             <input type="tel" id="telefone" required placeholder="84/85 XXX XXXX">
+                        </div>
+
+                        <hr>
+                        <h3>📸 Foto do Rosto</h3>
+                        <div class="camera-section">
+                            <div id="cameraRostoContainer">
+                                <video id="videoRosto" class="video-feed front" autoplay playsinline muted></video>
+                                <div id="cameraRostoLoading" class="camera-loading" style="display:none;">📷 Iniciando câmera...</div>
+                            </div>
+                            <canvas id="canvasRosto" style="display:none;"></canvas>
+                            <img id="imgRostoPreview" class="camera-preview" alt="Foto do Rosto">
+                            <div class="flex-btns">
+                                <button type="button" id="btnAbrirCameraRosto" class="btn-camera primary">📷 Abrir Câmera</button>
+                                <button type="button" id="btnTrocarCamera" class="btn-camera info">🔄 Trocar Câmera</button>
+                                <button type="button" id="btnFlashRosto" class="btn-camera warning" disabled>⚡ Flash</button>
+                                <button type="button" id="btnTirarFotoRosto" class="btn-camera" disabled>📸 Tirar Foto</button>
+                                <button type="button" id="btnFecharCameraRosto" class="btn-camera danger" style="display:none;">❌ Fechar</button>
+                            </div>
+                            <div id="fotoRostoStatus" class="doc-status info" style="display:none;"></div>
+                            <input type="hidden" id="fotoRostoData" value="">
                         </div>
 
                         <button type="submit" class="btn-submit" id="btnRegistar">✅ Registar Permuta</button>
@@ -443,415 +403,365 @@
             <div class="card">
                 <h2>🔍 Procurar Permutas</h2>
                 <div class="search-box">
-                    <label for="filtroProvincia">1. Selecione a Província de Destino:</label>
+                    <label>Província de Destino:</label>
                     <select id="filtroProvincia" onchange="filtrarLista()">
-                        <option value="" disabled selected>Selecione para ver resultados...</option>
+                        <option value="" disabled selected>Selecione...</option>
                     </select>
-                    <p style="font-size: 0.8em; margin-top: 5px; color: #666;">
-                        *Mostraremos apenas professores que querem ir para esta província.
-                    </p>
                 </div>
                 <div id="resultadosArea">
-                    <div class="no-results">
-                        👆 Selecione uma província acima para ver os pedidos disponíveis.
-                    </div>
+                    <div class="no-results">👆 Selecione uma província acima</div>
                 </div>
-                <button class="reset-btn" onclick="limparDados()">Resetar Sistema (Apagar Tudo)</button>
+                <button class="reset-btn" onclick="limparDados()">Resetar Sistema</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Dados geográficos
-        const provinciasMoz = [
-            "Maputo Cidade", "Maputo Província", "Gaza", "Inhambane", 
-            "Sofala", "Manica", "Tete", "Zambézia", "Nampula", 
-            "Cabo Delgado", "Niassa"
-        ];
-        
+        // Distritos completos
+        const provinciasMoz = ["Maputo Cidade", "Maputo Província", "Gaza", "Inhambane", "Sofala", "Manica", "Tete", "Zambézia", "Nampula", "Cabo Delgado", "Niassa"];
         const distritosPorProvincia = {
             "Maputo Cidade": ["Maputo Cidade"],
             "Maputo Província": ["Matola", "Boane", "Marracuene", "Manhiça", "Magude", "Moamba", "Namaacha", "Matutuíne"],
-            "Gaza": ["Xai-Xai", "Chokwé", "Bilene", "Chibuto", "Guijá", "Mapai", "Mabalane", "Manjacaze", "Massangena"],
-            "Inhambane": ["Inhambane", "Maxixe", "Vilanculos", "Massinga", "Zavala", "Jangamo", "Morrumbene", "Panda", "Funhalouro", "Inharrime", "Mabote"],
+            "Gaza": ["Xai-Xai", "Chokwé", "Bilene", "Chibuto", "Guijá", "Mapai", "Mabalane", "Manjacaze", "Massangena", "Chicualacuala"],
+            "Inhambane": ["Inhambane", "Maxixe", "Vilanculos", "Massinga", "Zavala", "Jangamo", "Morrumbene", "Panda", "Funhalouro", "Inharrime", "Mabote", "Govuro"],
             "Sofala": ["Beira", "Dondo", "Gorongosa", "Búzi", "Machanga", "Muanza", "Nhamatanda", "Chemba", "Caia", "Marromeu", "Cheringoma"],
-            "Manica": ["Chimoio", "Manica", "Sussundenga", "Macossa", "Gondola", "Mossurize", "Báruè", "Machaze"],
+            "Manica": ["Chimoio", "Manica", "Sussundenga", "Macossa", "Gondola", "Mossurize", "Báruè", "Machaze", "Tambara"],
             "Tete": ["Tete", "Moatize", "Cahora Bassa", "Changara", "Macanga", "Marávia", "Tsangano", "Zumbo", "Chiuta", "Dôa", "Magoé", "Mutarara"],
-            "Zambézia": ["Quelimane", "Chinde", "Maganja da Costa", "Morrumbala", "Alto Molócuè", "Gile", "Milange", "Nicoadala", "Gurué", "Mopeia", "Namacurra", "Pebane"],
-            "Nampula": ["Nampula", "Ilha de Moçambique", "Nacala", "Mossuril", "Ribaué", "Muecate", "Monapo", "Lalaua", "Mecubúri", "Memba", "Eráti", "Malema", "Nacarôa"],
-            "Cabo Delgado": ["Pemba", "Montepuez", "Mocímboa da Praia", "Palma", "Mueda", "Balama", "Chiure", "Metuge", "Namuno", "Meluco", "Ancuabe", "Ibo"],
-            "Niassa": ["Lichinga", "Cuamba", "Mandimba", "Majune", "Sanga", "Mavago", "Mecula", "Marrupa", "Metarica", "Muembe", "Ngauma"]
+            "Zambézia": ["Quelimane", "Chinde", "Maganja da Costa", "Morrumbala", "Alto Molócuè", "Gile", "Milange", "Nicoadala", "Gurué", "Mopeia", "Namacurra", "Pebane", "Inhassunge", "Mocuba"],
+            "Nampula": ["Nampula", "Ilha de Moçambique", "Nacala", "Mossuril", "Ribaué", "Muecate", "Monapo", "Lalaua", "Mecubúri", "Memba", "Eráti", "Malema", "Nacarôa", "Angoche", "Moma"],
+            "Cabo Delgado": ["Pemba", "Montepuez", "Mocímboa da Praia", "Palma", "Mueda", "Balama", "Chiure", "Metuge", "Namuno", "Meluco", "Ancuabe", "Ibo", "Macomia"],
+            "Niassa": ["Lichinga", "Cuamba", "Mandimba", "Majune", "Sanga", "Mavago", "Mecula", "Marrupa", "Metarica", "Muembe", "Ngauma", "Lago"]
         };
 
         let professores = JSON.parse(localStorage.getItem('professoresDB')) || [];
         if (professores.length === 0) {
             professores = [
-                { nome: "Carlos Mondlane", nivel: "DN2", provAtual: "Maputo Província", distritoAtual: "Matola", tipoLocal: "Dentro da Vila", distancia: 0, provDestino: "Sofala", distDestino: "Beira", condicoes: "-", telefone: "841112233" },
-                { nome: "Ana Sitoe", nivel: "DN1", provAtual: "Inhambane", distritoAtual: "Maxixe", tipoLocal: "Fora da Vila", distancia: 50, provDestino: "Maputo Cidade", distDestino: "Maputo Cidade", condicoes: "-", telefone: "859988776" },
-                { nome: "João Macheve", nivel: "DN2", provAtual: "Tete", distritoAtual: "Tete", tipoLocal: "Dentro da Vila", distancia: 0, provDestino: "Maputo Província", distDestino: "Matola", condicoes: "Precisa de casa", telefone: "820000000" }
+                { nome: "Carlos Mondlane", nivel: "DN2", tipoNomeacao: "Provisória", provAtual: "Maputo Província", distritoAtual: "Matola", tipoLocal: "Dentro da Vila", distancia: 0, provDestino: "Sofala", distDestino: "Beira", condicoes: "-", telefone: "841112233", fotoRosto: "" },
+                { nome: "Ana Sitoe", nivel: "DN1", tipoNomeacao: "Definitiva", provAtual: "Inhambane", distritoAtual: "Maxixe", tipoLocal: "Fora da Vila", distancia: 50, provDestino: "Maputo Cidade", distDestino: "Maputo Cidade", condicoes: "-", telefone: "859988776", fotoRosto: "" }
             ];
             localStorage.setItem('professoresDB', JSON.stringify(professores));
         }
 
-        let video = document.getElementById('videoCamera');
-        let canvas = document.getElementById('canvasCapture');
-        let imgPreview = document.getElementById('imgPreview');
-        let stream = null;
+        let streamDoc = null, streamRosto = null;
+        let currentFacing = "user";
         let documentoValidado = false;
-        let flashEnabled = false;
-        let currentTrack = null;
+        let fotoRostoCapturada = false;
+        let tipoNomeacaoSelecionado = "";
 
         function showView(viewId) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
-            
             if(viewId === 'view-list') {
-                // Carregar províncias no filtro
-                const filtroSelect = document.getElementById('filtroProvincia');
-                filtroSelect.innerHTML = '<option value="" disabled selected>Selecione para ver resultados...</option>';
-                provinciasMoz.forEach(prov => {
-                    filtroSelect.add(new Option(prov, prov));
-                });
-                document.getElementById('resultadosArea').innerHTML = '<div class="no-results">👆 Selecione uma província acima para ver os pedidos disponíveis.</div>';
+                const filtro = document.getElementById('filtroProvincia');
+                filtro.innerHTML = '<option value="" disabled selected>Selecione...</option>';
+                provinciasMoz.forEach(p => filtro.add(new Option(p, p)));
+                filtrarLista();
             } else if (viewId === 'view-form') {
-                resetForm();
-                fecharCameraCompleta();
-                documentoValidado = false;
-                document.getElementById('validacaoDocMsg').style.display = 'none';
-                imgPreview.style.display = 'none';
-                document.getElementById('etapaRestante').classList.add('hidden');
-                document.getElementById('etapaValidacao').style.display = 'block';
+                resetFormulario();
             }
         }
 
-        function fecharCameraEFecharForm() {
-            fecharCameraCompleta();
+        function resetFormulario() {
+            documentoValidado = false;
+            fotoRostoCapturada = false;
+            tipoNomeacaoSelecionado = "";
+            document.getElementById('tipoNomeacao').value = "";
+            document.getElementById('btnProvisoria').classList.remove('selected');
+            document.getElementById('btnDefinitiva').classList.remove('selected');
+            document.getElementById('etapaRestante').classList.add('hidden');
+            document.getElementById('etapaValidacao').style.display = 'block';
+            document.getElementById('validacaoDocMsg').style.display = 'none';
+            document.getElementById('fotoRostoStatus').style.display = 'none';
+            document.getElementById('imgRostoPreview').style.display = 'none';
+            document.getElementById('imgDocPreview').style.display = 'none';
+            fecharTodasCameras();
+        }
+
+        function fecharTodasCameras() {
+            if(streamDoc) {
+                streamDoc.getTracks().forEach(t => t.stop());
+                streamDoc = null;
+            }
+            if(streamRosto) {
+                streamRosto.getTracks().forEach(t => t.stop());
+                streamRosto = null;
+            }
+            const videoDoc = document.getElementById('videoDoc');
+            const videoRosto = document.getElementById('videoRosto');
+            if(videoDoc) videoDoc.style.display = 'none';
+            if(videoRosto) videoRosto.style.display = 'none';
+            document.getElementById('btnAbrirCameraDoc').style.display = 'inline-flex';
+            document.getElementById('btnTirarFotoDoc').disabled = true;
+            document.getElementById('btnFecharCameraDoc').style.display = 'none';
+            document.getElementById('btnAbrirCameraRosto').style.display = 'inline-flex';
+            document.getElementById('btnTirarFotoRosto').disabled = true;
+            document.getElementById('btnFecharCameraRosto').style.display = 'none';
+            document.getElementById('btnFlashDoc').disabled = true;
+            document.getElementById('btnFlashRosto').disabled = true;
+        }
+
+        function fecharTodasCamerasEFechar() {
+            fecharTodasCameras();
             showView('view-home');
         }
 
-        function fecharCameraCompleta() {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                stream = null;
-                currentTrack = null;
+        async function abrirCamera(tipo, facingMode = "environment") {
+            const videoElement = tipo === 'doc' ? document.getElementById('videoDoc') : document.getElementById('videoRosto');
+            const loadingElement = tipo === 'doc' ? document.getElementById('cameraDocLoading') : document.getElementById('cameraRostoLoading');
+            const btnAbrir = tipo === 'doc' ? document.getElementById('btnAbrirCameraDoc') : document.getElementById('btnAbrirCameraRosto');
+            const btnTirar = tipo === 'doc' ? document.getElementById('btnTirarFotoDoc') : document.getElementById('btnTirarFotoRosto');
+            const btnFechar = tipo === 'doc' ? document.getElementById('btnFecharCameraDoc') : document.getElementById('btnFecharCameraRosto');
+            const btnFlash = tipo === 'doc' ? document.getElementById('btnFlashDoc') : document.getElementById('btnFlashRosto');
+            
+            // Fechar stream existente
+            if(tipo === 'doc' && streamDoc) {
+                streamDoc.getTracks().forEach(t => t.stop());
+                streamDoc = null;
             }
-            video.style.display = 'none';
-            video.srcObject = null;
-            const btnAbrir = document.getElementById('btnAbrirCamera');
-            const btnTirar = document.getElementById('btnTirarFoto');
-            const btnFechar = document.getElementById('btnFecharCamera');
-            if (btnAbrir) btnAbrir.style.display = 'inline-flex';
-            if (btnTirar) btnTirar.disabled = true;
-            if (btnFechar) btnFechar.style.display = 'none';
-            const btnFlash = document.getElementById('btnFlash');
-            if (btnFlash) btnFlash.disabled = true;
-            flashEnabled = false;
-        }
-
-        async function abrirCamera() {
+            if(tipo === 'rosto' && streamRosto) {
+                streamRosto.getTracks().forEach(t => t.stop());
+                streamRosto = null;
+            }
+            
+            loadingElement.style.display = 'block';
+            videoElement.style.display = 'none';
+            
             try {
-                if (stream) fecharCameraCompleta();
+                const constraints = {
+                    video: {
+                        facingMode: { exact: facingMode },
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                };
                 
-                const constraints = { video: { facingMode: "environment" } };
-                stream = await navigator.mediaDevices.getUserMedia(constraints);
-                currentTrack = stream.getVideoTracks()[0];
-                video.srcObject = stream;
-                video.style.display = 'block';
-                await video.play();
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 
-                const btnAbrir = document.getElementById('btnAbrirCamera');
-                const btnTirar = document.getElementById('btnTirarFoto');
-                const btnFechar = document.getElementById('btnFecharCamera');
-                if (btnAbrir) btnAbrir.style.display = 'none';
-                if (btnTirar) btnTirar.disabled = false;
-                if (btnFechar) btnFechar.style.display = 'inline-flex';
-                
-                const btnFlash = document.getElementById('btnFlash');
-                if (currentTrack && currentTrack.getCapabilities && currentTrack.getCapabilities().torch) {
-                    if (btnFlash) btnFlash.disabled = false;
+                if(tipo === 'doc') {
+                    streamDoc = stream;
                 } else {
-                    if (btnFlash) btnFlash.disabled = true;
+                    streamRosto = stream;
                 }
                 
-                const statusDiv = document.getElementById('validacaoDocMsg');
-                if (statusDiv) statusDiv.style.display = 'none';
-                if (imgPreview) imgPreview.style.display = 'none';
-            } catch (err) {
-                alert("Erro ao acessar a câmera. Verifique permissões e tente novamente.");
-                console.error(err);
-            }
-        }
-
-        function toggleFlash() {
-            if (!currentTrack) return;
-            try {
-                flashEnabled = !flashEnabled;
-                currentTrack.applyConstraints({
-                    advanced: [{ torch: flashEnabled }]
-                });
-                const btnFlash = document.getElementById('btnFlash');
-                if (btnFlash) {
-                    btnFlash.style.background = flashEnabled ? '#f1c40f' : '#2c3e50';
-                    btnFlash.style.color = flashEnabled ? '#2c3e50' : 'white';
+                videoElement.srcObject = stream;
+                videoElement.style.display = 'block';
+                videoElement.classList.remove('front', 'back');
+                videoElement.classList.add(facingMode === 'user' ? 'front' : 'back');
+                loadingElement.style.display = 'none';
+                
+                btnAbrir.style.display = 'none';
+                btnTirar.disabled = false;
+                btnFechar.style.display = 'inline-flex';
+                
+                // Verificar suporte a flash
+                const track = stream.getVideoTracks()[0];
+                const capabilities = track.getCapabilities();
+                if(capabilities && capabilities.torch) {
+                    btnFlash.disabled = false;
+                } else {
+                    btnFlash.disabled = true;
                 }
-            } catch (err) {
-                alert("Flash não suportado neste dispositivo");
+                
+                await videoElement.play();
+                
+            } catch(err) {
+                loadingElement.style.display = 'none';
+                console.error('Erro ao acessar câmera:', err);
+                alert('Erro ao acessar a câmera. Verifique se deu permissão e tente novamente.\n\n' + (err.message || ''));
             }
         }
 
-        function extrairNomeDoTexto(texto, nomeDigitado) {
-            const nomeLower = nomeDigitado.toLowerCase().trim();
-            const textoLower = texto.toLowerCase();
-            
-            if (textoLower.includes(nomeLower)) {
-                return nomeDigitado;
-            }
-            
-            const palavrasNome = nomeLower.split(/\s+/);
-            let matches = 0;
-            for (let palavra of palavrasNome) {
-                if (palavra.length > 3 && textoLower.includes(palavra)) {
-                    matches++;
-                }
-            }
-            if (matches >= Math.min(2, palavrasNome.length)) {
-                return nomeDigitado;
-            }
-            return null;
-        }
-
-        async function capturarFotoEValidar() {
-            if (!stream || !video.videoWidth) {
-                alert("A câmera não está activa. Abra a câmera primeiro.");
+        function toggleFlash(tipo) {
+            const stream = tipo === 'doc' ? streamDoc : streamRosto;
+            if(!stream) return;
+            const track = stream.getVideoTracks()[0];
+            const capabilities = track.getCapabilities();
+            if(!capabilities.torch) {
+                alert('Flash não suportado nesta câmera');
                 return;
             }
-            const nomeDigitado = document.getElementById('nome').value.trim();
-            if (nomeDigitado === "") {
-                alert("Preencha o Nome Completo antes de capturar o documento.");
-                return;
-            }
+            const newTorch = !track.getSettings().torch;
+            track.applyConstraints({ advanced: [{ torch: newTorch }] });
+        }
 
+        function validarBI(textoOCR) {
+            const texto = textoOCR.toUpperCase();
+            const temRepublica = texto.includes("REPÚBLICA DE MOÇAMBIQUE") || texto.includes("REPUBLICA DE MOCAMBIQUE");
+            const temBilhete = texto.includes("BILHETE DE IDENTIDADE");
+            const temNumero = /N[º°]?\s*:?\s*[0-9A-Z]{8,}/i.test(texto);
+            const temNome = texto.includes("NOME") || texto.includes("NAME");
+            const temDataNasc = texto.includes("DATA DE NASCIMENTO") || texto.includes("DATE OF BIRTH");
+            const numeroMatch = texto.match(/[0-9]{10,15}[A-Z]/i);
+            const isValid = temRepublica && temBilhete && temNumero && temNome && temDataNasc;
+            return { isValid, detalhes: { temRepublica, temBilhete, temNumero, temNome, temDataNasc, numero: numeroMatch ? numeroMatch[0] : null } };
+        }
+
+        async function capturarDocumento() {
+            if(!streamDoc) { alert("Abra a câmera primeiro clicando em 'Abrir Câmera'"); return; }
+            const nomeDigitado = document.getElementById('nome').value.trim().toUpperCase();
+            if(!nomeDigitado) { alert("Preencha o nome completo"); return; }
+            
+            const video = document.getElementById('videoDoc');
+            const canvas = document.getElementById('canvasDoc');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageDataUrl = canvas.toDataURL('image/jpeg');
-            imgPreview.src = imageDataUrl;
-            imgPreview.style.display = 'block';
+            const imgData = canvas.toDataURL('image/jpeg');
+            document.getElementById('imgDocPreview').src = imgData;
+            document.getElementById('imgDocPreview').style.display = 'block';
             video.style.display = 'none';
             
             const statusDiv = document.getElementById('validacaoDocMsg');
             const ocrProgress = document.getElementById('ocrProgress');
             ocrProgress.style.display = 'block';
-            ocrProgress.innerHTML = '🔍 A processar imagem e extrair texto do documento... Aguarde...';
-            statusDiv.style.display = 'none';
+            ocrProgress.innerHTML = '🔍 Processando B.I. e validando formato oficial...';
             
             try {
-                const blob = await (await fetch(imageDataUrl)).blob();
-                
-                const { data: { text } } = await Tesseract.recognize(
-                    blob,
-                    'por',
-                    {
-                        logger: m => {
-                            if (m.status === 'recognizing text') {
-                                ocrProgress.innerHTML = `📖 Lendo documento: ${Math.round(m.progress * 100)}%`;
-                            }
-                        }
-                    }
-                );
-                
+                const blob = await (await fetch(imgData)).blob();
+                const { data: { text } } = await Tesseract.recognize(blob, 'por');
                 ocrProgress.style.display = 'none';
                 
-                const nomeEncontrado = extrairNomeDoTexto(text, nomeDigitado);
+                const validacao = validarBI(text);
+                const nomeNoDocumento = text.toUpperCase().includes(nomeDigitado);
                 
-                if (nomeEncontrado) {
+                if(validacao.isValid && nomeNoDocumento) {
                     documentoValidado = true;
                     statusDiv.className = 'doc-status success';
-                    statusDiv.innerHTML = `✅ VALIDAÇÃO APROVADA!<br>Nome detectado no documento: "${nomeEncontrado.toUpperCase()}"<br>Corresponde ao nome registado.`;
+                    statusDiv.innerHTML = `✅ B.I. VÁLIDO!<br>Formato oficial moçambicano reconhecido.<br>Nome confirmado: ${nomeDigitado}<br>Nº: ${validacao.detalhes.numero || 'Detectado'}`;
                     statusDiv.style.display = 'block';
-                    
                     document.getElementById('etapaRestante').classList.remove('hidden');
                     document.getElementById('etapaValidacao').style.display = 'none';
-                    
-                    fecharCameraCompleta();
+                    fecharTodasCameras();
                 } else {
-                    documentoValidado = false;
+                    let erros = [];
+                    if(!validacao.isValid) erros.push("Formato de B.I. não reconhecido");
+                    if(!nomeNoDocumento) erros.push(`Nome "${nomeDigitado}" não encontrado`);
                     statusDiv.className = 'doc-status error';
-                    const primeirasPalavras = text.substring(0, 100).replace(/\n/g, ' ');
-                    statusDiv.innerHTML = `❌ VALIDAÇÃO REPROVADA!<br>Nome digitado: "${nomeDigitado}"<br>Não foi encontrado no documento.<br><br>Texto detectado: "${primeirasPalavras}..."<br><br>Certifique-se que o documento está bem iluminado e visível.`;
+                    statusDiv.innerHTML = `❌ VALIDAÇÃO REPROVADA!<br>• ${erros.join('<br>• ')}<br><br>Certifique-se de que:<br>✓ É um B.I. de Moçambique<br>✓ A foto está nítida<br>✓ O documento está bem iluminado`;
                     statusDiv.style.display = 'block';
+                    documentoValidado = false;
                 }
-            } catch (ocrError) {
-                console.error("OCR error:", ocrError);
+            } catch(ocrError) {
                 ocrProgress.style.display = 'none';
                 statusDiv.className = 'doc-status error';
-                statusDiv.innerHTML = `❌ ERRO NA LEITURA DO DOCUMENTO!<br>Não foi possível extrair o texto. Tente tirar uma foto mais nítida e com boa iluminação.`;
+                statusDiv.innerHTML = `❌ Erro na leitura. Tente uma foto mais nítida.`;
                 statusDiv.style.display = 'block';
-                documentoValidado = false;
             }
         }
 
-        function resetForm() {
-            const form = document.getElementById('permutaForm');
-            if (form) form.reset();
-            
-            const distritoAtual = document.getElementById('distritoAtual');
-            if (distritoAtual) {
-                distritoAtual.disabled = true;
-                distritoAtual.innerHTML = '<option value="" disabled selected>Selecione a Província primeiro...</option>';
-            }
-            
-            const radioDentro = document.getElementById('radioDentro');
-            const radioFora = document.getElementById('radioFora');
-            if (radioDentro) radioDentro.disabled = true;
-            if (radioFora) radioFora.disabled = true;
-            
-            const distanciaGroup = document.getElementById('distanciaGroup');
-            if (distanciaGroup) distanciaGroup.classList.add('hidden');
-            
-            const distDestino = document.getElementById('distDestino');
-            if (distDestino) {
-                distDestino.disabled = true;
-                distDestino.innerHTML = '<option value="" disabled selected>Selecione a Província primeiro...</option>';
-            }
-            
-            documentoValidado = false;
-            
-            const validacaoMsg = document.getElementById('validacaoDocMsg');
-            if (validacaoMsg) validacaoMsg.style.display = 'none';
-            
-            const ocrProgress = document.getElementById('ocrProgress');
-            if (ocrProgress) ocrProgress.style.display = 'none';
-            
-            if (imgPreview) imgPreview.style.display = 'none';
-            
-            fecharCameraCompleta();
-            
-            const etapaRestante = document.getElementById('etapaRestante');
-            const etapaValidacao = document.getElementById('etapaValidacao');
-            if (etapaRestante) etapaRestante.classList.add('hidden');
-            if (etapaValidacao) etapaValidacao.style.display = 'block';
+        async function capturarRosto() {
+            if(!streamRosto) { alert("Abra a câmera primeiro clicando em 'Abrir Câmera'"); return; }
+            const video = document.getElementById('videoRosto');
+            const canvas = document.getElementById('canvasRosto');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imgData = canvas.toDataURL('image/jpeg');
+            document.getElementById('imgRostoPreview').src = imgData;
+            document.getElementById('imgRostoPreview').style.display = 'block';
+            document.getElementById('fotoRostoData').value = imgData;
+            fotoRostoCapturada = true;
+            document.getElementById('fotoRostoStatus').className = 'doc-status success';
+            document.getElementById('fotoRostoStatus').innerHTML = '✅ Foto capturada com sucesso!';
+            document.getElementById('fotoRostoStatus').style.display = 'block';
+            video.style.display = 'none';
+            document.getElementById('btnFecharCameraRosto').style.display = 'none';
         }
 
-        function inicializarSelects() {
-            const selectAtual = document.getElementById('provAtual');
-            const selectDestino = document.getElementById('provDestino');
-            
-            if (selectAtual) {
-                selectAtual.innerHTML = '<option value="" disabled selected>Selecione a Província...</option>';
-                provinciasMoz.forEach(prov => {
-                    selectAtual.add(new Option(prov, prov));
-                });
-            }
-            
-            if (selectDestino) {
-                selectDestino.innerHTML = '<option value="" disabled selected>Selecione a Província...</option>';
-                provinciasMoz.forEach(prov => {
-                    selectDestino.add(new Option(prov, prov));
-                });
-            }
+        function trocarCamera() {
+            currentFacing = currentFacing === "environment" ? "user" : "environment";
+            if(streamRosto) streamRosto.getTracks().forEach(t => t.stop());
+            abrirCamera('rosto', currentFacing);
+        }
+
+        function toggleDistancia() {
+            const fora = document.getElementById('radioFora').checked;
+            document.getElementById('distanciaGroup').classList.toggle('hidden', !fora);
         }
 
         function carregarDistritosAtuais() {
             const prov = document.getElementById('provAtual').value;
-            const selectDist = document.getElementById('distritoAtual');
-            
-            selectDist.innerHTML = '<option value="" disabled selected>Selecione o Distrito...</option>';
-            selectDist.disabled = false;
-            
-            const radioDentro = document.getElementById('radioDentro');
-            const radioFora = document.getElementById('radioFora');
-            if (radioDentro) radioDentro.disabled = true;
-            if (radioFora) radioFora.disabled = true;
-            
-            if (prov && distritosPorProvincia[prov]) {
-                distritosPorProvincia[prov].forEach(d => {
-                    selectDist.add(new Option(d, d));
-                });
+            const select = document.getElementById('distritoAtual');
+            select.innerHTML = '<option value="" disabled selected>Selecione...</option>';
+            if(prov && distritosPorProvincia[prov]) {
+                select.disabled = false;
+                distritosPorProvincia[prov].forEach(d => select.add(new Option(d, d)));
             }
         }
-        
-        function habilitarLocalizacao() {
-            const radioDentro = document.getElementById('radioDentro');
-            const radioFora = document.getElementById('radioFora');
-            if (radioDentro) radioDentro.disabled = false;
-            if (radioFora) radioFora.disabled = false;
-        }
-        
-        function toggleDistancia() {
-            const radioFora = document.getElementById('radioFora');
-            const distanciaGroup = document.getElementById('distanciaGroup');
-            if (radioFora && radioFora.checked) {
-                distanciaGroup.classList.remove('hidden');
-            } else if (distanciaGroup) {
-                distanciaGroup.classList.add('hidden');
-            }
-        }
-        
+
         function carregarDistritosDestino() {
             const prov = document.getElementById('provDestino').value;
-            const selectDist = document.getElementById('distDestino');
-            
-            selectDist.innerHTML = '<option value="" disabled selected>Selecione o Distrito...</option>';
-            
-            if (prov && distritosPorProvincia[prov]) {
-                selectDist.disabled = false;
-                distritosPorProvincia[prov].forEach(d => {
-                    selectDist.add(new Option(d, d));
-                });
-            } else {
-                selectDist.disabled = true;
+            const select = document.getElementById('distDestino');
+            select.innerHTML = '<option value="" disabled selected>Selecione...</option>';
+            if(prov && distritosPorProvincia[prov]) {
+                select.disabled = false;
+                distritosPorProvincia[prov].forEach(d => select.add(new Option(d, d)));
             }
         }
-        
+
         function filtrarLista() {
             const prov = document.getElementById('filtroProvincia').value;
             const area = document.getElementById('resultadosArea');
-            
-            if (!prov) {
-                area.innerHTML = '<div class="no-results">👆 Selecione uma província acima para ver os pedidos disponíveis.</div>';
-                return;
-            }
-            
+            if(!prov) return;
             const filtrados = professores.filter(p => p.provDestino === prov);
-            
-            if (filtrados.length === 0) {
-                area.innerHTML = `<div class="no-results"><h3>😕 Sem resultados</h3><p>Nenhum professor quer ir para ${prov}.</p></div>`;
-                return;
-            }
-            
+            if(filtrados.length === 0) { area.innerHTML = `<div class="no-results">Nenhum professor quer ir para ${prov}</div>`; return; }
             let html = `<h3>📋 Professores interessados em ${prov}:</h3>`;
             filtrados.forEach(p => {
-                let localInfo = `${p.distritoAtual} (${p.tipoLocal})`;
-                if(p.tipoLocal === 'Fora da Vila') localInfo += ` - ${p.distancia}km`;
+                const tagNomeacao = p.tipoNomeacao === "Provisória" ? 'tag-provisoria' : 'tag-definitiva';
                 html += `<div class="teacher-item">
-                    <h3>${p.nome} <span class="tag">${p.nivel}</span></h3>
-                    <div><strong>📍 Actualmente:</strong> ${p.provAtual} > ${localInfo}</div>
-                    <div><strong>🚀 Quer ir para:</strong> ${p.distDestino}</div>
-                    <div><em>Obs: ${p.condicoes || 'Sem condições'}</em></div>
-                    <div style="margin-top:10px;"><strong>📞 ${p.telefone}</strong></div>
+                    <div class="teacher-header">
+                        ${p.fotoRosto ? `<img src="${p.fotoRosto}" class="teacher-photo" alt="foto">` : '<div class="teacher-photo" style="background:#ccc; display:flex; align-items:center; justify-content:center;">📷</div>'}
+                        <div><h3 style="margin:0">${p.nome} <span class="tag">${p.nivel}</span> <span class="tag ${tagNomeacao}">${p.tipoNomeacao}</span></h3></div>
+                    </div>
+                    <div><strong>📍 Actual:</strong> ${p.provAtual} > ${p.distritoAtual} (${p.tipoLocal}${p.tipoLocal === 'Fora da Vila' ? ` ${p.distancia}km` : ''})</div>
+                    <div><strong>🚀 Destino:</strong> ${p.distDestino}</div>
+                    <div><em>${p.condicoes || 'Sem condições'}</em></div>
+                    <div><strong>📞 ${p.telefone}</strong></div>
                 </div>`;
             });
             area.innerHTML = html;
         }
 
+        // Event listeners
+        document.getElementById('btnProvisoria').onclick = () => {
+            tipoNomeacaoSelecionado = "Provisória";
+            document.getElementById('btnProvisoria').classList.add('selected');
+            document.getElementById('btnDefinitiva').classList.remove('selected');
+            document.getElementById('tipoNomeacao').value = "Provisória";
+        };
+        document.getElementById('btnDefinitiva').onclick = () => {
+            tipoNomeacaoSelecionado = "Definitiva";
+            document.getElementById('btnDefinitiva').classList.add('selected');
+            document.getElementById('btnProvisoria').classList.remove('selected');
+            document.getElementById('tipoNomeacao').value = "Definitiva";
+        };
+
+        document.getElementById('btnAbrirCameraDoc').onclick = () => abrirCamera('doc', 'environment');
+        document.getElementById('btnTirarFotoDoc').onclick = capturarDocumento;
+        document.getElementById('btnFecharCameraDoc').onclick = () => fecharTodasCameras();
+        document.getElementById('btnFlashDoc').onclick = () => toggleFlash('doc');
+        
+        document.getElementById('btnAbrirCameraRosto').onclick = () => abrirCamera('rosto', 'user');
+        document.getElementById('btnTirarFotoRosto').onclick = capturarRosto;
+        document.getElementById('btnFecharCameraRosto').onclick = () => fecharTodasCameras();
+        document.getElementById('btnFlashRosto').onclick = () => toggleFlash('rosto');
+        document.getElementById('btnTrocarCamera').onclick = trocarCamera;
+
         document.getElementById('permutaForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            if (!documentoValidado) {
-                alert("⚠️ A validação do documento é obrigatória! Capture o documento e aguarde a aprovação.");
-                return;
-            }
+            if(!documentoValidado) { alert("Valide o B.I. primeiro"); return; }
+            if(!tipoNomeacaoSelecionado) { alert("Selecione o tipo de nomeação"); return; }
+            if(!fotoRostoCapturada) { alert("Tire uma foto do rosto"); return; }
             
             const tipoLocal = document.querySelector('input[name="localizacao"]:checked');
-            if (!tipoLocal) {
-                alert("Selecione a localização da escola.");
-                return;
-            }
+            if(!tipoLocal) { alert("Selecione a localização da escola"); return; }
             
             const novo = {
                 nome: document.getElementById('nome').value,
                 nivel: document.getElementById('nivel').value,
+                tipoNomeacao: tipoNomeacaoSelecionado,
                 provAtual: document.getElementById('provAtual').value,
                 distritoAtual: document.getElementById('distritoAtual').value,
                 tipoLocal: tipoLocal.value,
@@ -859,39 +769,29 @@
                 provDestino: document.getElementById('provDestino').value,
                 distDestino: document.getElementById('distDestino').value,
                 condicoes: document.getElementById('condicoes').value,
-                telefone: document.getElementById('telefone').value
+                telefone: document.getElementById('telefone').value,
+                fotoRosto: document.getElementById('fotoRostoData').value
             };
             
-            const matches = professores.filter(p => p.provDestino === novo.provAtual && p.nivel === novo.nivel);
+            const matches = professores.filter(p => p.provDestino === novo.provAtual && p.nivel === novo.nivel && p.tipoNomeacao === novo.tipoNomeacao);
             professores.push(novo);
             localStorage.setItem('professoresDB', JSON.stringify(professores));
             
-            if (matches.length > 0) {
-                let msg = "✅ PERMUTA POSSÍVEL!\nEncontrámos " + matches.length + " compatível(eis):\n";
-                matches.forEach(m => msg += `👤 ${m.nome} (${m.nivel}) → ${m.provDestino} / 📞 ${m.telefone}\n`);
+            if(matches.length > 0) {
+                let msg = `✅ PERMUTA POSSÍVEL! Encontrámos ${matches.length} professor(es) com ${novo.nivel} - ${novo.tipoNomeacao}:\n`;
+                matches.forEach(m => msg += `👤 ${m.nome} 📞 ${m.telefone}\n`);
                 alert(msg);
             } else {
-                alert("Registo efetuado! ⚠️ Ainda não há ninguém com nível compatível para " + novo.provAtual);
+                alert(`Registo efetuado! ⚠️ Ainda não há ninguém com ${novo.nivel} - ${novo.tipoNomeacao} para ${novo.provAtual}`);
             }
-            
-            fecharCameraCompleta();
             showView('view-list');
         });
+
+        function limparDados() { if(confirm("Apagar todos os dados?")) { localStorage.removeItem('professoresDB'); location.reload(); } }
         
-        function limparDados() {
-            if(confirm("Apagar todos os dados?")) {
-                localStorage.removeItem('professoresDB');
-                location.reload();
-            }
-        }
-        
-        // Event listeners
-        document.getElementById('btnAbrirCamera').onclick = abrirCamera;
-        document.getElementById('btnTirarFoto').onclick = capturarFotoEValidar;
-        document.getElementById('btnFecharCamera').onclick = fecharCameraCompleta;
-        document.getElementById('btnFlash').onclick = toggleFlash;
-        
-        inicializarSelects();
+        const selectAtual = document.getElementById('provAtual');
+        const selectDestino = document.getElementById('provDestino');
+        provinciasMoz.forEach(p => { selectAtual.add(new Option(p, p)); selectDestino.add(new Option(p, p)); });
     </script>
 </body>
 </html>
