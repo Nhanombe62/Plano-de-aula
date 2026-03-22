@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Permuta de Professores - Moçambique | Validação com Documento</title>
+    <!-- Tesseract.js para OCR real -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
     <style>
         :root {
             --primary: #009688;
@@ -13,6 +15,7 @@
             --light: #f4f7f6;
             --success: #2ecc71;
             --danger: #e74c3c;
+            --warning: #f1c40f;
         }
 
         body {
@@ -152,7 +155,6 @@
             border-radius: 12px;
             margin: 0 auto 15px;
             background: #1e1e1e;
-            transform: scaleX(-1);
             display: none;
         }
         .camera-preview {
@@ -183,6 +185,14 @@
         .btn-camera.danger {
             background: var(--accent);
         }
+        .btn-camera.warning {
+            background: var(--warning);
+            color: #2c3e50;
+        }
+        .btn-camera:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         .doc-status {
             margin-top: 15px;
             padding: 12px;
@@ -205,6 +215,12 @@
         .doc-status.info {
             background: #d6eaf8;
             color: #1f618d;
+            display: block;
+        }
+        .doc-status.loading {
+            background: #fef9e7;
+            color: #b7950b;
+            border-left: 5px solid var(--warning);
             display: block;
         }
         .flex-btns {
@@ -261,13 +277,18 @@
         }
         .hidden { display: none; }
         hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+        .ocr-progress {
+            font-size: 0.85rem;
+            margin-top: 8px;
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
 
     <header>
         <h1>🇲🇿 Portal de Permuta</h1>
-        <p>Validação por Captura de Documento (BI/Passaporte/Carta Condução)</p>
+        <p>Validação com OCR - Leitura real do documento (BI/Passaporte/Carta Condução)</p>
     </header>
 
     <div class="container">
@@ -293,23 +314,21 @@
                         <input type="text" id="nome" required placeholder="Ex: João Manuel Alberto">
                     </div>
 
-                    <!-- ÁREA DE CAPTURA DO DOCUMENTO -->
                     <div class="camera-section">
                         <h3 style="margin:0 0 12px 0;">📸 Captura de Documento Oficial</h3>
-                        <p style="font-size:0.85rem; color:#555;">Tire uma foto do <strong>B.I, Passaporte, Espera BI ou Carta de Condução</strong>.<br>O sistema lerá o nome no documento e comparará com o nome preenchido.</p>
+                        <p style="font-size:0.85rem; color:#555;">Tire uma foto do <strong>B.I, Passaporte, Espera BI ou Carta de Condução</strong>.<br>O sistema fará a leitura OCR e comparará o nome.</p>
                         
                         <video id="videoCamera" class="video-feed" autoplay playsinline></video>
                         <canvas id="canvasCapture" style="display:none;"></canvas>
                         <img id="imgPreview" class="camera-preview" alt="Pré-visualização">
                         
-                        <div id="statusDoc" class="doc-status info" style="display:none;"></div>
-                        
                         <div class="flex-btns">
                             <button type="button" id="btnAbrirCamera" class="btn-camera primary">📷 Abrir Câmera</button>
+                            <button type="button" id="btnFlash" class="btn-camera warning" disabled>⚡ Flash</button>
                             <button type="button" id="btnTirarFoto" class="btn-camera" disabled>📸 Capturar Documento</button>
                             <button type="button" id="btnFecharCamera" class="btn-camera danger" style="display:none;">❌ Fechar Câmera</button>
                         </div>
-                        <p style="font-size:0.75rem; margin-top:12px;">* Após capturar, o sistema validará automaticamente o nome.</p>
+                        <div id="ocrProgress" class="ocr-progress" style="display:none;"></div>
                         <div id="validacaoDocMsg" class="doc-status" style="display:none;"></div>
                     </div>
 
@@ -418,7 +437,7 @@
     </div>
 
     <script>
-        // ======================= DADOS GEOGRÁFICOS =========================
+        // Dados geográficos
         const provinciasMoz = [
             "Maputo Cidade", "Maputo Província", "Gaza", "Inhambane", 
             "Sofala", "Manica", "Tete", "Zambézia", "Nampula", 
@@ -438,7 +457,6 @@
             "Niassa": ["Lichinga", "Cuamba", "Mandimba", "Majune", "Sanga", "Mavago", "Mecula", "Marrupa", "Metarica", "Muembe", "Ngauma"]
         };
 
-        // Dados de professores
         let professores = JSON.parse(localStorage.getItem('professoresDB')) || [];
         if (professores.length === 0) {
             professores = [
@@ -449,14 +467,14 @@
             localStorage.setItem('professoresDB', JSON.stringify(professores));
         }
 
-        // Elementos da câmera
         let video = document.getElementById('videoCamera');
         let canvas = document.getElementById('canvasCapture');
         let imgPreview = document.getElementById('imgPreview');
         let stream = null;
         let documentoValidado = false;
+        let flashEnabled = false;
+        let currentTrack = null;
 
-        // Funções auxiliares
         function showView(viewId) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
@@ -483,51 +501,103 @@
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
                 stream = null;
+                currentTrack = null;
             }
             video.style.display = 'none';
             video.srcObject = null;
             document.getElementById('btnAbrirCamera').style.display = 'inline-flex';
             document.getElementById('btnTirarFoto').disabled = true;
             document.getElementById('btnFecharCamera').style.display = 'none';
+            document.getElementById('btnFlash').disabled = true;
+            flashEnabled = false;
         }
 
         async function abrirCamera() {
             try {
-                if (stream) {
-                    fecharCameraCompleta();
-                }
+                if (stream) fecharCameraCompleta();
+                
                 const constraints = { video: { facingMode: { exact: "environment" } } };
                 stream = await navigator.mediaDevices.getUserMedia(constraints);
+                currentTrack = stream.getVideoTracks()[0];
                 video.srcObject = stream;
                 video.style.display = 'block';
                 await video.play();
+                
                 document.getElementById('btnAbrirCamera').style.display = 'none';
                 document.getElementById('btnTirarFoto').disabled = false;
                 document.getElementById('btnFecharCamera').style.display = 'inline-flex';
+                
+                // Verificar suporte a flash (torch)
+                if (currentTrack && currentTrack.getCapabilities && currentTrack.getCapabilities().torch) {
+                    document.getElementById('btnFlash').disabled = false;
+                } else {
+                    document.getElementById('btnFlash').disabled = true;
+                }
+                
                 document.getElementById('validacaoDocMsg').style.display = 'none';
                 imgPreview.style.display = 'none';
             } catch (err) {
-                // Fallback para câmera padrão se a environment falhar
                 try {
                     const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
                     stream = fallbackStream;
+                    currentTrack = stream.getVideoTracks()[0];
                     video.srcObject = stream;
                     video.style.display = 'block';
                     await video.play();
                     document.getElementById('btnAbrirCamera').style.display = 'none';
                     document.getElementById('btnTirarFoto').disabled = false;
                     document.getElementById('btnFecharCamera').style.display = 'inline-flex';
+                    if (currentTrack && currentTrack.getCapabilities && currentTrack.getCapabilities().torch) {
+                        document.getElementById('btnFlash').disabled = false;
+                    }
                 } catch (fallbackErr) {
-                    alert("Erro ao acessar a câmera. Verifique permissões e tente novamente.");
-                    console.error(err, fallbackErr);
+                    alert("Erro ao acessar a câmera. Verifique permissões.");
                 }
             }
         }
 
-        // Captura a foto e valida o nome
-        function capturarFotoEValidar() {
+        function toggleFlash() {
+            if (!currentTrack) return;
+            try {
+                flashEnabled = !flashEnabled;
+                currentTrack.applyConstraints({
+                    advanced: [{ torch: flashEnabled }]
+                });
+                document.getElementById('btnFlash').style.background = flashEnabled ? '#f1c40f' : '#2c3e50';
+                document.getElementById('btnFlash').style.color = flashEnabled ? '#2c3e50' : 'white';
+            } catch (err) {
+                alert("Flash não suportado neste dispositivo");
+            }
+        }
+
+        // Extrair nome do texto OCR
+        function extrairNomeDoTexto(texto, nomeDigitado) {
+            // Normaliza e procura o nome digitado no texto OCR
+            const nomeLower = nomeDigitado.toLowerCase().trim();
+            const textoLower = texto.toLowerCase();
+            
+            // Procura por correspondência exata ou parcial (nome completo)
+            if (textoLower.includes(nomeLower)) {
+                return nomeDigitado;
+            }
+            
+            // Tenta encontrar palavras que correspondam
+            const palavrasNome = nomeLower.split(/\s+/);
+            let matches = 0;
+            for (let palavra of palavrasNome) {
+                if (palavra.length > 3 && textoLower.includes(palavra)) {
+                    matches++;
+                }
+            }
+            if (matches >= Math.min(2, palavrasNome.length)) {
+                return nomeDigitado;
+            }
+            return null;
+        }
+
+        async function capturarFotoEValidar() {
             if (!stream || !video.videoWidth) {
-                alert("A câmera não está activa. Por favor, abra a câmera primeiro.");
+                alert("A câmera não está activa. Abra a câmera primeiro.");
                 return;
             }
             const nomeDigitado = document.getElementById('nome').value.trim();
@@ -536,7 +606,7 @@
                 return;
             }
 
-            // Capturar frame do vídeo
+            // Capturar foto
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
@@ -546,32 +616,62 @@
             imgPreview.style.display = 'block';
             video.style.display = 'none';
             
-            // Simulação de OCR: extrai o nome do documento
-            // Nesta simulação, consideramos que o nome lido é exatamente o nome digitado.
-            // Se quiser uma simulação mais realista, pode-se adicionar um pequeno atraso e comparar.
-            const nomeDocumento = nomeDigitado.toUpperCase();
             const statusDiv = document.getElementById('validacaoDocMsg');
+            const ocrProgress = document.getElementById('ocrProgress');
+            ocrProgress.style.display = 'block';
+            ocrProgress.innerHTML = '🔍 A processar imagem e extrair texto do documento... Aguarde...';
+            statusDiv.style.display = 'none';
             
-            if (nomeDocumento === nomeDigitado.toUpperCase()) {
-                documentoValidado = true;
-                document.getElementById('docValidado').value = "true";
-                statusDiv.className = 'doc-status success';
-                statusDiv.innerHTML = `✅ VALIDAÇÃO APROVADA! Nome no documento: "${nomeDocumento}". Coincide com o nome registado.`;
-                statusDiv.style.display = 'block';
-                document.getElementById('btnRegistar').disabled = false;
-                // Fechar câmera após validação bem-sucedida
-                fecharCameraCompleta();
-            } else {
-                documentoValidado = false;
-                document.getElementById('docValidado').value = "false";
+            try {
+                // Converter dataURL para blob
+                const blob = await (await fetch(imageDataUrl)).blob();
+                
+                // Usar Tesseract para OCR
+                const { data: { text } } = await Tesseract.recognize(
+                    blob,
+                    'por',
+                    {
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                ocrProgress.innerHTML = `📖 Lendo documento: ${Math.round(m.progress * 100)}%`;
+                            }
+                        }
+                    }
+                );
+                
+                ocrProgress.style.display = 'none';
+                
+                console.log("Texto extraído:", text);
+                const nomeEncontrado = extrairNomeDoTexto(text, nomeDigitado);
+                
+                if (nomeEncontrado) {
+                    documentoValidado = true;
+                    document.getElementById('docValidado').value = "true";
+                    statusDiv.className = 'doc-status success';
+                    statusDiv.innerHTML = `✅ VALIDAÇÃO APROVADA!<br>Nome detectado no documento: "${nomeEncontrado.toUpperCase()}"<br>Corresponde ao nome registado.`;
+                    statusDiv.style.display = 'block';
+                    document.getElementById('btnRegistar').disabled = false;
+                    fecharCameraCompleta();
+                } else {
+                    documentoValidado = false;
+                    document.getElementById('docValidado').value = "false";
+                    statusDiv.className = 'doc-status error';
+                    const primeirasPalavras = text.substring(0, 100).replace(/\n/g, ' ');
+                    statusDiv.innerHTML = `❌ VALIDAÇÃO REPROVADA!<br>Nome digitado: "${nomeDigitado}"<br>Não foi encontrado no documento.<br><br>Texto detectado: "${primeirasPalavras}..."<br><br>Certifique-se que o documento está bem iluminado e visível.`;
+                    statusDiv.style.display = 'block';
+                    document.getElementById('btnRegistar').disabled = true;
+                }
+            } catch (ocrError) {
+                console.error("OCR error:", ocrError);
+                ocrProgress.style.display = 'none';
                 statusDiv.className = 'doc-status error';
-                statusDiv.innerHTML = `❌ VALIDAÇÃO REPROVADA! Nome detectado no documento: "${nomeDocumento || 'NÃO DETECTADO'}" não corresponde ao nome inserido: "${nomeDigitado}". O registo não será permitido.`;
+                statusDiv.innerHTML = `❌ ERRO NA LEITURA DO DOCUMENTO!<br>Não foi possível extrair o texto. Tente tirar uma foto mais nítida e com boa iluminação.`;
                 statusDiv.style.display = 'block';
+                documentoValidado = false;
                 document.getElementById('btnRegistar').disabled = true;
             }
         }
 
-        // Reset do formulário
         function resetForm() {
             document.getElementById('permutaForm').reset();
             document.getElementById('distritoAtual').disabled = true;
@@ -584,12 +684,12 @@
             documentoValidado = false;
             document.getElementById('docValidado').value = "false";
             document.getElementById('validacaoDocMsg').style.display = 'none';
+            document.getElementById('ocrProgress').style.display = 'none';
             imgPreview.style.display = 'none';
             fecharCameraCompleta();
             document.getElementById('btnRegistar').disabled = true;
         }
 
-        // Inicialização dos selects
         function inicializarSelects() {
             const selectAtual = document.getElementById('provAtual');
             const selectDestino = document.getElementById('provDestino');
@@ -612,14 +712,17 @@
                 distritosPorProvincia[prov].forEach(d => selectDist.add(new Option(d, d)));
             }
         }
+        
         function habilitarLocalizacao() {
             document.getElementById('radioDentro').disabled = false;
             document.getElementById('radioFora').disabled = false;
         }
+        
         function toggleDistancia() {
             const fora = document.getElementById('radioFora').checked;
             document.getElementById('distanciaGroup').classList.toggle('hidden', !fora);
         }
+        
         function carregarDistritosDestino() {
             const prov = document.getElementById('provDestino').value;
             const selectDist = document.getElementById('distDestino');
@@ -648,10 +751,9 @@
             area.innerHTML = html;
         }
 
-        // Submissão do formulário
         document.getElementById('permutaForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            if (!document.getElementById('docValidado').value === "true" || !documentoValidado) {
+            if (!documentoValidado) {
                 alert("⚠️ A validação do documento é obrigatória! Capture o documento e aguarde a aprovação.");
                 return;
             }
@@ -678,10 +780,10 @@
         
         function limparDados() { if(confirm("Apagar todos os dados?")) { localStorage.removeItem('professoresDB'); location.reload(); } }
         
-        // Eventos dos botões da câmera
         document.getElementById('btnAbrirCamera').onclick = abrirCamera;
         document.getElementById('btnTirarFoto').onclick = capturarFotoEValidar;
         document.getElementById('btnFecharCamera').onclick = fecharCameraCompleta;
+        document.getElementById('btnFlash').onclick = toggleFlash;
         
         inicializarSelects();
     </script>
