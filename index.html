@@ -8,7 +8,6 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
     <style>
         :root {
             --primary: #009688;
@@ -293,7 +292,6 @@
             margin-bottom: 10px;
         }
         .no-results { text-align: center; padding: 40px; color: #777; background: #eee; border-radius: 8px; }
-        .reset-btn { background: var(--accent); color: white; border: none; padding: 10px; width: 100%; margin-top: 20px; border-radius: 6px; cursor: pointer; }
         .radio-group { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
         .radio-option { display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .radio-option input[type="radio"] { width: auto; margin: 0; }
@@ -333,11 +331,6 @@
             font-size: 12px;
             display: inline-block;
             margin-left: 10px;
-        }
-        .loading-spinner {
-            text-align: center;
-            padding: 20px;
-            color: var(--primary);
         }
     </style>
 </head>
@@ -526,8 +519,6 @@
                 <div id="resultadosArea">
                     <div class="no-results">👆 Selecione uma província para ver os pedidos disponíveis</div>
                 </div>
-                
-                <button class="reset-btn" onclick="limparDados()">⚠️ Limpar Todos os Dados (Admin)</button>
             </div>
         </div>
     </div>
@@ -588,7 +579,6 @@
                 }
             }, error => {
                 console.error("Erro ao carregar dados:", error);
-                alert("Erro ao conectar ao Firebase. Verifique sua conexão com a internet.");
             });
         }
 
@@ -601,7 +591,7 @@
                 return true;
             } catch(e) {
                 console.error("Erro ao salvar:", e);
-                alert("Erro ao salvar no Firebase. Verifique sua conexão.");
+                alert("Erro ao salvar no Firebase: " + e.message);
                 return false;
             }
         }
@@ -648,6 +638,9 @@
             document.getElementById('imgDocPreview').style.display = 'none';
             document.getElementById('botoesCameraDoc').style.display = 'flex';
             document.getElementById('botoesPosCaptura').style.display = 'none';
+            document.getElementById('radioDentro').checked = false;
+            document.getElementById('radioFora').checked = false;
+            document.getElementById('distanciaGroup').classList.add('hidden');
             fecharTodasCameras();
         }
 
@@ -699,7 +692,7 @@
                 btnFechar.style.display = 'inline-flex';
                 
                 const track = stream.getVideoTracks()[0];
-                if(track.getCapabilities().torch) btnFlash.disabled = false;
+                if(track.getCapabilities && track.getCapabilities().torch) btnFlash.disabled = false;
                 await videoElement.play();
             } catch(err) {
                 loadingElement.style.display = 'none';
@@ -711,7 +704,7 @@
             const stream = tipo === 'doc' ? streamDoc : streamRosto;
             if(!stream) return;
             const track = stream.getVideoTracks()[0];
-            track.applyConstraints({ advanced: [{ torch: !track.getSettings().torch }] });
+            track.applyConstraints({ advanced: [{ torch: !track.getSettings().torch }] }).catch(e => console.log("Flash não suportado"));
         }
 
         function normalizarTexto(texto) {
@@ -734,7 +727,7 @@
 
         function validarBI(textoOCR) {
             const texto = textoOCR.toUpperCase();
-            const temRepublica = texto.includes("REPUBLICA") || texto.includes("REPÚBLICA") || texto.includes("MOCAMBIQUE");
+            const temRepublica = texto.includes("REPUBLICA") || texto.includes("REPÚBLICA") || texto.includes("MOCAMBIQUE") || texto.includes("MOÇAMBIQUE");
             const temBilhete = texto.includes("BILHETE") || texto.includes("IDENTIDADE");
             const temNumero = /[0-9]{8,}/.test(texto);
             let pontos = 0;
@@ -858,6 +851,8 @@
             if(prov && distritosPorProvincia[prov]) {
                 select.disabled = false;
                 distritosPorProvincia[prov].forEach(d => select.add(new Option(d, d)));
+            } else {
+                select.disabled = true;
             }
         }
 
@@ -974,62 +969,110 @@
 
         document.getElementById('permutaForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            if(!documentoValidado) { alert("Valide o B.I. primeiro"); return; }
-            if(!tipoNomeacaoSelecionado) { alert("Selecione o tipo de nomeação"); return; }
-            if(!fotoRostoCapturada) { alert("Tire uma foto do rosto"); return; }
+            
+            // Verificações
+            if(!documentoValidado) { 
+                alert("❌ Valide o B.I. primeiro! Tire uma foto do seu Bilhete de Identidade e valide.");
+                return; 
+            }
+            if(!tipoNomeacaoSelecionado) { 
+                alert("❌ Selecione o tipo de nomeação (Provisória ou Definitiva)");
+                return; 
+            }
+            if(!fotoRostoCapturada) { 
+                alert("❌ Tire uma foto do seu rosto");
+                return; 
+            }
+            
+            const nivel = document.getElementById('nivel').value;
+            if(!nivel || nivel === "") { 
+                alert("❌ Selecione o nível de ensino");
+                return; 
+            }
+            
+            const provAtual = document.getElementById('provAtual').value;
+            if(!provAtual || provAtual === "") { 
+                alert("❌ Selecione a província onde trabalha");
+                return; 
+            }
+            
+            const distritoAtual = document.getElementById('distritoAtual').value;
+            if(!distritoAtual || distritoAtual === "") { 
+                alert("❌ Selecione o distrito onde trabalha");
+                return; 
+            }
             
             const tipoLocal = document.querySelector('input[name="localizacao"]:checked');
-            if(!tipoLocal) { alert("Selecione a localização da escola"); return; }
+            if(!tipoLocal) { 
+                alert("❌ Selecione a localização da escola (Dentro ou Fora da Vila)");
+                return; 
+            }
             
             const distancia = document.getElementById('distancia').value;
             if(tipoLocal.value === 'Fora da Vila' && (!distancia || distancia <= 0)) {
-                alert("Informe a distância da vila para a escola");
+                alert("❌ Informe a distância da vila para a escola");
                 return;
+            }
+            
+            const provDestino = document.getElementById('provDestino').value;
+            if(!provDestino || provDestino === "") { 
+                alert("❌ Selecione a província de destino");
+                return; 
+            }
+            
+            const distDestino = document.getElementById('distDestino').value;
+            if(!distDestino || distDestino === "") { 
+                alert("❌ Selecione o distrito de destino");
+                return; 
+            }
+            
+            const telefone = document.getElementById('telefone').value;
+            if(!telefone || telefone === "") { 
+                alert("❌ Informe o seu contacto telefónico");
+                return; 
             }
             
             const novo = {
                 nome: document.getElementById('nome').value,
-                nivel: document.getElementById('nivel').value,
+                nivel: nivel,
                 tipoNomeacao: tipoNomeacaoSelecionado,
-                provAtual: document.getElementById('provAtual').value,
-                distritoAtual: document.getElementById('distritoAtual').value,
+                provAtual: provAtual,
+                distritoAtual: distritoAtual,
                 tipoLocal: tipoLocal.value,
                 distancia: distancia || 0,
-                provDestino: document.getElementById('provDestino').value,
-                distDestino: document.getElementById('distDestino').value,
+                provDestino: provDestino,
+                distDestino: distDestino,
                 condicoes: document.getElementById('condicoes').value || "Nenhuma",
-                telefone: document.getElementById('telefone').value,
+                telefone: telefone,
                 fotoRosto: document.getElementById('fotoRostoData').value
             };
+            
+            // Mostrar loading no botão
+            const btnRegistar = document.getElementById('btnRegistar');
+            const textoOriginal = btnRegistar.innerHTML;
+            btnRegistar.innerHTML = '⏳ Salvando...';
+            btnRegistar.disabled = true;
             
             const matches = professores.filter(p => p.provDestino === novo.provAtual && p.nivel === novo.nivel && p.tipoNomeacao === novo.tipoNomeacao);
             
             const sucesso = await salvarProfessorFirebase(novo);
             
+            btnRegistar.innerHTML = textoOriginal;
+            btnRegistar.disabled = false;
+            
             if(sucesso) {
                 if(matches.length > 0) {
-                    let msg = `✅ PERMUTA POSSÍVEL! Encontrámos ${matches.length} professor(es) com ${novo.nivel} - ${novo.tipoNomeacao}:\n`;
-                    matches.forEach(m => msg += `👤 ${m.nome} 📞 ${m.telefone}\n`);
+                    let msg = `✅ PERMUTA POSSÍVEL! Encontrámos ${matches.length} professor(es) com ${novo.nivel} - ${novo.tipoNomeacao}:\n\n`;
+                    matches.forEach(m => msg += `👤 ${m.nome}\n📞 ${m.telefone}\n\n`);
                     alert(msg);
                 } else {
-                    alert(`Registo efetuado! ⚠️ Ainda não há ninguém com ${novo.nivel} - ${novo.tipoNomeacao} para ${novo.provAtual}`);
+                    alert(`✅ Registo efetuado com sucesso!\n\n⚠️ Ainda não há ninguém com ${novo.nivel} - ${novo.tipoNomeacao} para ${novo.provAtual}\n\nSeu pedido foi registado e ficará disponível para outros professores.`);
                 }
                 showView('view-list');
+            } else {
+                alert("❌ Erro ao salvar. Tente novamente.");
             }
         });
-
-        function limparDados() {
-            if(confirm("⚠️ ATENÇÃO: Esta ação irá apagar TODOS os dados do sistema. Continuar?")) {
-                db.collection('professores').get().then(snapshot => {
-                    snapshot.docs.forEach(doc => doc.ref.delete());
-                    alert("Todos os dados foram apagados do Firebase!");
-                    professores = [];
-                    atualizarFiltrosLista();
-                }).catch(err => {
-                    alert("Erro ao apagar dados: " + err.message);
-                });
-            }
-        }
         
         // Inicializar
         inicializarSelectsForm();
