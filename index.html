@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Permuta de Professores - Moçambique | Validação BI Oficial</title>
+    <title>Permuta de Professores - Moçambique | Validação BI</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
     <style>
         :root {
@@ -117,12 +117,6 @@
         h3 { margin-top: 0; color: var(--dark); }
 
         .form-group { margin-bottom: 15px; }
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
 
         label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9em; }
         input, select, textarea {
@@ -157,14 +151,9 @@
             margin: 0 auto 15px;
             background: #1e1e1e;
             display: none;
-            transform: scaleX(-1);
         }
-        .video-feed.front {
-            transform: scaleX(-1);
-        }
-        .video-feed.back {
-            transform: none;
-        }
+        .video-feed.front { transform: scaleX(-1); }
+        .video-feed.back { transform: none; }
         .camera-preview {
             width: 100%;
             max-width: 400px;
@@ -246,10 +235,25 @@
         .nomeacao-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
         .nomeacao-btn.provisoria.selected { background: var(--warning); border-color: var(--warning); color: #2c3e50; }
         .nomeacao-btn.definitiva.selected { background: var(--success); border-color: var(--success); color: white; }
-        .camera-loading {
-            padding: 20px;
-            color: var(--primary);
-            font-size: 14px;
+        .camera-loading { padding: 20px; color: var(--primary); font-size: 14px; }
+        .dicas {
+            background: #fff3cd;
+            border-left: 4px solid var(--warning);
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 12px;
+            text-align: left;
+        }
+        .texto-detectado {
+            background: #f0f0f0;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-family: monospace;
+            word-break: break-all;
+            max-height: 100px;
+            overflow-y: auto;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -280,7 +284,13 @@
                         </div>
                         <div class="camera-section">
                             <h3>📸 Captura do B.I. Moçambicano</h3>
-                            <p>Tire uma foto do <strong>BILHETE DE IDENTIDADE</strong> (frente).<br>O sistema verifica o formato oficial.</p>
+                            <div class="dicas">
+                                💡 <strong>Dicas para melhor leitura:</strong><br>
+                                • Posicione o BI numa superfície plana e bem iluminada<br>
+                                • Evite reflexos e sombras<br>
+                                • Mantenha a câmera estável e o documento inteiro na imagem<br>
+                                • Aguarde a imagem ficar nítida antes de capturar
+                            </div>
                             <div id="cameraDocContainer">
                                 <video id="videoDoc" class="video-feed back" autoplay playsinline muted></video>
                                 <div id="cameraDocLoading" class="camera-loading" style="display:none;">📷 Iniciando câmera...</div>
@@ -294,6 +304,7 @@
                                 <button type="button" id="btnFecharCameraDoc" class="btn-camera danger" style="display:none;">❌ Fechar</button>
                             </div>
                             <div id="ocrProgress" class="ocr-progress" style="display:none;"></div>
+                            <div id="textoDetectado" class="texto-detectado" style="display:none;"></div>
                             <div id="validacaoDocMsg" class="doc-status"></div>
                         </div>
                     </div>
@@ -448,6 +459,80 @@
         let fotoRostoCapturada = false;
         let tipoNomeacaoSelecionado = "";
 
+        // Função para normalizar texto (remover acentos, maiúsculas)
+        function normalizarTexto(texto) {
+            return texto.toUpperCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^\w\s]/g, '')
+                .trim();
+        }
+
+        // Função para verificar se nome está contido no texto (flexível)
+        function nomeEstaNoTexto(textoOCR, nomeDigitado) {
+            const textoNorm = normalizarTexto(textoOCR);
+            const nomeNorm = normalizarTexto(nomeDigitado);
+            
+            // Verifica se o nome completo está contido
+            if (textoNorm.includes(nomeNorm)) return true;
+            
+            // Divide o nome em partes e verifica se a maioria está presente
+            const partesNome = nomeNorm.split(/\s+/);
+            let partesEncontradas = 0;
+            for (let parte of partesNome) {
+                if (parte.length > 3 && textoNorm.includes(parte)) {
+                    partesEncontradas++;
+                }
+            }
+            
+            // Se encontrar pelo menos 70% das partes com mais de 3 letras
+            const partesRelevantes = partesNome.filter(p => p.length > 3);
+            if (partesRelevantes.length === 0) return false;
+            
+            return (partesEncontradas / partesRelevantes.length) >= 0.7;
+        }
+
+        // Função para validar BI com critérios mais flexíveis
+        function validarBI(textoOCR) {
+            const texto = textoOCR.toUpperCase();
+            
+            // Critérios flexíveis
+            const temRepublica = texto.includes("REPUBLICA") || texto.includes("REPÚBLICA") || texto.includes("MOCAMBIQUE") || texto.includes("MOÇAMBIQUE");
+            const temBilhete = texto.includes("BILHETE") || texto.includes("IDENTIDADE");
+            const temNumero = /[0-9]{8,}/.test(texto);
+            
+            // Se tiver pelo menos 2 dos 3 critérios, considera válido
+            let pontos = 0;
+            if (temRepublica) pontos++;
+            if (temBilhete) pontos++;
+            if (temNumero) pontos++;
+            
+            const isValid = pontos >= 2;
+            
+            return { isValid, pontos, temRepublica, temBilhete, temNumero };
+        }
+
+        // Pré-processamento da imagem para melhorar OCR
+        function preprocessImage(canvas) {
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            
+            // Aumentar contraste simples
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i+1];
+                const b = data[i+2];
+                const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                const newVal = gray > 128 ? 255 : 0;
+                data[i] = newVal;
+                data[i+1] = newVal;
+                data[i+2] = newVal;
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+        }
+
         function showView(viewId) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
@@ -474,6 +559,7 @@
             document.getElementById('fotoRostoStatus').style.display = 'none';
             document.getElementById('imgRostoPreview').style.display = 'none';
             document.getElementById('imgDocPreview').style.display = 'none';
+            document.getElementById('textoDetectado').style.display = 'none';
             fecharTodasCameras();
         }
 
@@ -513,7 +599,6 @@
             const btnFechar = tipo === 'doc' ? document.getElementById('btnFecharCameraDoc') : document.getElementById('btnFecharCameraRosto');
             const btnFlash = tipo === 'doc' ? document.getElementById('btnFlashDoc') : document.getElementById('btnFlashRosto');
             
-            // Fechar stream existente
             if(tipo === 'doc' && streamDoc) {
                 streamDoc.getTracks().forEach(t => t.stop());
                 streamDoc = null;
@@ -553,21 +638,17 @@
                 btnTirar.disabled = false;
                 btnFechar.style.display = 'inline-flex';
                 
-                // Verificar suporte a flash
                 const track = stream.getVideoTracks()[0];
                 const capabilities = track.getCapabilities();
                 if(capabilities && capabilities.torch) {
                     btnFlash.disabled = false;
-                } else {
-                    btnFlash.disabled = true;
                 }
                 
                 await videoElement.play();
                 
             } catch(err) {
                 loadingElement.style.display = 'none';
-                console.error('Erro ao acessar câmera:', err);
-                alert('Erro ao acessar a câmera. Verifique se deu permissão e tente novamente.\n\n' + (err.message || ''));
+                alert('Erro ao acessar a câmera. Verifique permissões.');
             }
         }
 
@@ -575,30 +656,13 @@
             const stream = tipo === 'doc' ? streamDoc : streamRosto;
             if(!stream) return;
             const track = stream.getVideoTracks()[0];
-            const capabilities = track.getCapabilities();
-            if(!capabilities.torch) {
-                alert('Flash não suportado nesta câmera');
-                return;
-            }
             const newTorch = !track.getSettings().torch;
             track.applyConstraints({ advanced: [{ torch: newTorch }] });
         }
 
-        function validarBI(textoOCR) {
-            const texto = textoOCR.toUpperCase();
-            const temRepublica = texto.includes("REPÚBLICA DE MOÇAMBIQUE") || texto.includes("REPUBLICA DE MOCAMBIQUE");
-            const temBilhete = texto.includes("BILHETE DE IDENTIDADE");
-            const temNumero = /N[º°]?\s*:?\s*[0-9A-Z]{8,}/i.test(texto);
-            const temNome = texto.includes("NOME") || texto.includes("NAME");
-            const temDataNasc = texto.includes("DATA DE NASCIMENTO") || texto.includes("DATE OF BIRTH");
-            const numeroMatch = texto.match(/[0-9]{10,15}[A-Z]/i);
-            const isValid = temRepublica && temBilhete && temNumero && temNome && temDataNasc;
-            return { isValid, detalhes: { temRepublica, temBilhete, temNumero, temNome, temDataNasc, numero: numeroMatch ? numeroMatch[0] : null } };
-        }
-
         async function capturarDocumento() {
-            if(!streamDoc) { alert("Abra a câmera primeiro clicando em 'Abrir Câmera'"); return; }
-            const nomeDigitado = document.getElementById('nome').value.trim().toUpperCase();
+            if(!streamDoc) { alert("Abra a câmera primeiro"); return; }
+            const nomeDigitado = document.getElementById('nome').value.trim();
             if(!nomeDigitado) { alert("Preencha o nome completo"); return; }
             
             const video = document.getElementById('videoDoc');
@@ -607,6 +671,10 @@
             canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Pré-processamento para melhorar OCR
+            preprocessImage(canvas);
+            
             const imgData = canvas.toDataURL('image/jpeg');
             document.getElementById('imgDocPreview').src = imgData;
             document.getElementById('imgDocPreview').style.display = 'block';
@@ -614,50 +682,65 @@
             
             const statusDiv = document.getElementById('validacaoDocMsg');
             const ocrProgress = document.getElementById('ocrProgress');
+            const textoDetectadoDiv = document.getElementById('textoDetectado');
+            
             ocrProgress.style.display = 'block';
-            ocrProgress.innerHTML = '🔍 Processando B.I. e validando formato oficial...';
+            ocrProgress.innerHTML = '🔍 Processando BI... Aguarde alguns segundos';
+            statusDiv.style.display = 'none';
+            textoDetectadoDiv.style.display = 'none';
             
             try {
                 const blob = await (await fetch(imgData)).blob();
-                const { data: { text } } = await Tesseract.recognize(blob, 'por');
+                const { data: { text } } = await Tesseract.recognize(blob, 'por', {
+                    logger: m => {
+                        if (m.status === 'recognizing text') {
+                            ocrProgress.innerHTML = `📖 Lendo documento: ${Math.round(m.progress * 100)}%`;
+                        }
+                    }
+                });
+                
                 ocrProgress.style.display = 'none';
                 
-                const validacao = validarBI(text);
-                const nomeNoDocumento = text.toUpperCase().includes(nomeDigitado);
+                const textoOCR = text;
+                textoDetectadoDiv.innerHTML = `<strong>Texto detectado no documento:</strong><br>${textoOCR.substring(0, 500)}${textoOCR.length > 500 ? '...' : ''}`;
+                textoDetectadoDiv.style.display = 'block';
                 
-                if(validacao.isValid && nomeNoDocumento) {
+                const validacaoBI = validarBI(textoOCR);
+                const nomeEncontrado = nomeEstaNoTexto(textoOCR, nomeDigitado);
+                
+                if(validacaoBI.isValid && nomeEncontrado) {
                     documentoValidado = true;
                     statusDiv.className = 'doc-status success';
-                    statusDiv.innerHTML = `✅ B.I. VÁLIDO!<br>Formato oficial moçambicano reconhecido.<br>Nome confirmado: ${nomeDigitado}<br>Nº: ${validacao.detalhes.numero || 'Detectado'}`;
+                    statusDiv.innerHTML = `✅ B.I. VÁLIDO!<br>✓ Formato moçambicano reconhecido (${validacaoBI.pontos}/3 critérios)<br>✓ Nome confirmado: ${nomeDigitado}<br><br>Clique em "Continuar" para preencher os restantes dados.`;
                     statusDiv.style.display = 'block';
                     document.getElementById('etapaRestante').classList.remove('hidden');
                     document.getElementById('etapaValidacao').style.display = 'none';
                     fecharTodasCameras();
                 } else {
                     let erros = [];
-                    if(!validacao.isValid) erros.push("Formato de B.I. não reconhecido");
-                    if(!nomeNoDocumento) erros.push(`Nome "${nomeDigitado}" não encontrado`);
+                    if(!validacaoBI.isValid) erros.push(`Formato de BI não totalmente reconhecido (${validacaoBI.pontos}/3 critérios)`);
+                    if(!nomeEncontrado) erros.push(`Nome "${nomeDigitado}" não encontrado no texto extraído`);
+                    
                     statusDiv.className = 'doc-status error';
-                    statusDiv.innerHTML = `❌ VALIDAÇÃO REPROVADA!<br>• ${erros.join('<br>• ')}<br><br>Certifique-se de que:<br>✓ É um B.I. de Moçambique<br>✓ A foto está nítida<br>✓ O documento está bem iluminado`;
+                    statusDiv.innerHTML = `❌ VALIDAÇÃO REPROVADA!<br>• ${erros.join('<br>• ')}<br><br><strong>Dicas:</strong><br>✓ Posicione o BI numa superfície plana<br>✓ Garanta boa iluminação (sem reflexos)<br>✓ Mantenha a câmera estável<br>✓ O documento deve estar inteiro na imagem<br>✓ Tente capturar novamente com mais luz`;
                     statusDiv.style.display = 'block';
                     documentoValidado = false;
                 }
             } catch(ocrError) {
                 ocrProgress.style.display = 'none';
                 statusDiv.className = 'doc-status error';
-                statusDiv.innerHTML = `❌ Erro na leitura. Tente uma foto mais nítida.`;
+                statusDiv.innerHTML = `❌ Erro na leitura. Tente uma foto mais nítida e com melhor iluminação.`;
                 statusDiv.style.display = 'block';
             }
         }
 
         async function capturarRosto() {
-            if(!streamRosto) { alert("Abra a câmera primeiro clicando em 'Abrir Câmera'"); return; }
+            if(!streamRosto) { alert("Abra a câmera primeiro"); return; }
             const video = document.getElementById('videoRosto');
             const canvas = document.getElementById('canvasRosto');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
             const imgData = canvas.toDataURL('image/jpeg');
             document.getElementById('imgRostoPreview').src = imgData;
             document.getElementById('imgRostoPreview').style.display = 'block';
@@ -724,7 +807,6 @@
             area.innerHTML = html;
         }
 
-        // Event listeners
         document.getElementById('btnProvisoria').onclick = () => {
             tipoNomeacaoSelecionado = "Provisória";
             document.getElementById('btnProvisoria').classList.add('selected');
