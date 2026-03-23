@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Permuta de Professores - Moçambique | Sistema Completo</title>
+    <title>Permuta de Professores - Moçambique | Firebase Cloud</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
     <style>
         :root {
             --primary: #009688;
@@ -312,17 +316,6 @@
             font-size: 12px;
             text-align: left;
         }
-        .texto-detectado {
-            background: #f0f0f0;
-            padding: 8px;
-            border-radius: 5px;
-            font-size: 11px;
-            font-family: monospace;
-            word-break: break-all;
-            max-height: 100px;
-            overflow-y: auto;
-            margin-top: 10px;
-        }
         .current-filter {
             background: var(--primary);
             color: white;
@@ -332,20 +325,34 @@
             display: inline-block;
             margin-bottom: 15px;
         }
+        .status-online {
+            background: var(--success);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .loading-spinner {
+            text-align: center;
+            padding: 20px;
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🇲🇿 Portal de Permuta</h1>
-        <p>Validação oficial de B.I. Moçambicano + Foto do Rosto</p>
+        <h1>🇲🇿 Portal de Permuta <span id="statusBadge" class="status-online" style="display:none;">✓ Firebase Cloud</span></h1>
+        <p>Sistema com banco de dados em tempo real - Dados sincronizados na nuvem</p>
     </header>
 
     <div class="container">
         <div id="view-home" class="view active">
             <div class="menu-grid">
                 <button class="menu-btn" onclick="showView('view-form')"><span>📝</span> Registar Permuta</button>
-                <button class="menu-btn secondary" onclick="showView('view-list')"><span>🔍</span> Pedidos Disponíveis</button>
+                <button class="menu-btn secondary" onclick="carregarLista()"><span>🔍</span> Pedidos Disponíveis</button>
             </div>
         </div>
 
@@ -520,13 +527,28 @@
                     <div class="no-results">👆 Selecione uma província para ver os pedidos disponíveis</div>
                 </div>
                 
-                <button class="reset-btn" onclick="limparDados()">Resetar Sistema (Apagar Tudo)</button>
+                <button class="reset-btn" onclick="limparDados()">⚠️ Limpar Todos os Dados (Admin)</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Distritos completos
+        // ==================== CONFIGURAÇÃO FIREBASE ====================
+        const firebaseConfig = {
+            apiKey: "AIzaSyA8HY9QBk0aQlMkkp6wTpR_mmoCS7lpQ_c",
+            authDomain: "permuta-de-professores.firebaseapp.com",
+            projectId: "permuta-de-professores",
+            storageBucket: "permuta-de-professores.firebasestorage.app",
+            messagingSenderId: "528412441677",
+            appId: "1:528412441677:web:5afee14088aee988f73004",
+            measurementId: "G-8H1QJL3EF6"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // ==================== DADOS GEOGRÁFICOS ====================
         const provinciasMoz = ["Maputo Cidade", "Maputo Província", "Gaza", "Inhambane", "Sofala", "Manica", "Tete", "Zambézia", "Nampula", "Cabo Delgado", "Niassa"];
         const distritosPorProvincia = {
             "Maputo Cidade": ["Maputo Cidade"],
@@ -542,89 +564,72 @@
             "Niassa": ["Lichinga", "Cuamba", "Mandimba", "Majune", "Sanga", "Mavago", "Mecula", "Marrupa", "Metarica", "Muembe", "Ngauma", "Lago"]
         };
 
-        let professores = JSON.parse(localStorage.getItem('professoresDB')) || [];
-        if (professores.length === 0) {
-            professores = [
-                { nome: "Carlos Mondlane", nivel: "DN2", tipoNomeacao: "Provisória", provAtual: "Maputo Província", distritoAtual: "Matola", tipoLocal: "Dentro da Vila", distancia: 0, provDestino: "Sofala", distDestino: "Beira", condicoes: "Prefiro escola perto da cidade", telefone: "841112233", fotoRosto: "" },
-                { nome: "Ana Sitoe", nivel: "DN1", tipoNomeacao: "Definitiva", provAtual: "Inhambane", distritoAtual: "Maxixe", tipoLocal: "Fora da Vila", distancia: 50, provDestino: "Maputo Cidade", distDestino: "Maputo Cidade", condicoes: "Precisa de casa", telefone: "859988776", fotoRosto: "" },
-                { nome: "João Macheve", nivel: "DN2", tipoNomeacao: "Provisória", provAtual: "Tete", distritoAtual: "Tete", tipoLocal: "Dentro da Vila", distancia: 0, provDestino: "Maputo Província", distDestino: "Matola", condicoes: "Aceito qualquer escola", telefone: "820000000", fotoRosto: "" }
-            ];
-            localStorage.setItem('professoresDB', JSON.stringify(professores));
-        }
-
+        let professores = [];
         let streamDoc = null, streamRosto = null;
         let currentFacing = "user";
         let documentoValidado = false;
         let fotoRostoCapturada = false;
         let tipoNomeacaoSelecionado = "";
-        let filtroProvinciaAtual = "";
-        let filtroDistritoAtual = "";
-        let modoFiltro = "";
-        let capturedImageData = null; // guarda imagem capturada
+        let capturedImageData = null;
 
-        function normalizarTexto(texto) {
-            return texto.toUpperCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^\w\s]/g, '')
-                .trim();
+        // Mostrar status conectado
+        document.getElementById('statusBadge').style.display = 'inline-block';
+
+        // ==================== FUNÇÕES DO FIREBASE ====================
+        function carregarProfessoresFirebase() {
+            db.collection('professores').orderBy('dataRegisto', 'desc').onSnapshot(snapshot => {
+                professores = [];
+                snapshot.forEach(doc => {
+                    professores.push({ id: doc.id, ...doc.data() });
+                });
+                console.log(`📥 Dados carregados: ${professores.length} registos`);
+                if(document.getElementById('view-list').classList.contains('active')) {
+                    atualizarFiltrosLista();
+                }
+            }, error => {
+                console.error("Erro ao carregar dados:", error);
+                alert("Erro ao conectar ao Firebase. Verifique sua conexão com a internet.");
+            });
         }
 
-        function nomeEstaNoTexto(textoOCR, nomeDigitado) {
-            const textoNorm = normalizarTexto(textoOCR);
-            const nomeNorm = normalizarTexto(nomeDigitado);
-            if (textoNorm.includes(nomeNorm)) return true;
-            const partesNome = nomeNorm.split(/\s+/);
-            let partesEncontradas = 0;
-            for (let parte of partesNome) {
-                if (parte.length > 3 && textoNorm.includes(parte)) partesEncontradas++;
+        async function salvarProfessorFirebase(dados) {
+            try {
+                await db.collection('professores').add({
+                    ...dados,
+                    dataRegisto: new Date().toISOString()
+                });
+                return true;
+            } catch(e) {
+                console.error("Erro ao salvar:", e);
+                alert("Erro ao salvar no Firebase. Verifique sua conexão.");
+                return false;
             }
-            const partesRelevantes = partesNome.filter(p => p.length > 3);
-            if (partesRelevantes.length === 0) return false;
-            return (partesEncontradas / partesRelevantes.length) >= 0.7;
         }
 
-        function validarBI(textoOCR) {
-            const texto = textoOCR.toUpperCase();
-            const temRepublica = texto.includes("REPUBLICA") || texto.includes("REPÚBLICA") || texto.includes("MOCAMBIQUE") || texto.includes("MOÇAMBIQUE");
-            const temBilhete = texto.includes("BILHETE") || texto.includes("IDENTIDADE");
-            const temNumero = /[0-9]{8,}/.test(texto);
-            let pontos = 0;
-            if (temRepublica) pontos++;
-            if (temBilhete) pontos++;
-            if (temNumero) pontos++;
-            return { isValid: pontos >= 2, pontos };
-        }
-
-        function preprocessImage(canvas) {
-            const ctx = canvas.getContext('2d');
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-            for (let i = 0; i < data.length; i += 4) {
-                const gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
-                const newVal = gray > 128 ? 255 : 0;
-                data[i] = data[i+1] = data[i+2] = newVal;
-            }
-            ctx.putImageData(imageData, 0, 0);
-        }
-
+        // ==================== FUNÇÕES DO SISTEMA ====================
         function showView(viewId) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
             if(viewId === 'view-list') {
-                const filtroProv = document.getElementById('filtroProvincia');
-                filtroProv.innerHTML = '<option value="" selected>-- Selecione a Província --</option>';
-                provinciasMoz.forEach(p => filtroProv.add(new Option(p, p)));
-                document.getElementById('filtroDistritoGroup').style.display = 'none';
-                document.getElementById('btnFiltrarDistrito').style.display = 'none';
-                document.getElementById('btnTodosProvincia').style.display = 'none';
-                document.getElementById('filtroAtivo').style.display = 'none';
-                document.getElementById('resultadosArea').innerHTML = '<div class="no-results">👆 Selecione uma província para ver os pedidos disponíveis</div>';
-                filtroProvinciaAtual = "";
-                filtroDistritoAtual = "";
+                atualizarFiltrosLista();
             } else if (viewId === 'view-form') {
                 resetFormulario();
             }
+        }
+
+        function carregarLista() {
+            showView('view-list');
+        }
+
+        function atualizarFiltrosLista() {
+            const filtroProv = document.getElementById('filtroProvincia');
+            filtroProv.innerHTML = '<option value="" selected>-- Selecione a Província --</option>';
+            provinciasMoz.forEach(p => filtroProv.add(new Option(p, p)));
+            document.getElementById('filtroDistritoGroup').style.display = 'none';
+            document.getElementById('btnFiltrarDistrito').style.display = 'none';
+            document.getElementById('btnTodosProvincia').style.display = 'none';
+            document.getElementById('filtroAtivo').style.display = 'none';
+            document.getElementById('resultadosArea').innerHTML = '<div class="no-results">👆 Selecione uma província para ver os pedidos disponíveis</div>';
         }
 
         function resetFormulario() {
@@ -641,7 +646,6 @@
             document.getElementById('fotoRostoStatus').style.display = 'none';
             document.getElementById('imgRostoPreview').style.display = 'none';
             document.getElementById('imgDocPreview').style.display = 'none';
-            // Resetar interface da câmera do documento
             document.getElementById('botoesCameraDoc').style.display = 'flex';
             document.getElementById('botoesPosCaptura').style.display = 'none';
             fecharTodasCameras();
@@ -710,65 +714,70 @@
             track.applyConstraints({ advanced: [{ torch: !track.getSettings().torch }] });
         }
 
-        // Captura a foto do documento e mostra preview, esconde câmera, mostra botões de retake/validar
+        function normalizarTexto(texto) {
+            return texto.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\s]/g, '').trim();
+        }
+
+        function nomeEstaNoTexto(textoOCR, nomeDigitado) {
+            const textoNorm = normalizarTexto(textoOCR);
+            const nomeNorm = normalizarTexto(nomeDigitado);
+            if (textoNorm.includes(nomeNorm)) return true;
+            const partesNome = nomeNorm.split(/\s+/);
+            let partesEncontradas = 0;
+            for (let parte of partesNome) {
+                if (parte.length > 3 && textoNorm.includes(parte)) partesEncontradas++;
+            }
+            const partesRelevantes = partesNome.filter(p => p.length > 3);
+            if (partesRelevantes.length === 0) return false;
+            return (partesEncontradas / partesRelevantes.length) >= 0.7;
+        }
+
+        function validarBI(textoOCR) {
+            const texto = textoOCR.toUpperCase();
+            const temRepublica = texto.includes("REPUBLICA") || texto.includes("REPÚBLICA") || texto.includes("MOCAMBIQUE");
+            const temBilhete = texto.includes("BILHETE") || texto.includes("IDENTIDADE");
+            const temNumero = /[0-9]{8,}/.test(texto);
+            let pontos = 0;
+            if (temRepublica) pontos++;
+            if (temBilhete) pontos++;
+            if (temNumero) pontos++;
+            return { isValid: pontos >= 2, pontos };
+        }
+
         function capturarDocumento() {
             if(!streamDoc) { alert("Abra a câmera primeiro"); return; }
-            
             const video = document.getElementById('videoDoc');
             const canvas = document.getElementById('canvasDoc');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            // Guardar a imagem original para validação
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
             capturedImageData = canvas.toDataURL('image/jpeg');
             document.getElementById('imgDocPreview').src = capturedImageData;
             document.getElementById('imgDocPreview').style.display = 'block';
             video.style.display = 'none';
-            
-            // Ocultar botões da câmera e mostrar os de pós-captura
             document.getElementById('botoesCameraDoc').style.display = 'none';
             document.getElementById('botoesPosCaptura').style.display = 'flex';
-            
-            // Limpar mensagens anteriores
             document.getElementById('validacaoDocMsg').style.display = 'none';
-            document.getElementById('ocrProgress').style.display = 'none';
         }
-        
-        // Função para retirar a foto e voltar à câmera
+
         function retirarFoto() {
-            // Esconder preview
             document.getElementById('imgDocPreview').style.display = 'none';
-            // Mostrar vídeo novamente
             document.getElementById('videoDoc').style.display = 'block';
-            // Mostrar botões da câmera e esconder os de pós-captura
             document.getElementById('botoesCameraDoc').style.display = 'flex';
             document.getElementById('botoesPosCaptura').style.display = 'none';
-            // Limpar imagem capturada
             capturedImageData = null;
-            // Limpar mensagens
             document.getElementById('validacaoDocMsg').style.display = 'none';
-            document.getElementById('ocrProgress').style.display = 'none';
         }
-        
-        // Validar a foto capturada
+
         async function validarFoto() {
-            if(!capturedImageData) {
-                alert("Nenhuma foto capturada. Tire uma foto primeiro.");
-                return;
-            }
+            if(!capturedImageData) { alert("Nenhuma foto capturada."); return; }
             const nomeDigitado = document.getElementById('nome').value.trim();
-            if(!nomeDigitado) {
-                alert("Preencha o nome completo antes de validar.");
-                return;
-            }
+            if(!nomeDigitado) { alert("Preencha o nome completo."); return; }
             
             const statusDiv = document.getElementById('validacaoDocMsg');
             const ocrProgress = document.getElementById('ocrProgress');
             ocrProgress.style.display = 'block';
             ocrProgress.innerHTML = '🔍 Processando BI...';
-            statusDiv.style.display = 'none';
             
             try {
                 const blob = await (await fetch(capturedImageData)).blob();
@@ -783,20 +792,16 @@
                 if(validacaoBI.isValid && nomeEncontrado) {
                     documentoValidado = true;
                     statusDiv.className = 'doc-status success';
-                    statusDiv.innerHTML = `✅ B.I. VÁLIDO!<br>✓ Nome confirmado: ${nomeDigitado}<br>Clique em "Continuar" para preencher os restantes dados.`;
+                    statusDiv.innerHTML = `✅ B.I. VÁLIDO! Nome confirmado: ${nomeDigitado}`;
                     statusDiv.style.display = 'block';
-                    // Esconder os botões de pós-captura e mostrar mensagem
                     document.getElementById('botoesPosCaptura').style.display = 'none';
-                    // Avançar para próxima etapa
                     document.getElementById('etapaRestante').classList.remove('hidden');
                     document.getElementById('etapaValidacao').style.display = 'none';
                     fecharTodasCameras();
                 } else {
                     statusDiv.className = 'doc-status error';
-                    statusDiv.innerHTML = `❌ VALIDAÇÃO REPROVADA!<br>• Nome "${nomeDigitado}" não encontrado<br><br>Dicas: Posicione o BI numa superfície plana, boa iluminação, sem reflexos.`;
+                    statusDiv.innerHTML = `❌ VALIDAÇÃO REPROVADA! Nome "${nomeDigitado}" não encontrado. Tente uma foto mais nítida.`;
                     statusDiv.style.display = 'block';
-                    documentoValidado = false;
-                    // Manter os botões de retake para tentar novamente
                 }
             } catch(ocrError) {
                 ocrProgress.style.display = 'none';
@@ -900,7 +905,7 @@
                         <div class="detail-item"><span class="detail-label">🏫 Localização da escola:</span> ${p.tipoLocal}</div>
                         <div class="detail-item"><span class="detail-label">📏 Distância da vila:</span> ${distanciaInfo}</div>
                         <div class="detail-item"><span class="detail-label">🎯 Destino pretendido:</span> ${p.provDestino} > ${p.distDestino}</div>
-                        <div class="detail-item"><span class="detail-label">📝 Condições:</span> ${p.condicoes || 'Nenhuma condição especial'}</div>
+                        <div class="detail-item"><span class="detail-label">📝 Condições:</span> ${p.condicoes || 'Nenhuma'}</div>
                         <div class="detail-item"><span class="detail-label">📞 Contacto:</span> <strong>${p.telefone}</strong></div>
                     </div>
                 </div>`;
@@ -910,17 +915,9 @@
 
         function filtrarPorProvincia() {
             const prov = document.getElementById('filtroProvincia').value;
-            if(!prov || prov === "") {
-                alert("Selecione uma província primeiro");
-                return;
-            }
-            
-            filtroProvinciaAtual = prov;
-            filtroDistritoAtual = "";
-            modoFiltro = "provincia";
-            
+            if(!prov || prov === "") { alert("Selecione uma província"); return; }
             const filtrados = professores.filter(p => p.provDestino === prov);
-            document.getElementById('filtroAtivo').innerHTML = `📍 Filtro atual: Professores que querem ir para <strong>${prov}</strong> (${filtrados.length} resultados)`;
+            document.getElementById('filtroAtivo').innerHTML = `📍 Filtro: Professores que querem ir para <strong>${prov}</strong> (${filtrados.length} resultados)`;
             document.getElementById('filtroAtivo').style.display = 'inline-block';
             mostrarResultados(filtrados, `Professores interessados em ${prov}`);
         }
@@ -928,29 +925,14 @@
         function filtrarPorDistrito() {
             const prov = document.getElementById('filtroProvincia').value;
             const dist = document.getElementById('filtroDistrito').value;
-            
-            if(!prov || prov === "") {
-                alert("Selecione uma província primeiro");
-                return;
-            }
-            if(!dist || dist === "") {
-                alert("Selecione um distrito");
-                return;
-            }
-            
-            filtroProvinciaAtual = prov;
-            filtroDistritoAtual = dist;
-            modoFiltro = "distrito";
-            
+            if(!prov || !dist) { alert("Selecione província e distrito"); return; }
             const filtrados = professores.filter(p => p.provDestino === prov && p.distDestino === dist);
-            document.getElementById('filtroAtivo').innerHTML = `📍 Filtro atual: Professores que querem ir para <strong>${prov} > ${dist}</strong> (${filtrados.length} resultados)`;
+            document.getElementById('filtroAtivo').innerHTML = `📍 Filtro: Professores que querem ir para <strong>${prov} > ${dist}</strong> (${filtrados.length} resultados)`;
             document.getElementById('filtroAtivo').style.display = 'inline-block';
             mostrarResultados(filtrados, `Professores interessados em ${prov} - ${dist}`);
         }
 
         function mostrarTodosProvincia() {
-            const prov = document.getElementById('filtroProvincia').value;
-            if(!prov || prov === "") return;
             filtrarPorProvincia();
         }
 
@@ -990,7 +972,7 @@
         document.getElementById('btnFlashRosto').onclick = () => toggleFlash('rosto');
         document.getElementById('btnTrocarCamera').onclick = trocarCamera;
 
-        document.getElementById('permutaForm').addEventListener('submit', function(e) {
+        document.getElementById('permutaForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             if(!documentoValidado) { alert("Valide o B.I. primeiro"); return; }
             if(!tipoNomeacaoSelecionado) { alert("Selecione o tipo de nomeação"); return; }
@@ -1021,22 +1003,37 @@
             };
             
             const matches = professores.filter(p => p.provDestino === novo.provAtual && p.nivel === novo.nivel && p.tipoNomeacao === novo.tipoNomeacao);
-            professores.push(novo);
-            localStorage.setItem('professoresDB', JSON.stringify(professores));
             
-            if(matches.length > 0) {
-                let msg = `✅ PERMUTA POSSÍVEL! Encontrámos ${matches.length} professor(es) com ${novo.nivel} - ${novo.tipoNomeacao}:\n`;
-                matches.forEach(m => msg += `👤 ${m.nome} 📞 ${m.telefone}\n`);
-                alert(msg);
-            } else {
-                alert(`Registo efetuado! ⚠️ Ainda não há ninguém com ${novo.nivel} - ${novo.tipoNomeacao} para ${novo.provAtual}`);
+            const sucesso = await salvarProfessorFirebase(novo);
+            
+            if(sucesso) {
+                if(matches.length > 0) {
+                    let msg = `✅ PERMUTA POSSÍVEL! Encontrámos ${matches.length} professor(es) com ${novo.nivel} - ${novo.tipoNomeacao}:\n`;
+                    matches.forEach(m => msg += `👤 ${m.nome} 📞 ${m.telefone}\n`);
+                    alert(msg);
+                } else {
+                    alert(`Registo efetuado! ⚠️ Ainda não há ninguém com ${novo.nivel} - ${novo.tipoNomeacao} para ${novo.provAtual}`);
+                }
+                showView('view-list');
             }
-            showView('view-list');
         });
 
-        function limparDados() { if(confirm("Apagar todos os dados?")) { localStorage.removeItem('professoresDB'); location.reload(); } }
+        function limparDados() {
+            if(confirm("⚠️ ATENÇÃO: Esta ação irá apagar TODOS os dados do sistema. Continuar?")) {
+                db.collection('professores').get().then(snapshot => {
+                    snapshot.docs.forEach(doc => doc.ref.delete());
+                    alert("Todos os dados foram apagados do Firebase!");
+                    professores = [];
+                    atualizarFiltrosLista();
+                }).catch(err => {
+                    alert("Erro ao apagar dados: " + err.message);
+                });
+            }
+        }
         
+        // Inicializar
         inicializarSelectsForm();
+        carregarProfessoresFirebase();
     </script>
 </body>
 </html>
