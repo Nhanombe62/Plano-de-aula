@@ -373,11 +373,15 @@
                             </div>
                             <canvas id="canvasDoc" style="display:none;"></canvas>
                             <img id="imgDocPreview" class="camera-preview" alt="BI">
-                            <div class="flex-btns">
+                            <div class="flex-btns" id="botoesCameraDoc">
                                 <button type="button" id="btnAbrirCameraDoc" class="btn-camera primary">📷 Abrir Câmera</button>
                                 <button type="button" id="btnFlashDoc" class="btn-camera warning" disabled>⚡ Flash</button>
                                 <button type="button" id="btnTirarFotoDoc" class="btn-camera" disabled>📸 Capturar BI</button>
                                 <button type="button" id="btnFecharCameraDoc" class="btn-camera danger" style="display:none;">❌ Fechar</button>
+                            </div>
+                            <div id="botoesPosCaptura" style="display:none;">
+                                <button type="button" id="btnRetirarFoto" class="btn-camera warning">↺ Tirar novamente</button>
+                                <button type="button" id="btnValidarFoto" class="btn-camera primary">✅ Validar BI</button>
                             </div>
                             <div id="ocrProgress" class="ocr-progress" style="display:none;"></div>
                             <div id="validacaoDocMsg" class="doc-status"></div>
@@ -555,7 +559,8 @@
         let tipoNomeacaoSelecionado = "";
         let filtroProvinciaAtual = "";
         let filtroDistritoAtual = "";
-        let modoFiltro = ""; // 'provincia' ou 'distrito'
+        let modoFiltro = "";
+        let capturedImageData = null; // guarda imagem capturada
 
         function normalizarTexto(texto) {
             return texto.toUpperCase()
@@ -626,6 +631,7 @@
             documentoValidado = false;
             fotoRostoCapturada = false;
             tipoNomeacaoSelecionado = "";
+            capturedImageData = null;
             document.getElementById('tipoNomeacao').value = "";
             document.getElementById('btnProvisoria').classList.remove('selected');
             document.getElementById('btnDefinitiva').classList.remove('selected');
@@ -635,6 +641,9 @@
             document.getElementById('fotoRostoStatus').style.display = 'none';
             document.getElementById('imgRostoPreview').style.display = 'none';
             document.getElementById('imgDocPreview').style.display = 'none';
+            // Resetar interface da câmera do documento
+            document.getElementById('botoesCameraDoc').style.display = 'flex';
+            document.getElementById('botoesPosCaptura').style.display = 'none';
             fecharTodasCameras();
         }
 
@@ -701,22 +710,59 @@
             track.applyConstraints({ advanced: [{ torch: !track.getSettings().torch }] });
         }
 
-        async function capturarDocumento() {
+        // Captura a foto do documento e mostra preview, esconde câmera, mostra botões de retake/validar
+        function capturarDocumento() {
             if(!streamDoc) { alert("Abra a câmera primeiro"); return; }
-            const nomeDigitado = document.getElementById('nome').value.trim();
-            if(!nomeDigitado) { alert("Preencha o nome completo"); return; }
             
             const video = document.getElementById('videoDoc');
             const canvas = document.getElementById('canvasDoc');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            preprocessImage(canvas);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            const imgData = canvas.toDataURL('image/jpeg');
-            document.getElementById('imgDocPreview').src = imgData;
+            // Guardar a imagem original para validação
+            capturedImageData = canvas.toDataURL('image/jpeg');
+            document.getElementById('imgDocPreview').src = capturedImageData;
             document.getElementById('imgDocPreview').style.display = 'block';
             video.style.display = 'none';
+            
+            // Ocultar botões da câmera e mostrar os de pós-captura
+            document.getElementById('botoesCameraDoc').style.display = 'none';
+            document.getElementById('botoesPosCaptura').style.display = 'flex';
+            
+            // Limpar mensagens anteriores
+            document.getElementById('validacaoDocMsg').style.display = 'none';
+            document.getElementById('ocrProgress').style.display = 'none';
+        }
+        
+        // Função para retirar a foto e voltar à câmera
+        function retirarFoto() {
+            // Esconder preview
+            document.getElementById('imgDocPreview').style.display = 'none';
+            // Mostrar vídeo novamente
+            document.getElementById('videoDoc').style.display = 'block';
+            // Mostrar botões da câmera e esconder os de pós-captura
+            document.getElementById('botoesCameraDoc').style.display = 'flex';
+            document.getElementById('botoesPosCaptura').style.display = 'none';
+            // Limpar imagem capturada
+            capturedImageData = null;
+            // Limpar mensagens
+            document.getElementById('validacaoDocMsg').style.display = 'none';
+            document.getElementById('ocrProgress').style.display = 'none';
+        }
+        
+        // Validar a foto capturada
+        async function validarFoto() {
+            if(!capturedImageData) {
+                alert("Nenhuma foto capturada. Tire uma foto primeiro.");
+                return;
+            }
+            const nomeDigitado = document.getElementById('nome').value.trim();
+            if(!nomeDigitado) {
+                alert("Preencha o nome completo antes de validar.");
+                return;
+            }
             
             const statusDiv = document.getElementById('validacaoDocMsg');
             const ocrProgress = document.getElementById('ocrProgress');
@@ -725,7 +771,7 @@
             statusDiv.style.display = 'none';
             
             try {
-                const blob = await (await fetch(imgData)).blob();
+                const blob = await (await fetch(capturedImageData)).blob();
                 const { data: { text } } = await Tesseract.recognize(blob, 'por', {
                     logger: m => { if (m.status === 'recognizing text') ocrProgress.innerHTML = `📖 Lendo: ${Math.round(m.progress * 100)}%`; }
                 });
@@ -739,6 +785,9 @@
                     statusDiv.className = 'doc-status success';
                     statusDiv.innerHTML = `✅ B.I. VÁLIDO!<br>✓ Nome confirmado: ${nomeDigitado}<br>Clique em "Continuar" para preencher os restantes dados.`;
                     statusDiv.style.display = 'block';
+                    // Esconder os botões de pós-captura e mostrar mensagem
+                    document.getElementById('botoesPosCaptura').style.display = 'none';
+                    // Avançar para próxima etapa
                     document.getElementById('etapaRestante').classList.remove('hidden');
                     document.getElementById('etapaValidacao').style.display = 'none';
                     fecharTodasCameras();
@@ -747,6 +796,7 @@
                     statusDiv.innerHTML = `❌ VALIDAÇÃO REPROVADA!<br>• Nome "${nomeDigitado}" não encontrado<br><br>Dicas: Posicione o BI numa superfície plana, boa iluminação, sem reflexos.`;
                     statusDiv.style.display = 'block';
                     documentoValidado = false;
+                    // Manter os botões de retake para tentar novamente
                 }
             } catch(ocrError) {
                 ocrProgress.style.display = 'none';
@@ -931,6 +981,8 @@
         document.getElementById('btnTirarFotoDoc').onclick = capturarDocumento;
         document.getElementById('btnFecharCameraDoc').onclick = () => fecharTodasCameras();
         document.getElementById('btnFlashDoc').onclick = () => toggleFlash('doc');
+        document.getElementById('btnRetirarFoto').onclick = retirarFoto;
+        document.getElementById('btnValidarFoto').onclick = validarFoto;
         
         document.getElementById('btnAbrirCameraRosto').onclick = () => abrirCamera('rosto', 'user');
         document.getElementById('btnTirarFotoRosto').onclick = capturarRosto;
