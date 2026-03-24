@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Permuta de Professores - Moçambique | Firebase Cloud</title>
+    <title>Permuta de Professores - Moçambique</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
     <style>
         :root {
             --primary: #009688;
@@ -128,7 +125,6 @@
             background-color: #fff;
         }
         input:focus, select:focus { border-color: var(--primary); outline: none; }
-        select option[value=""] { color: #999; }
 
         .btn-submit {
             background-color: var(--primary); color: white; border: none;
@@ -332,13 +328,29 @@
             display: inline-block;
             margin-left: 10px;
         }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 1000;
+            animation: fadeInUp 0.3s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🇲🇿 Portal de Permuta <span id="statusBadge" class="status-online" style="display:none;">✓ Firebase Cloud</span></h1>
-        <p>Sistema com banco de dados em tempo real - Dados sincronizados na nuvem</p>
+        <h1>🇲🇿 Portal de Permuta</h1>
+        <p>Sistema de Trocas de Posto de Trabalho</p>
     </header>
 
     <div class="container">
@@ -362,10 +374,7 @@
                         <div class="camera-section">
                             <h3>📸 Captura do B.I. Moçambicano</h3>
                             <div class="dicas">
-                                💡 <strong>Dicas para melhor leitura:</strong><br>
-                                • Posicione o BI numa superfície plana e bem iluminada<br>
-                                • Evite reflexos e sombras<br>
-                                • Mantenha a câmera estável e o documento inteiro na imagem
+                                💡 <strong>Dicas:</strong> Posicione o BI numa superfície plana e bem iluminada, evite reflexos.
                             </div>
                             <div id="cameraDocContainer">
                                 <video id="videoDoc" class="video-feed back" autoplay playsinline muted></video>
@@ -524,21 +533,6 @@
     </div>
 
     <script>
-        // ==================== CONFIGURAÇÃO FIREBASE ====================
-        const firebaseConfig = {
-            apiKey: "AIzaSyA8HY9QBk0aQlMkkp6wTpR_mmoCS7lpQ_c",
-            authDomain: "permuta-de-professores.firebaseapp.com",
-            projectId: "permuta-de-professores",
-            storageBucket: "permuta-de-professores.firebasestorage.app",
-            messagingSenderId: "528412441677",
-            appId: "1:528412441677:web:5afee14088aee988f73004",
-            measurementId: "G-8H1QJL3EF6"
-        };
-
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        
         // ==================== DADOS GEOGRÁFICOS ====================
         const provinciasMoz = ["Maputo Cidade", "Maputo Província", "Gaza", "Inhambane", "Sofala", "Manica", "Tete", "Zambézia", "Nampula", "Cabo Delgado", "Niassa"];
         const distritosPorProvincia = {
@@ -555,7 +549,40 @@
             "Niassa": ["Lichinga", "Cuamba", "Mandimba", "Majune", "Sanga", "Mavago", "Mecula", "Marrupa", "Metarica", "Muembe", "Ngauma", "Lago"]
         };
 
+        // ==================== ARMAZENAMENTO LOCAL ====================
         let professores = [];
+        
+        function carregarDados() {
+            const saved = localStorage.getItem('professoresDB');
+            if(saved) {
+                professores = JSON.parse(saved);
+            } else {
+                professores = [
+                    { nome: "Carlos Mondlane", nivel: "DN2", tipoNomeacao: "Provisória", provAtual: "Maputo Província", distritoAtual: "Matola", tipoLocal: "Dentro da Vila", distancia: 0, provDestino: "Sofala", distDestino: "Beira", condicoes: "Prefiro escola perto da cidade", telefone: "841112233", fotoRosto: "", dataRegisto: new Date().toISOString() },
+                    { nome: "Ana Sitoe", nivel: "DN1", tipoNomeacao: "Definitiva", provAtual: "Inhambane", distritoAtual: "Maxixe", tipoLocal: "Fora da Vila", distancia: 50, provDestino: "Maputo Cidade", distDestino: "Maputo Cidade", condicoes: "Precisa de casa", telefone: "859988776", fotoRosto: "", dataRegisto: new Date().toISOString() },
+                    { nome: "João Macheve", nivel: "DN2", tipoNomeacao: "Provisória", provAtual: "Tete", distritoAtual: "Tete", tipoLocal: "Dentro da Vila", distancia: 0, provDestino: "Maputo Província", distDestino: "Matola", condicoes: "Aceito qualquer escola", telefone: "820000000", fotoRosto: "", dataRegisto: new Date().toISOString() }
+                ];
+                localStorage.setItem('professoresDB', JSON.stringify(professores));
+            }
+            if(document.getElementById('view-list').classList.contains('active')) {
+                atualizarFiltrosLista();
+            }
+        }
+        
+        function salvarDados() {
+            localStorage.setItem('professoresDB', JSON.stringify(professores));
+        }
+        
+        function mostrarToast(mensagem, tipo = 'success') {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.background = tipo === 'success' ? '#2ecc71' : '#e74c3c';
+            toast.innerHTML = mensagem;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ==================== VARIÁVEIS DO SISTEMA ====================
         let streamDoc = null, streamRosto = null;
         let currentFacing = "user";
         let documentoValidado = false;
@@ -563,40 +590,6 @@
         let tipoNomeacaoSelecionado = "";
         let capturedImageData = null;
 
-        // Mostrar status conectado
-        document.getElementById('statusBadge').style.display = 'inline-block';
-
-        // ==================== FUNÇÕES DO FIREBASE ====================
-        function carregarProfessoresFirebase() {
-            db.collection('professores').orderBy('dataRegisto', 'desc').onSnapshot(snapshot => {
-                professores = [];
-                snapshot.forEach(doc => {
-                    professores.push({ id: doc.id, ...doc.data() });
-                });
-                console.log(`📥 Dados carregados: ${professores.length} registos`);
-                if(document.getElementById('view-list').classList.contains('active')) {
-                    atualizarFiltrosLista();
-                }
-            }, error => {
-                console.error("Erro ao carregar dados:", error);
-            });
-        }
-
-        async function salvarProfessorFirebase(dados) {
-            try {
-                await db.collection('professores').add({
-                    ...dados,
-                    dataRegisto: new Date().toISOString()
-                });
-                return true;
-            } catch(e) {
-                console.error("Erro ao salvar:", e);
-                alert("Erro ao salvar no Firebase: " + e.message);
-                return false;
-            }
-        }
-
-        // ==================== FUNÇÕES DO SISTEMA ====================
         function showView(viewId) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
@@ -967,7 +960,7 @@
         document.getElementById('btnFlashRosto').onclick = () => toggleFlash('rosto');
         document.getElementById('btnTrocarCamera').onclick = trocarCamera;
 
-        document.getElementById('permutaForm').addEventListener('submit', async function(e) {
+        document.getElementById('permutaForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             // Verificações
@@ -1044,7 +1037,8 @@
                 distDestino: distDestino,
                 condicoes: document.getElementById('condicoes').value || "Nenhuma",
                 telefone: telefone,
-                fotoRosto: document.getElementById('fotoRostoData').value
+                fotoRosto: document.getElementById('fotoRostoData').value,
+                dataRegisto: new Date().toISOString()
             };
             
             // Mostrar loading no botão
@@ -1055,12 +1049,14 @@
             
             const matches = professores.filter(p => p.provDestino === novo.provAtual && p.nivel === novo.nivel && p.tipoNomeacao === novo.tipoNomeacao);
             
-            const sucesso = await salvarProfessorFirebase(novo);
+            professores.push(novo);
+            salvarDados();
             
-            btnRegistar.innerHTML = textoOriginal;
-            btnRegistar.disabled = false;
-            
-            if(sucesso) {
+            // Simular um pequeno atraso para mostrar o loading
+            setTimeout(() => {
+                btnRegistar.innerHTML = textoOriginal;
+                btnRegistar.disabled = false;
+                
                 if(matches.length > 0) {
                     let msg = `✅ PERMUTA POSSÍVEL! Encontrámos ${matches.length} professor(es) com ${novo.nivel} - ${novo.tipoNomeacao}:\n\n`;
                     matches.forEach(m => msg += `👤 ${m.nome}\n📞 ${m.telefone}\n\n`);
@@ -1068,15 +1064,15 @@
                 } else {
                     alert(`✅ Registo efetuado com sucesso!\n\n⚠️ Ainda não há ninguém com ${novo.nivel} - ${novo.tipoNomeacao} para ${novo.provAtual}\n\nSeu pedido foi registado e ficará disponível para outros professores.`);
                 }
+                
+                mostrarToast("✅ Registo salvo com sucesso!", "success");
                 showView('view-list');
-            } else {
-                alert("❌ Erro ao salvar. Tente novamente.");
-            }
+            }, 500);
         });
         
         // Inicializar
         inicializarSelectsForm();
-        carregarProfessoresFirebase();
+        carregarDados();
     </script>
 </body>
 </html>
