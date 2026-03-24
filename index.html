@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Permuta de Professores - Moçambique | Firebase Cloud</title>
+    <title>Permuta de Professores - Moçambique</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
@@ -322,15 +322,6 @@
             display: inline-block;
             margin-bottom: 15px;
         }
-        .status-online {
-            background: var(--success);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            display: inline-block;
-            margin-left: 10px;
-        }
         .toast {
             position: fixed;
             bottom: 20px;
@@ -347,43 +338,13 @@
             from { opacity: 0; transform: translateX(-50%) translateY(20px); }
             to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-        .loading-spinner {
-            background: white;
-            padding: 20px 40px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .loading-spinner .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--light);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🇲🇿 Portal de Permuta <span id="statusBadge" class="status-online">✓ Firebase Cloud</span></h1>
-        <p>Sistema com banco de dados em tempo real - Dados sincronizados na nuvem</p>
+        <h1>🇲🇿 Sistema de Permuta do Posto de Trabalho Moçambicano</h1>
+        <p>Registe o seu pedido de permuta e encontre colegas interessados</p>
     </header>
 
     <div class="container">
@@ -402,12 +363,15 @@
                     <div id="etapaValidacao">
                         <div class="form-group">
                             <label>Nome Completo (igual ao B.I.): *</label>
-                            <input type="text" id="nome" required placeholder="Ex: EDMILSON BARTOLOMEU NHANOMBE">
+                            <input type="text" id="nome" required placeholder="Ex: Bartolomeu Hilario Nhanombe">
                         </div>
                         <div class="camera-section">
                             <h3>📸 Captura do B.I. Moçambicano</h3>
                             <div class="dicas">
-                                💡 <strong>Dicas:</strong> Posicione o BI numa superfície plana e bem iluminada, evite reflexos.
+                                💡 <strong>Dicas para melhor leitura:</strong><br>
+                                • Posicione o BI numa superfície plana e bem iluminada<br>
+                                • Evite reflexos e sombras<br>
+                                • Mantenha a câmera estável e o documento inteiro na imagem
                             </div>
                             <div id="cameraDocContainer">
                                 <video id="videoDoc" class="video-feed back" autoplay playsinline muted></video>
@@ -618,34 +582,32 @@
                     snapshot.forEach(doc => {
                         professores.push({ id: doc.id, ...doc.data() });
                     });
-                    console.log(`📥 Firebase: ${professores.length} registos carregados`);
+                    console.log(`📥 Dados carregados: ${professores.length} registos`);
                     
                     if(document.getElementById('view-list').classList.contains('active')) {
                         atualizarFiltrosLista();
                     }
                     
-                    // Atualizar se estiver na lista
                     if(document.getElementById('view-list').classList.contains('active') && 
                        document.getElementById('filtroProvincia').value) {
                         filtrarPorProvincia();
                     }
                 }, error => {
-                    console.error("Erro Firebase:", error);
-                    mostrarToast("❌ Erro ao carregar dados do Firebase. Verifique sua conexão.", "error");
+                    console.error("Erro:", error);
+                    mostrarToast("❌ Erro ao carregar dados. Verifique sua conexão.", "error");
                 });
         }
         
-        async function salvarProfessorFirebase(dados) {
+        async function salvarProfessor(dados) {
             try {
                 const docRef = await db.collection('professores').add({
                     ...dados,
                     dataRegisto: new Date().toISOString()
                 });
-                console.log("✅ Professor salvo com ID:", docRef.id);
                 return true;
             } catch(e) {
                 console.error("Erro ao salvar:", e);
-                mostrarToast("❌ Erro ao salvar: " + e.message, "error");
+                mostrarToast("❌ Erro ao salvar. Tente novamente.", "error");
                 return false;
             }
         }
@@ -660,6 +622,45 @@
         }
 
         // ==================== FUNÇÕES DO SISTEMA ====================
+        function limparFormulario() {
+            // Resetar todos os campos do formulário
+            document.getElementById('nome').value = '';
+            document.getElementById('nivel').value = '';
+            document.getElementById('tipoNomeacao').value = '';
+            document.getElementById('btnProvisoria').classList.remove('selected');
+            document.getElementById('btnDefinitiva').classList.remove('selected');
+            document.getElementById('provAtual').value = '';
+            document.getElementById('distritoAtual').innerHTML = '<option value="" disabled selected>-- Primeiro selecione a Província --</option>';
+            document.getElementById('distritoAtual').disabled = true;
+            document.getElementById('radioDentro').checked = false;
+            document.getElementById('radioFora').checked = false;
+            document.getElementById('distanciaGroup').classList.add('hidden');
+            document.getElementById('provDestino').value = '';
+            document.getElementById('distDestino').innerHTML = '<option value="" disabled selected>-- Primeiro selecione a Província --</option>';
+            document.getElementById('distDestino').disabled = true;
+            document.getElementById('condicoes').value = '';
+            document.getElementById('telefone').value = '';
+            document.getElementById('fotoRostoData').value = '';
+            document.getElementById('imgRostoPreview').style.display = 'none';
+            document.getElementById('fotoRostoStatus').style.display = 'none';
+            
+            // Resetar variáveis de estado
+            documentoValidado = false;
+            fotoRostoCapturada = false;
+            tipoNomeacaoSelecionado = "";
+            capturedImageData = null;
+            
+            // Voltar para etapa de validação
+            document.getElementById('etapaRestante').classList.add('hidden');
+            document.getElementById('etapaValidacao').style.display = 'block';
+            document.getElementById('validacaoDocMsg').style.display = 'none';
+            document.getElementById('imgDocPreview').style.display = 'none';
+            document.getElementById('botoesCameraDoc').style.display = 'flex';
+            document.getElementById('botoesPosCaptura').style.display = 'none';
+            
+            fecharTodasCameras();
+        }
+
         function showView(viewId) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
@@ -961,7 +962,7 @@
                         <div class="detail-item"><span class="detail-label">📍 Local de trabalho actual:</span> ${p.provAtual}</div>
                         <div class="detail-item"><span class="detail-label">🏙️ Distrito actual:</span> ${p.distritoAtual}</div>
                         <div class="detail-item"><span class="detail-label">🏫 Localização da escola:</span> ${p.tipoLocal}</div>
-                        <div class="detail-item"><span class="detail-label">📏 Distância da vila:</span> ${distanciaInfo}</div>
+                        <div class="detail-item"><span class="detail-label">📏 Distância da vila para Escola:</span> ${distanciaInfo}</div>
                         <div class="detail-item"><span class="detail-label">🎯 Destino pretendido:</span> ${p.provDestino} > ${p.distDestino}</div>
                         <div class="detail-item"><span class="detail-label">📝 Condições:</span> ${p.condicoes || 'Nenhuma'}</div>
                         <div class="detail-item"><span class="detail-label">📞 Contacto:</span> <strong>${p.telefone}</strong></div>
@@ -1033,7 +1034,6 @@
         document.getElementById('permutaForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Verificações
             if(!documentoValidado) { 
                 alert("❌ Valide o B.I. primeiro! Tire uma foto do seu Bilhete de Identidade e valide.");
                 return; 
@@ -1112,25 +1112,27 @@
             
             const btnRegistar = document.getElementById('btnRegistar');
             const textoOriginal = btnRegistar.innerHTML;
-            btnRegistar.innerHTML = '⏳ Salvando no Firebase...';
+            btnRegistar.innerHTML = '⏳ Salvando dados, aguarde...';
             btnRegistar.disabled = true;
             
             const matches = professores.filter(p => p.provDestino === novo.provAtual && p.nivel === novo.nivel && p.tipoNomeacao === novo.tipoNomeacao);
             
-            const sucesso = await salvarProfessorFirebase(novo);
+            const sucesso = await salvarProfessor(novo);
             
             btnRegistar.innerHTML = textoOriginal;
             btnRegistar.disabled = false;
             
             if(sucesso) {
-                mostrarToast("✅ Registo salvo com sucesso no Firebase!", "success");
+                mostrarToast("✅ Registo efetuado com sucesso!", "success");
                 if(matches.length > 0) {
                     let msg = `✅ PERMUTA POSSÍVEL! Encontrámos ${matches.length} professor(es) com ${novo.nivel} - ${novo.tipoNomeacao}:\n\n`;
                     matches.forEach(m => msg += `👤 ${m.nome}\n📞 ${m.telefone}\n\n`);
                     alert(msg);
                 } else {
-                    alert(`✅ Registo efetuado com sucesso no Firebase!\n\n⚠️ Ainda não há ninguém com ${novo.nivel} - ${novo.tipoNomeacao} para ${novo.provAtual}\n\nSeu pedido foi registado e ficará disponível para outros professores.`);
+                    alert(`✅ Registo efetuado com sucesso!\n\n⚠️ Ainda não há ninguém com ${novo.nivel} - ${novo.tipoNomeacao} para ${novo.provAtual}\n\nSeu pedido foi registado e ficará disponível para outros professores.`);
                 }
+                // Limpar todos os campos do formulário
+                limparFormulario();
                 showView('view-list');
             }
         });
