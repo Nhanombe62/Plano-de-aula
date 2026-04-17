@@ -3,312 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro - Sistema de Registro</title>
+    <title>Admin - Enviar Push</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
             padding: 20px;
         }
-
         .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .card {
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            width: 100%;
-            max-width: 500px;
-            overflow: hidden;
-            display: none;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-
-        .header p {
-            opacity: 0.9;
-        }
-
-        .form-container {
-            padding: 30px;
-        }
-
-        .form-group {
+            border-radius: 16px;
+            padding: 25px;
             margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        input, select {
+        h1 { color: #2c3e50; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .subtitle { color: #7f8c8d; margin-bottom: 25px; font-size: 14px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50; }
+        input, textarea, select {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
+            padding: 12px;
+            border: 1px solid #ddd;
             border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            font-size: 14px;
         }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        textarea { resize: vertical; min-height: 100px; }
+        button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
             border: none;
+            padding: 14px;
             border-radius: 8px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
         }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
         }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-            margin-top: 10px;
-        }
-
-        .btn-secondary:hover {
-            box-shadow: 0 5px 15px rgba(149, 165, 166, 0.4);
-        }
-
-        .message {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 8px;
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
             text-align: center;
-            font-weight: 500;
+        }
+        .stat-number { font-size: 28px; font-weight: bold; }
+        .stat-label { font-size: 11px; opacity: 0.9; margin-top: 5px; }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
             display: none;
         }
-
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            display: block;
-        }
-
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            display: block;
-        }
-
-        .info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-            display: block;
-        }
-
-        .warning {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-            display: block;
-        }
-
+        .result.success { background: #d4edda; color: #155724; display: block; }
+        .result.error { background: #f8d7da; color: #721c24; display: block; }
+        .result.info { background: #d1ecf1; color: #0c5460; display: block; }
         .loading {
+            display: none;
             text-align: center;
-            padding: 50px;
-            color: white;
-            font-size: 18px;
+            margin-top: 15px;
+            padding: 10px;
         }
-
+        .loading.show { display: block; }
+        .device-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .device-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .badge.online { background: #27ae60; color: white; }
+        .badge.offline { background: #95a5a6; color: white; }
         .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
             border-radius: 50%;
-            border-top: 4px solid white;
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin: 0 auto 10px;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        .atualizacao-info {
-            background: #e8f4f8;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            display: none;
-        }
-
-        .atualizacao-info.show {
-            display: block;
-        }
-
-        .atualizacao-info i {
-            color: #667eea;
-            margin-right: 10px;
-        }
-
-        .error-border {
-            border-color: #e74c3c !important;
-        }
-
-        .error-text {
-            color: #e74c3c;
-            font-size: 12px;
-            margin-top: 5px;
-            display: block;
-        }
-
-        /* Estilo para status de notificação */
-        .push-status {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 15px;
-            font-size: 12px;
-            text-align: center;
-            border-left: 3px solid #667eea;
-        }
-        .push-status i {
-            margin-right: 5px;
-        }
-        .push-status.granted {
-            background: #d4edda;
-            border-left-color: #28a745;
-        }
-        .push-status.denied {
-            background: #f8d7da;
-            border-left-color: #dc3545;
-        }
     </style>
 </head>
 <body>
-    <!-- Tela de carregamento -->
-    <div class="loading" id="loadingScreen">
-        <div class="spinner"></div>
-        <p>Verificando cadastro...</p>
-    </div>
-
-    <!-- Container principal (formulário) -->
-    <div class="container" id="mainContainer">
-        <div class="header">
-            <h1>📝 <span id="headerTitle">Primeiro Acesso</span></h1>
-            <p id="headerSubtitle">Complete o formulário para se cadastrar</p>
+    <div class="container">
+        <div class="card">
+            <h1>
+                <span>🔔</span> 
+                Painel Administrativo
+            </h1>
+            <p class="subtitle">Envie notificações push para todos os usuários</p>
+            
+            <div class="stats" id="statsContainer">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalDevices">0</div>
+                    <div class="stat-label">Total Dispositivos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeDevices">0</div>
+                    <div class="stat-label">Com Push Ativo</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="notificationsSent">0</div>
+                    <div class="stat-label">Notificações Enviadas</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Título da Notificação</label>
+                <input type="text" id="title" placeholder="Ex: Nova Aula Disponível" value="📢 Plano de Aula MZ">
+            </div>
+            
+            <div class="form-group">
+                <label>Mensagem</label>
+                <textarea id="body" placeholder="Digite a mensagem que todos vão receber..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Link (opcional)</label>
+                <input type="text" id="link" placeholder="https://nhanombe62.github.io/" value="/">
+            </div>
+            
+            <div class="form-group">
+                <label>Prioridade</label>
+                <select id="priority">
+                    <option value="high">Alta (Entrega imediata)</option>
+                    <option value="normal">Normal (Economia de bateria)</option>
+                </select>
+            </div>
+            
+            <button id="sendBtn" onclick="enviarNotificacao()">
+                📨 Enviar Notificação
+            </button>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                Enviando notificações...
+            </div>
+            
+            <div class="result" id="result"></div>
         </div>
-
-        <div class="form-container">
-            <!-- Status de Push Notification -->
-            <div class="push-status" id="pushStatus" style="display: none;">
-                <i class="fas fa-bell"></i> <span id="pushStatusText">Verificando notificações...</span>
-                <button id="ativarPushBtn" style="margin-top:8px; padding:5px 12px; font-size:11px; background:#3498db; color:white; border:none; border-radius:5px; cursor:pointer;">🔔 Ativar Notificações</button>
+        
+        <div class="card">
+            <h3>📱 Dispositivos Conectados</h3>
+            <div class="device-list" id="deviceList">
+                <p style="color:#999; text-align:center;">Carregando dispositivos...</p>
             </div>
-
-            <div class="atualizacao-info" id="atualizacaoInfo">
-                <i class="fas fa-edit"></i> 
-                <strong>Actualizar Dados:</strong> Preencha os campos abaixo para actualizar suas informações.
-            </div>
-
-            <form id="cadastroForm">
-                <div class="form-group">
-                    <label for="nome">Nome Completo *</label>
-                    <input type="text" id="nome" required 
-                           placeholder="Digite seu nome completo (ex: João Silva)">
-                    <span class="error-text" id="nomeError"></span>
-                </div>
-
-                <div class="form-group">
-                    <label for="numero">Número de Telefone *</label>
-                    <input type="tel" id="numero" required 
-                           placeholder="Ex: 841234567">
-                    <span class="error-text" id="numeroError"></span>
-                </div>
-
-                <div class="form-group">
-                    <label for="escola">Escola *</label>
-                    <input type="text" id="escola" required 
-                           placeholder="Nome da escola">
-                    <span class="error-text" id="escolaError"></span>
-                </div>
-
-                <div class="form-group">
-                    <label for="provincia">Província *</label>
-                    <select id="provincia" required>
-                        <option value="">Selecione a província</option>
-                        <option value="Maputo">Maputo</option>
-                        <option value="Gaza">Gaza</option>
-                        <option value="Inhambane">Inhambane</option>
-                        <option value="Sofala">Sofala</option>
-                        <option value="Manica">Manica</option>
-                        <option value="Tete">Tete</option>
-                        <option value="Zambézia">Zambézia</option>
-                        <option value="Nampula">Nampula</option>
-                        <option value="Cabo Delgado">Cabo Delgado</option>
-                        <option value="Niassa">Niassa</option>
-                    </select>
-                    <span class="error-text" id="provinciaError"></span>
-                </div>
-
-                <button type="submit" class="btn" id="submitBtn">
-                    <span id="btnText">Cadastrar</span>
-                </button>
-                
-                <button type="button" class="btn btn-secondary" id="voltarBtn" style="display: none;">
-                    <i class="fas fa-arrow-left"></i> Voltar para o App
-                </button>
-
-                <div class="message" id="message"></div>
-            </form>
         </div>
     </div>
 
-    <!-- Adicionar Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
 
     <script>
-        // ==================== CONFIGURAÇÃO FIREBASE ====================
         const firebaseConfig = {
             apiKey: "AIzaSyApZGFB_XKGYX-vpLJHiBaz8V8b4Z36eGY",
             authDomain: "notificao-4e707.firebaseapp.com",
@@ -322,547 +197,162 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
-        // ID único do dispositivo (persistente)
-        let deviceId = localStorage.getItem('device_id');
-        if (!deviceId) {
-            deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('device_id', deviceId);
-        }
+        let allDevices = [];
         
-        // VAPID Key
-        const VAPID_KEY = "BBZvwJyvzBzEo5eujMiAiv7ys50uOQjkmOJv8_NZdUf96SDtPlpKnsjNEmSLfgMx7vKA5xUxB8RHQN2vCzZpywc";
-        
-        // ==================== PUSH NOTIFICATIONS ====================
-        async function registrarTokenPush(nomeUsuario) {
-            try {
-                if (!('Notification' in window)) {
-                    console.log('Notificações não suportadas');
-                    return null;
-                }
-                
-                if (Notification.permission !== 'granted') {
-                    console.log('Permissão não concedida ainda');
-                    return null;
-                }
-                
-                // Registrar Service Worker
-                let registration;
-                if ('serviceWorker' in navigator) {
-                    registration = await navigator.serviceWorker.ready;
-                } else {
-                    return null;
-                }
-                
-                const messaging = firebase.messaging();
-                const token = await messaging.getToken({
-                    vapidKey: VAPID_KEY,
-                    serviceWorkerRegistration: registration
-                });
-                
-                if (token) {
-                    // Salvar token no Firebase com os dados do usuário
-                    const deviceRef = database.ref('push_devices/' + deviceId);
-                    await deviceRef.set({
-                        token: token,
-                        userName: nomeUsuario,
-                        userAgent: navigator.userAgent,
-                        lastSeen: firebase.database.ServerValue.TIMESTAMP,
-                        active: true,
-                        firstSeen: firebase.database.ServerValue.TIMESTAMP
-                    });
-                    
-                    // Salvar índice reverso (token -> deviceId)
-                    const tokenKey = token.replace(/[.#$/[\]]/g, '_');
-                    await database.ref('fcm_tokens/' + tokenKey).set({
-                        deviceId: deviceId,
-                        userName: nomeUsuario,
-                        lastSeen: firebase.database.ServerValue.TIMESTAMP,
-                        active: true
-                    });
-                    
-                    console.log('✅ Token registrado para:', nomeUsuario);
-                    return token;
-                }
-                
-                return null;
-            } catch (error) {
-                console.error('Erro ao registrar token:', error);
-                return null;
-            }
-        }
-        
-        // Atualizar dados do usuário no dispositivo
-        async function atualizarDadosUsuario(nome, escola, provincia, numero) {
-            if (!deviceId) return;
-            
-            try {
-                await database.ref('push_devices/' + deviceId).update({
-                    userName: nome,
-                    escola: escola,
-                    provincia: provincia,
-                    telefone: numero,
-                    lastSeen: firebase.database.ServerValue.TIMESTAMP
-                });
-                console.log('✅ Dados do usuário atualizados no push_devices');
-            } catch (error) {
-                console.error('Erro ao atualizar dados:', error);
-            }
-        }
-        
-        // Solicitar permissão de notificação
-        async function solicitarPermissaoPush() {
-            try {
-                const permission = await Notification.requestPermission();
-                
-                if (permission === 'granted') {
-                    const pushStatusDiv = document.getElementById('pushStatus');
-                    pushStatusDiv.className = 'push-status granted';
-                    document.getElementById('pushStatusText').innerHTML = '<i class="fas fa-check-circle"></i> Notificações ativadas! Você receberá novidades.';
-                    document.getElementById('ativarPushBtn').style.display = 'none';
-                    
-                    // Se já tem usuário cadastrado, registrar token
-                    const usuarioSalvo = localStorage.getItem('usuario_cadastrado');
-                    if (usuarioSalvo) {
-                        const user = JSON.parse(usuarioSalvo);
-                        await registrarTokenPush(user.nome);
+        // Carregar dispositivos
+        function loadDevices() {
+            database.ref('push_devices').on('value', (snapshot) => {
+                const devices = [];
+                snapshot.forEach(child => {
+                    const device = child.val();
+                    if (device.token && device.active !== false) {
+                        devices.push({
+                            id: child.key,
+                            token: device.token,
+                            userName: device.userName || 'Usuário',
+                            userAgent: device.userAgent,
+                            lastSeen: device.lastSeen
+                        });
                     }
-                    
-                    return true;
-                } else {
-                    const pushStatusDiv = document.getElementById('pushStatus');
-                    pushStatusDiv.className = 'push-status denied';
-                    document.getElementById('pushStatusText').innerHTML = '<i class="fas fa-ban"></i> Notificações bloqueadas. Você pode ativar nas configurações do navegador.';
-                    return false;
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-                return false;
-            }
-        }
-        
-        // Verificar e mostrar status do push
-        function verificarStatusPush() {
-            const pushStatusDiv = document.getElementById('pushStatus');
-            
-            if (Notification.permission === 'granted') {
-                pushStatusDiv.style.display = 'block';
-                pushStatusDiv.className = 'push-status granted';
-                document.getElementById('pushStatusText').innerHTML = '<i class="fas fa-check-circle"></i> Notificações ativas! Você receberá novidades.';
-                document.getElementById('ativarPushBtn').style.display = 'none';
-            } else if (Notification.permission === 'denied') {
-                pushStatusDiv.style.display = 'block';
-                pushStatusDiv.className = 'push-status denied';
-                document.getElementById('pushStatusText').innerHTML = '<i class="fas fa-ban"></i> Notificações bloqueadas. Ative nas configurações do navegador.';
-                document.getElementById('ativarPushBtn').style.display = 'block';
-            } else {
-                pushStatusDiv.style.display = 'block';
-                pushStatusDiv.className = 'push-status';
-                document.getElementById('pushStatusText').innerHTML = '<i class="fas fa-bell"></i> Ative as notificações para receber novidades!';
-                document.getElementById('ativarPushBtn').style.display = 'block';
-            }
-        }
-        
-        // Atualizar lastSeen periodicamente
-        setInterval(() => {
-            if (deviceId) {
-                database.ref('push_devices/' + deviceId).update({
-                    lastSeen: firebase.database.ServerValue.TIMESTAMP,
-                    active: true
-                }).catch(err => console.log('Erro:', err));
-            }
-        }, 60000);
-        
-        // ==================== SEU CÓDIGO ORIGINAL (preservado) ====================
-        // URL do seu Google Apps Script
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxWsH88RWwFLK1bbjVjaFRNx894boMEyKeNsIjNctkdxOx90CzkCNRaXEwNZpY8JPA25Q/exec';
-
-        // Chave para localStorage
-        const STORAGE_KEY = 'usuario_cadastrado';
-        const PERFIL_KEY = 'perfil_professor';
-
-        // Elementos DOM
-        const loadingScreen = document.getElementById('loadingScreen');
-        const mainContainer = document.getElementById('mainContainer');
-        const form = document.getElementById('cadastroForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const btnText = document.getElementById('btnText');
-        const messageDiv = document.getElementById('message');
-        const headerTitle = document.getElementById('headerTitle');
-        const headerSubtitle = document.getElementById('headerSubtitle');
-        const voltarBtn = document.getElementById('voltarBtn');
-        const atualizacaoInfo = document.getElementById('atualizacaoInfo');
-
-        // Variável para controlar se é atualização
-        let isUpdating = false;
-        let existingUserData = null;
-
-        // LISTA DE PALAVRAS OFENSIVAS
-        const offensiveWords = [
-            'cu', 'cú', 'anus', 'rabo', 'bunda', 'pinto', 'caralho', 'piroca', 'pau', 
-            'vagina', 'xoxota', 'buceta', 'ppk', 'pepeca', 'priquito', 'boquete', 
-            'punheta', 'masturbação', 'orgasmo', 'foda', 'transar', 'putaria',
-            'merda', 'bosta', 'cocô', 'fezes', 'mijo', 'urina', 'porra', 'cacete',
-            'puta', 'puto', 'prostituta', 'prostituição', 'rameira', 'vadio',
-            'viado', 'bicha', 'boiola', 'sapatão', 'traveco', 'veado', 'baitola',
-            'preto', 'preta', 'macaco', 'macaca', 'crioulo', 'crioula', 'mulato',
-            'gordo', 'gorda', 'baleia', 'porco', 'vaca', 'burro', 'anormal', 'gorda',
-            'deficiente', 'aleijado', 'mongol', 'retardado', 'autista', 'esquisito',
-            'nazista', 'fascista', 'comunista', 'terrorista', 'extremista',
-            'mãe', 'mae', 'mâe', 'pai', 'tio', 'tia', 'avô', 'avo', 'avó', 
-            'irmão', 'irmao', 'irmã', 'primo', 'prima', 'sogra', 'sogro',
-            'corno', 'corna', 'chifrudo', 'trouxa', 'otário', 'otario', 'otaria',
-            'imbecil', 'idiota', 'estúpido', 'burro', 'animal', 'selvagem', 'ignorante',
-            'diabo', 'satanás', 'inferno', 'demônio', 'capeta', 'cão',
-            'drogado', 'viciado', 'noia', 'cracudo', 'maconheiro', 'cheirador',
-            'feio', 'horrível', 'nojento', 'asqueroso', 'repugnante', 'nojenta',
-            'lixo', 'escória', 'verme', 'rato', 'barata', 'formiga',
-            'filho da puta', 'desgraçado', 'maldito', 'vagabundo', 'miserável',
-            'viadinho', 'bichinha', 'sapatona', 'boiola', 'baitola',
-            'cafajeste', 'malandro', 'picareta', 'aldrabão', 'trapaceiro',
-            'assassino', 'ladrão', 'bandido', 'criminoso', 'marginal',
-            'sexo', 'porn', 'porno', 'putaria', 'safado', 'safada'
-        ];
-
-        function removeAcentos(texto) {
-            return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        }
-
-        function isOffensiveName(nome) {
-            if (!nome || typeof nome !== 'string') return true;
-            const nomeTrim = nome.trim();
-            const nomeLower = nomeTrim.toLowerCase();
-            const nomeSemAcentos = removeAcentos(nomeLower);
-            const palavras = nomeTrim.split(/\s+/);
-            if (palavras.length < 2) return true;
-            
-            for (let palavra of palavras) {
-                if (palavra.length < 3) return true;
-                const palavraLower = palavra.toLowerCase();
-                const palavraSemAcentos = removeAcentos(palavraLower);
-                for (let ofensiva of offensiveWords) {
-                    const ofensivaSemAcentos = removeAcentos(ofensiva.toLowerCase());
-                    if (palavraSemAcentos.includes(ofensivaSemAcentos) || 
-                        ofensivaSemAcentos.includes(palavraSemAcentos)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        function validateName(nome) {
-            clearError('nome');
-            if (!nome || nome.trim() === '') {
-                showError('nome', 'Por favor, digite seu nome completo');
-                return false;
-            }
-            const nomeTrim = nome.trim();
-            const palavras = nomeTrim.split(/\s+/);
-            if (palavras.length < 2) {
-                showError('nome', 'Digite o nome completo (mínimo 2 palavras, ex: João Silva)');
-                return false;
-            }
-            for (let palavra of palavras) {
-                if (palavra.length < 3) {
-                    showError('nome', 'Cada nome deve ter pelo menos 3 letras');
-                    return false;
-                }
-            }
-            if (isOffensiveName(nome)) {
-                showError('nome', '⚠️ Nome contém palavras ofensivas ou inadequadas. Por favor, use seu nome real.');
-                return false;
-            }
-            return true;
-        }
-
-        function validatePhone(numero) {
-            clearError('numero');
-            if (!numero || numero.trim() === '') {
-                showError('numero', 'Digite o número de telefone');
-                return false;
-            }
-            const phoneClean = numero.replace(/\D/g, '');
-            if (phoneClean.length !== 9) {
-                showError('numero', 'Número deve ter 9 dígitos (ex: 841234567)');
-                return false;
-            }
-            return true;
-        }
-
-        function validateEscola(escola) {
-            clearError('escola');
-            if (!escola || escola.trim() === '') {
-                showError('escola', 'Digite o nome da escola');
-                return false;
-            }
-            if (escola.trim().length < 3) {
-                showError('escola', 'Nome da escola muito curto');
-                return false;
-            }
-            return true;
-        }
-
-        function validateProvincia(provincia) {
-            clearError('provincia');
-            if (!provincia) {
-                showError('provincia', 'Selecione a província');
-                return false;
-            }
-            return true;
-        }
-
-        function showError(fieldId, message) {
-            const errorSpan = document.getElementById(`${fieldId}Error`);
-            const inputField = document.getElementById(fieldId);
-            if (errorSpan) {
-                errorSpan.textContent = message;
-                errorSpan.style.display = 'block';
-            }
-            if (inputField) {
-                inputField.classList.add('error-border');
-            }
-        }
-
-        function clearError(fieldId) {
-            const errorSpan = document.getElementById(`${fieldId}Error`);
-            const inputField = document.getElementById(fieldId);
-            if (errorSpan) {
-                errorSpan.textContent = '';
-                errorSpan.style.display = 'none';
-            }
-            if (inputField) {
-                inputField.classList.remove('error-border');
-            }
-        }
-
-        function clearAllErrors() {
-            const fields = ['nome', 'numero', 'escola', 'provincia'];
-            fields.forEach(clearError);
-        }
-
-        function checkIfUpdating() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const updateParam = urlParams.get('update');
-            
-            if (updateParam === 'true') {
-                isUpdating = true;
-                headerTitle.textContent = 'Actualizar Cadastro';
-                headerSubtitle.textContent = 'Actualize suas informações';
-                submitBtn.querySelector('#btnText').textContent = 'Actualizar';
-                atualizacaoInfo.classList.add('show');
-                voltarBtn.style.display = 'block';
-                
-                const usuarioSalvo = localStorage.getItem(STORAGE_KEY);
-                if (usuarioSalvo) {
-                    existingUserData = JSON.parse(usuarioSalvo);
-                    preencherFormulario(existingUserData);
-                }
-            }
-        }
-
-        function preencherFormulario(dados) {
-            if (dados) {
-                document.getElementById('nome').value = dados.nome || '';
-                document.getElementById('numero').value = dados.numero || '';
-                document.getElementById('escola').value = dados.escola || '';
-                document.getElementById('provincia').value = dados.provincia || '';
-            }
-        }
-
-        function verificarCadastro() {
-            console.log('🔍 Verificando localStorage...');
-            
-            const usuarioSalvo = localStorage.getItem(STORAGE_KEY);
-            const urlParams = new URLSearchParams(window.location.search);
-            const updateParam = urlParams.get('update');
-            
-            if (updateParam === 'true') {
-                console.log('🔄 Modo atualização. Mostrando formulário...');
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                    mainContainer.style.display = 'block';
-                    verificarStatusPush();
-                }, 500);
-                return;
-            }
-            
-            if (usuarioSalvo) {
-                const usuario = JSON.parse(usuarioSalvo);
-                if (usuario.nome && isOffensiveName(usuario.nome)) {
-                    console.log('⚠️ Nome ofensivo detectado. Forçando atualização...');
-                    showMessage('⚠️ Seu nome contém palavras ofensivas. Por favor, atualize seus dados.', 'warning');
-                    setTimeout(() => {
-                        window.location.href = '?update=true';
-                    }, 2000);
-                } else {
-                    console.log('✅ Usuário JÁ cadastrado. Redirecionando...');
-                    setTimeout(() => {
-                        window.location.href = 'tela.html';
-                    }, 1000);
-                }
-            } else {
-                console.log('❌ Usuário NÃO cadastrado. Mostrando formulário...');
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                    mainContainer.style.display = 'block';
-                    verificarStatusPush();
-                }, 1000);
-            }
-        }
-
-        function salvarUsuario(dados) {
-            try {
-                if (isOffensiveName(dados.nome)) {
-                    showMessage('❌ Nome contém palavras ofensivas. Por favor, use seu nome real.', 'error');
-                    return false;
-                }
-                
-                const usuario = {
-                    nome: dados.nome,
-                    numero: dados.numero,
-                    escola: dados.escola,
-                    provincia: dados.provincia,
-                    data: new Date().toLocaleString('pt-MZ'),
-                    timestamp: Date.now(),
-                    nomeValidado: true
-                };
-                
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(usuario));
-                
-                const perfilProfessor = {
-                    nome: dados.nome,
-                    escola: dados.escola,
-                    provincia: dados.provincia,
-                    numero: dados.numero,
-                    ultimaAtualizacao: new Date().toLocaleString('pt-MZ'),
-                    nomeValidado: true
-                };
-                localStorage.setItem(PERFIL_KEY, JSON.stringify(perfilProfessor));
-                
-                // Atualizar dados no push_devices
-                atualizarDadosUsuario(dados.nome, dados.escola, dados.provincia, dados.numero);
-                
-                // Registrar token push se tiver permissão
-                if (Notification.permission === 'granted') {
-                    registrarTokenPush(dados.nome);
-                }
-                
-                console.log('💾 Usuário salvo no localStorage:', usuario);
-                return true;
-            } catch (error) {
-                console.error('Erro ao salvar no localStorage:', error);
-                return false;
-            }
-        }
-
-        async function enviarParaGoogleSheets(dados) {
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        ...dados,
-                        tipo: isUpdating ? 'atualizacao' : 'cadastro',
-                        nome_validado: !isOffensiveName(dados.nome),
-                        data_atualizacao: new Date().toISOString()
-                    })
                 });
-                console.log('📤 Dados enviados para Google Sheets');
-            } catch (error) {
-                console.error('Erro ao enviar para Google Sheets:', error);
-            }
-        }
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            clearAllErrors();
-            
-            const dados = {
-                nome: document.getElementById('nome').value.trim(),
-                numero: document.getElementById('numero').value.trim(),
-                escola: document.getElementById('escola').value.trim(),
-                provincia: document.getElementById('provincia').value
-            };
-
-            const isNameValid = validateName(dados.nome);
-            const isPhoneValid = validatePhone(dados.numero);
-            const isEscolaValid = validateEscola(dados.escola);
-            const isProvinciaValid = validateProvincia(dados.provincia);
-
-            if (!isNameValid || !isPhoneValid || !isEscolaValid || !isProvinciaValid) {
-                showMessage('Por favor, corrija os erros no formulário.', 'error');
-                return;
-            }
-
-            submitBtn.disabled = true;
-            btnText.textContent = isUpdating ? 'Actualizando...' : 'Cadastrando...';
-
-            const salvo = salvarUsuario(dados);
-            
-            if (!salvo) {
-                showMessage('Erro ao salvar localmente. Tente novamente.', 'error');
-                submitBtn.disabled = false;
-                btnText.textContent = isUpdating ? 'Actualizar' : 'Cadastrar';
-                return;
-            }
-
-            const mensagemSucesso = isUpdating ? '✓ Dados actualizados com sucesso! Redirecionando...' : '✓ Cadastro realizado! Redirecionando...';
-            showMessage(mensagemSucesso, 'success');
-            
-            enviarParaGoogleSheets(dados);
-            
-            setTimeout(() => {
-                window.location.href = 'tela.html';
-            }, 2000);
-        });
-
-        document.getElementById('nome').addEventListener('input', (e) => {
-            if (e.target.value.trim() !== '') {
-                validateName(e.target.value);
-            }
-        });
-
-        document.getElementById('numero').addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 9);
-            if (e.target.value !== '') {
-                validatePhone(e.target.value);
-            }
-        });
-
-        voltarBtn.addEventListener('click', () => {
-            window.location.href = 'tela.html';
-        });
-
-        function showMessage(text, type) {
-            messageDiv.textContent = text;
-            messageDiv.className = `message ${type}`;
-            messageDiv.style.display = 'block';
-            
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 5000);
-        }
-
-        // Botão ativar push
-        document.getElementById('ativarPushBtn').addEventListener('click', solicitarPermissaoPush);
-
-        // Registrar Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/firebase-messaging-sw.js')
-                    .then(reg => console.log('✅ Service Worker registrado'))
-                    .catch(err => console.log('❌ SW Error:', err));
+                
+                allDevices = devices;
+                
+                const ativosComToken = devices.filter(d => d.token && d.active !== false).length;
+                document.getElementById('totalDevices').textContent = devices.length;
+                document.getElementById('activeDevices').textContent = ativosComToken;
+                
+                const deviceList = document.getElementById('deviceList');
+                if (devices.length === 0) {
+                    deviceList.innerHTML = '<p style="color:#999; text-align:center;">📭 Nenhum dispositivo conectado. Peça para alguém abrir o app e ativar notificações.</p>';
+                } else {
+                    deviceList.innerHTML = devices.map(d => `
+                        <div class="device-item">
+                            <div>
+                                <strong>📱 ${d.userName}</strong>
+                                <span class="badge online">Push Ativo</span>
+                            </div>
+                            <div style="font-size: 10px; color: #999;">
+                                ${d.userAgent?.substring(0, 40) || 'Dispositivo'}<br>
+                                Último acesso: ${new Date(d.lastSeen).toLocaleString()}
+                            </div>
+                        </div>
+                    `).join('');
+                }
             });
         }
-
-        window.onload = function() {
-            console.log('🚀 Página carregada. Iniciando verificação...');
-            checkIfUpdating();
-            verificarCadastro();
-        };
+        
+        // Carregar estatísticas
+        function loadStats() {
+            database.ref('notifications_sent').once('value', (snapshot) => {
+                document.getElementById('notificationsSent').textContent = snapshot.numChildren();
+            });
+        }
+        
+        // Enviar notificação
+        async function enviarNotificacao() {
+            const title = document.getElementById('title').value;
+            const body = document.getElementById('body').value;
+            const link = document.getElementById('link').value;
+            const priority = document.getElementById('priority').value;
+            
+            if (!title || !body) {
+                mostrarResultado('error', '❌ Preencha título e mensagem!');
+                return;
+            }
+            
+            const dispositivosValidos = allDevices.filter(d => d.token && d.active !== false);
+            
+            if (dispositivosValidos.length === 0) {
+                mostrarResultado('error', '❌ Nenhum dispositivo com push ativo! Os usuários precisam abrir o app e ativar as notificações.');
+                return;
+            }
+            
+            mostrarLoading(true);
+            mostrarResultado('info', `📡 Enviando para ${dispositivosValidos.length} dispositivo(s)...`);
+            
+            let sucessos = 0;
+            
+            // Salvar notificação na fila de cada usuário
+            for (const device of dispositivosValidos) {
+                try {
+                    const userId = device.token.replace(/[.#$/[\]]/g, '_');
+                    const notifRef = database.ref(`notification_queue/${userId}`).push();
+                    
+                    await notifRef.set({
+                        title: title,
+                        body: body,
+                        link: link,
+                        priority: priority,
+                        timestamp: Date.now(),
+                        timestamp_readable: new Date().toLocaleString('pt-MZ'),
+                        delivered: false,
+                        read: false
+                    });
+                    sucessos++;
+                } catch(e) {
+                    console.error('Erro:', e);
+                }
+            }
+            
+            // Registrar no histórico
+            await database.ref('notifications_sent').push().set({
+                title: title,
+                body: body,
+                sentTo: sucessos,
+                timestamp: Date.now(),
+                priority: priority
+            });
+            
+            mostrarLoading(false);
+            
+            if (sucessos > 0) {
+                mostrarResultado('success', `✅ Notificação enviada com sucesso!\n\n📨 ${sucessos} dispositivo(s) vão receber a notificação.\n💡 A notificação chegará mesmo com o app fechado.`);
+                
+                // Limpar campo mensagem
+                document.getElementById('body').value = '';
+                
+                // Atualizar estatísticas
+                loadStats();
+            } else {
+                mostrarResultado('error', '❌ Falha ao enviar notificações.');
+            }
+        }
+        
+        function mostrarResultado(type, message) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = message.replace(/\n/g, '<br>');
+            setTimeout(() => {
+                if (resultDiv.className === `result ${type}`) {
+                    resultDiv.className = 'result';
+                }
+            }, 8000);
+        }
+        
+        function mostrarLoading(show) {
+            const loadingDiv = document.getElementById('loading');
+            const sendBtn = document.getElementById('sendBtn');
+            if (show) {
+                loadingDiv.classList.add('show');
+                sendBtn.disabled = true;
+            } else {
+                loadingDiv.classList.remove('show');
+                sendBtn.disabled = false;
+            }
+        }
+        
+        // Inicializar
+        loadDevices();
+        loadStats();
+        
+        // Atualizar a cada 30 segundos
+        setInterval(() => {
+            loadDevices();
+            loadStats();
+        }, 30000);
+        
+        window.enviarNotificacao = enviarNotificacao;
     </script>
 </body>
 </html>
