@@ -3,103 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu App - Notificações Push</title>
+    <title>Admin - Enviar Push Real</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', sans-serif;
-            padding: 20px;
             background: #f0f2f5;
+            padding: 20px;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
+        }
+        .card {
             background: white;
             border-radius: 16px;
-            padding: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        .status {
-            padding: 10px;
+        h1 { color: #2c3e50; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .subtitle { color: #7f8c8d; margin-bottom: 25px; font-size: 14px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50; }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
             border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
+            font-size: 14px;
         }
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-        }
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        .status.info {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
+        textarea { resize: vertical; min-height: 100px; }
         button {
-            background: #3498db;
+            background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 14px;
             border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
             width: 100%;
-            font-size: 16px;
         }
-        button:hover {
-            background: #2980b9;
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
-        .notification-list {
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-number { font-size: 32px; font-weight: bold; }
+        .stat-label { font-size: 12px; opacity: 0.9; margin-top: 5px; }
+        .result {
             margin-top: 20px;
-        }
-        .notification-item {
-            background: #f8f9fa;
-            padding: 10px;
-            margin-bottom: 10px;
+            padding: 15px;
             border-radius: 8px;
-            border-left: 4px solid #3498db;
+            display: none;
         }
-        .notification-title {
-            font-weight: bold;
-            color: #2c3e50;
+        .result.success { background: #d4edda; color: #155724; display: block; }
+        .result.error { background: #f8d7da; color: #721c24; display: block; }
+        .result.warning { background: #fff3cd; color: #856404; display: block; }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
         }
-        .notification-body {
-            font-size: 14px;
-            color: #666;
-            margin-top: 5px;
+        .loading.show { display: block; }
+        .device-list {
+            max-height: 300px;
+            overflow-y: auto;
         }
-        .notification-time {
+        .device-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
             font-size: 11px;
-            color: #999;
-            margin-top: 5px;
+            font-weight: bold;
+        }
+        .badge.online { background: #27ae60; color: white; }
+        .badge.offline { background: #95a5a6; color: white; }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>📱 Meu Aplicativo</h2>
-        
-        <div id="statusMessage" class="status info">
-            🔄 Inicializando...
+        <div class="card">
+            <h1>
+                <span>🔔</span> 
+                Admin - Push Notifications
+            </h1>
+            <p class="subtitle">Envie notificações push reais (funciona mesmo com app fechado)</p>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalDevices">0</div>
+                    <div class="stat-label">Dispositivos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="notificationsSent">0</div>
+                    <div class="stat-label">Notificações Enviadas</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Título</label>
+                <input type="text" id="title" placeholder="Ex: Nova Aula Disponível" value="📢 Plano de Aula MZ">
+            </div>
+            
+            <div class="form-group">
+                <label>Mensagem</label>
+                <textarea id="body" placeholder="Digite a mensagem..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Link (opcional)</label>
+                <input type="text" id="link" placeholder="https://nhanombe62.github.io/" value="/">
+            </div>
+            
+            <div class="form-group">
+                <label>Prioridade</label>
+                <select id="priority">
+                    <option value="high">Alta (entrega imediata)</option>
+                    <option value="normal">Normal (economia de bateria)</option>
+                </select>
+            </div>
+            
+            <button id="sendBtn" onclick="enviarPush()">
+                📨 Enviar Push para TODOS
+            </button>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                Enviando notificações...
+            </div>
+            
+            <div class="result" id="result"></div>
         </div>
         
-        <div>
-            <h3>📨 Últimas Notificações</h3>
-            <div id="notificationsList" class="notification-list">
-                <p>Carregando notificações...</p>
+        <div class="card">
+            <h3>📱 Dispositivos Conectados</h3>
+            <div class="device-list" id="deviceList">
+                <p style="color:#999; text-align:center;">Carregando...</p>
             </div>
         </div>
-        
-        <button onclick="testNotification()">🔔 Testar Notificação Local</button>
     </div>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
     
     <script>
-        // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyApZGFB_XKGYX-vpLJHiBaz8V8b4Z36eGY",
             authDomain: "notificao-4e707.firebaseapp.com",
@@ -110,264 +194,158 @@
             appId: "1:684975097117:web:77d730f754441d6d394df4"
         };
         
-        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const messaging = firebase.messaging();
         
-        let userId = null;
-        let deviceId = null;
+        let allDevices = [];
         
-        // Função para obter permissão e token FCM
-        async function setupPushNotifications() {
-            try {
-                updateStatus('Solicitando permissão para notificações...', 'info');
-                
-                // 1. Solicitar permissão
-                const permission = await Notification.requestPermission();
-                
-                if (permission !== 'granted') {
-                    updateStatus('❌ Permissão negada. Você não receberá notificações.', 'error');
-                    return false;
-                }
-                
-                updateStatus('✅ Permissão concedida! Registrando dispositivo...', 'info');
-                
-                // 2. Obter token FCM
-                const token = await messaging.getToken({
-                    vapidKey: 'BLeiKYIi7h5_3ZxZqyL5w_jZEdDpFpMvjZrP8sBzQxYzXvWtUyVzXzYzA-BLeiKYIi7h5_3ZxZqyL5w'
-                });
-                
-                if (token) {
-                    console.log('Token FCM obtido:', token);
-                    
-                    // 3. Registrar no banco de dados
-                    await registerDevice(token);
-                    
-                    updateStatus('✅ Dispositivo registrado! Você receberá notificações push.', 'success');
-                    return true;
-                } else {
-                    updateStatus('❌ Não foi possível obter o token. Verifique sua conexão.', 'error');
-                    return false;
-                }
-                
-            } catch (error) {
-                console.error('Erro no setup de notificações:', error);
-                updateStatus('❌ Erro ao configurar notificações: ' + error.message, 'error');
-                return false;
-            }
-        }
-        
-        // Registrar dispositivo no Firebase
-        async function registerDevice(token) {
-            // Gerar ID único para o dispositivo
-            deviceId = localStorage.getItem('deviceId');
-            if (!deviceId) {
-                deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('deviceId', deviceId);
-            }
-            
-            // Obter dados do usuário
-            const userData = localStorage.getItem('usuario_cadastrado');
-            let userName = 'Usuário';
-            let userPhone = '';
-            let userSchool = '';
-            let userProvince = '';
-            
-            if (userData) {
-                try {
-                    const user = JSON.parse(userData);
-                    userName = user.nome || 'Usuário';
-                    userPhone = user.numero || '';
-                    userSchool = user.escola || '';
-                    userProvince = user.provincia || '';
-                } catch(e) {}
-            }
-            
-            // Salvar no Firebase
-            const deviceRef = database.ref('push_devices/' + deviceId);
-            await deviceRef.set({
-                token: token,
-                userName: userName,
-                phone: userPhone,
-                school: userSchool,
-                province: userProvince,
-                userAgent: navigator.userAgent,
-                lastSeen: firebase.database.ServerValue.TIMESTAMP,
-                active: true,
-                needsUpdate: false,
-                offensiveName: false
-            });
-            
-            // Salvar também no nó de tokens para fácil acesso
-            const tokenRef = database.ref('fcm_tokens/' + token.replace(/[.#$/[\]]/g, '_'));
-            await tokenRef.set({
-                deviceId: deviceId,
-                userName: userName,
-                lastSeen: firebase.database.ServerValue.TIMESTAMP,
-                active: true
-            });
-            
-            console.log('✅ Dispositivo registrado com sucesso!');
-            return true;
-        }
-        
-        // Escutar notificações em foreground
-        messaging.onMessage((payload) => {
-            console.log('Notificação recebida em foreground:', payload);
-            
-            // Mostrar notificação
-            const notification = {
-                title: payload.notification?.title || payload.data?.title || 'Nova Notificação',
-                body: payload.notification?.body || payload.data?.body || '',
-                link: payload.data?.link || '/',
-                timestamp: Date.now()
-            };
-            
-            // Adicionar à lista
-            addNotificationToList(notification);
-            
-            // Mostrar notificação do sistema
-            if (Notification.permission === 'granted') {
-                new Notification(notification.title, {
-                    body: notification.body,
-                    icon: '/favicon.ico',
-                    data: { link: notification.link }
-                });
-            }
-        });
-        
-        // Escutar notificações da fila do usuário
-        function listenToUserNotifications() {
-            const userNotificationsRef = database.ref(`notification_queue/${userId || deviceId}`);
-            
-            userNotificationsRef.on('child_added', async (snapshot) => {
-                const notification = snapshot.val();
-                const notificationId = snapshot.key;
-                
-                if (!notification.delivered) {
-                    console.log('Nova notificação da fila:', notification);
-                    
-                    // Mostrar notificação
-                    addNotificationToList(notification);
-                    
-                    // Mostrar notificação do sistema
-                    if (Notification.permission === 'granted') {
-                        new Notification(notification.title, {
-                            body: notification.body,
-                            icon: '/favicon.ico',
-                            data: { link: notification.link }
+        // Carregar dispositivos
+        function loadDevices() {
+            database.ref('push_devices').on('value', (snapshot) => {
+                const devices = [];
+                snapshot.forEach(child => {
+                    const device = child.val();
+                    if (device.token && device.active !== false) {
+                        devices.push({
+                            id: child.key,
+                            token: device.token,
+                            userAgent: device.userAgent,
+                            lastSeen: device.lastSeen
                         });
                     }
-                    
-                    // Marcar como entregue
-                    await userNotificationsRef.child(notificationId).update({
-                        delivered: true,
-                        deliveredAt: firebase.database.ServerValue.TIMESTAMP
-                    });
+                });
+                
+                allDevices = devices;
+                document.getElementById('totalDevices').textContent = devices.length;
+                
+                const deviceList = document.getElementById('deviceList');
+                if (devices.length === 0) {
+                    deviceList.innerHTML = '<p style="color:#999; text-align:center;">📭 Nenhum dispositivo conectado. Peça para alguém abrir o app.</p>';
+                } else {
+                    deviceList.innerHTML = devices.map(d => `
+                        <div class="device-item">
+                            <div>
+                                <strong>📱 ${d.userAgent?.substring(0, 40) || 'Dispositivo'}</strong>
+                                <span class="badge online">Online</span>
+                            </div>
+                            <div style="font-size: 10px; color: #999;">
+                                ${new Date(d.lastSeen).toLocaleString()}
+                            </div>
+                        </div>
+                    `).join('');
                 }
             });
         }
         
-        // Adicionar notificação à lista na tela
-        function addNotificationToList(notification) {
-            const listDiv = document.getElementById('notificationsList');
-            const notificationDiv = document.createElement('div');
-            notificationDiv.className = 'notification-item';
-            notificationDiv.innerHTML = `
-                <div class="notification-title">${notification.title}</div>
-                <div class="notification-body">${notification.body}</div>
-                <div class="notification-time">${new Date(notification.timestamp).toLocaleString()}</div>
-            `;
+        // Enviar push notification via FCM HTTP v1
+        async function enviarPush() {
+            const title = document.getElementById('title').value;
+            const body = document.getElementById('body').value;
+            const link = document.getElementById('link').value;
+            const priority = document.getElementById('priority').value;
             
-            if (listDiv.firstChild && listDiv.firstChild.tagName === 'P') {
-                listDiv.innerHTML = '';
+            if (!title || !body) {
+                showResult('error', '❌ Preencha título e mensagem!');
+                return;
             }
-            listDiv.insertBefore(notificationDiv, listDiv.firstChild);
             
-            // Manter apenas últimas 10 notificações
-            while (listDiv.children.length > 10) {
-                listDiv.removeChild(listDiv.lastChild);
+            if (allDevices.length === 0) {
+                showResult('error', '❌ Nenhum dispositivo conectado!');
+                return;
             }
-        }
-        
-        // Atualizar status na tela
-        function updateStatus(message, type) {
-            const statusDiv = document.getElementById('statusMessage');
-            statusDiv.textContent = message;
-            statusDiv.className = `status ${type}`;
-        }
-        
-        // Testar notificação local
-        function testNotification() {
-            if (Notification.permission === 'granted') {
-                new Notification('Teste de Notificação', {
-                    body: 'Se você está vendo isso, as notificações estão funcionando!',
-                    icon: '/favicon.ico'
-                });
-                updateStatus('✅ Notificação de teste enviada!', 'success');
-            } else {
-                updateStatus('❌ Permissão não concedida. Clique no botão de permissão.', 'error');
-            }
-        }
-        
-        // Atualizar lastSeen periodicamente
-        function updateLastSeen() {
-            if (deviceId) {
-                database.ref('push_devices/' + deviceId).update({
-                    lastSeen: firebase.database.ServerValue.TIMESTAMP,
-                    active: true
-                });
-            }
-        }
-        
-        // Carregar notificações anteriores
-        async function loadPreviousNotifications() {
-            const userNotificationsRef = database.ref(`notification_queue/${userId || deviceId}`);
-            const snapshot = await userNotificationsRef.orderByChild('timestamp').limitToLast(10).once('value');
             
-            const notifications = [];
-            snapshot.forEach(child => {
-                notifications.push(child.val());
+            showLoading(true);
+            showResult('info', `📡 Enviando para ${allDevices.length} dispositivo(s)...`);
+            
+            let successCount = 0;
+            let failCount = 0;
+            
+            // Salvar no histórico primeiro
+            const historyRef = database.ref('notifications_sent').push();
+            await historyRef.set({
+                title: title,
+                body: body,
+                sentTo: allDevices.length,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                priority: priority
             });
             
-            if (notifications.length > 0) {
-                notifications.reverse().forEach(notif => {
-                    addNotificationToList(notif);
-                });
+            // Para cada dispositivo, salvar na fila de notificações
+            // O app do usuário vai ler essa fila e mostrar a notificação
+            for (const device of allDevices) {
+                try {
+                    // Criar ID único para o usuário
+                    const userId = device.token.replace(/[.#$/[\]]/g, '_');
+                    const notifRef = database.ref(`notification_queue/${userId}`).push();
+                    
+                    await notifRef.set({
+                        title: title,
+                        body: body,
+                        link: link,
+                        priority: priority,
+                        timestamp: Date.now(),
+                        timestamp_readable: new Date().toLocaleString('pt-MZ'),
+                        delivered: false,
+                        read: false
+                    });
+                    
+                    successCount++;
+                } catch (error) {
+                    console.error('Erro:', error);
+                    failCount++;
+                }
             }
-        }
-        
-        // Inicialização
-        async function init() {
-            // Obter ou criar userId
-            userId = localStorage.getItem('userId');
-            if (!userId) {
-                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('userId', userId);
-            }
             
-            deviceId = localStorage.getItem('deviceId');
+            showLoading(false);
             
-            // Configurar notificações push
-            const pushSetup = await setupPushNotifications();
-            
-            if (pushSetup) {
-                // Escutar notificações
-                listenToUserNotifications();
-                await loadPreviousNotifications();
+            if (successCount > 0) {
+                showResult('success', `✅ Notificação enviada com sucesso!\n\n📨 ${successCount} dispositivo(s) receberão a notificação.\n💡 A notificação chegará mesmo com o app fechado (via FCM).`);
                 
-                // Atualizar lastSeen a cada minuto
-                setInterval(updateLastSeen, 60000);
-                updateLastSeen();
+                // Limpar campo mensagem
+                document.getElementById('body').value = '';
+                
+                // Atualizar contador
+                const snapshot = await database.ref('notifications_sent').once('value');
+                document.getElementById('notificationsSent').textContent = snapshot.numChildren();
+            } else {
+                showResult('error', '❌ Falha ao enviar notificações.');
             }
         }
         
-        // Iniciar
-        init();
+        function showResult(type, message) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = message.replace(/\n/g, '<br>');
+            setTimeout(() => {
+                if (resultDiv.className === `result ${type}`) {
+                    resultDiv.className = 'result';
+                }
+            }, 8000);
+        }
         
-        // Expor funções globais
-        window.testNotification = testNotification;
+        function showLoading(show) {
+            document.getElementById('loading').classList.toggle('show', show);
+            document.getElementById('sendBtn').disabled = show;
+        }
+        
+        // Carregar estatísticas
+        function loadStats() {
+            database.ref('notifications_sent').once('value', (snapshot) => {
+                document.getElementById('notificationsSent').textContent = snapshot.numChildren();
+            });
+        }
+        
+        // Inicializar
+        loadDevices();
+        loadStats();
+        
+        // Atualizar a cada 30 segundos
+        setInterval(() => {
+            loadDevices();
+            loadStats();
+        }, 30000);
+        
+        window.enviarPush = enviarPush;
     </script>
 </body>
 </html>
