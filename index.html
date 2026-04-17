@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu App - Notificações</title>
+    <title>Meu App - Notificações Push</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -19,31 +19,22 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         .status {
-            padding: 15px;
+            padding: 10px;
             border-radius: 8px;
             margin-bottom: 20px;
             text-align: center;
-            font-weight: bold;
         }
         .status.success {
             background: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
         }
         .status.error {
             background: #f8d7da;
             color: #721c24;
-            border: 1px solid #f5c6cb;
         }
         .status.info {
             background: #d1ecf1;
             color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-        .status.warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
         }
         button {
             background: #3498db;
@@ -54,46 +45,19 @@
             cursor: pointer;
             width: 100%;
             font-size: 16px;
-            margin-top: 10px;
-            transition: all 0.3s;
         }
         button:hover {
             background: #2980b9;
-            transform: translateY(-2px);
-        }
-        button:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-        }
-        .permission-btn {
-            background: #28a745;
-            margin-bottom: 10px;
-        }
-        .permission-btn:hover {
-            background: #218838;
         }
         .notification-list {
             margin-top: 20px;
-            max-height: 400px;
-            overflow-y: auto;
         }
         .notification-item {
             background: #f8f9fa;
-            padding: 12px;
+            padding: 10px;
             margin-bottom: 10px;
             border-radius: 8px;
             border-left: 4px solid #3498db;
-            animation: slideIn 0.3s ease;
-        }
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
         .notification-title {
             font-weight: bold;
@@ -109,72 +73,30 @@
             color: #999;
             margin-top: 5px;
         }
-        .badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-left: 8px;
-        }
-        .badge.success {
-            background: #28a745;
-            color: white;
-        }
-        .badge.error {
-            background: #dc3545;
-            color: white;
-        }
-        .info-box {
-            background: #e8f4f8;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            border-left: 4px solid #3498db;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>📱 Meu Aplicativo</h2>
         
-        <div class="info-box">
-            💡 <strong>Como ativar notificações:</strong>
-            <ol style="margin-top: 8px; margin-left: 20px;">
-                <li>Clique em "🔔 Ativar Notificações"</li>
-                <li>Clique em "Permitir" quando o navegador perguntar</li>
-                <li>Pronto! Você receberá notificações</li>
-            </ol>
-        </div>
-        
         <div id="statusMessage" class="status info">
-            🔄 Clique no botão abaixo para ativar notificações
+            🔄 Inicializando...
         </div>
         
-        <button id="requestPermissionBtn" class="permission-btn" onclick="requestNotificationPermission()">
-            🔔 Ativar Notificações
-        </button>
-        
-        <button onclick="checkPermissionStatus()">
-            📊 Verificar Status
-        </button>
-        
-        <div style="margin-top: 20px;">
+        <div>
             <h3>📨 Últimas Notificações</h3>
             <div id="notificationsList" class="notification-list">
-                <p style="color: #999; text-align: center;">Nenhuma notificação ainda</p>
+                <p>Carregando notificações...</p>
             </div>
         </div>
         
-        <button onclick="testLocalNotification()">
-            🔔 Testar Notificação Local
-        </button>
+        <button onclick="testNotification()">🔔 Testar Notificação Local</button>
     </div>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
     
     <script>
         // Configuração do Firebase
@@ -191,141 +113,155 @@
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const messaging = firebase.messaging();
         
-        let deviceId = localStorage.getItem('deviceId');
-        let notificationPermission = false;
+        let userId = null;
+        let deviceId = null;
         
-        // Função para solicitar permissão de notificação
-        async function requestNotificationPermission() {
+        // Função para obter permissão e token FCM
+        async function setupPushNotifications() {
             try {
-                updateStatus('🔄 Solicitando permissão...', 'info');
+                updateStatus('Solicitando permissão para notificações...', 'info');
                 
-                // Verificar se o navegador suporta notificações
-                if (!('Notification' in window)) {
-                    updateStatus('❌ Seu navegador não suporta notificações. Use Chrome, Firefox ou Edge.', 'error');
+                // 1. Solicitar permissão
+                const permission = await Notification.requestPermission();
+                
+                if (permission !== 'granted') {
+                    updateStatus('❌ Permissão negada. Você não receberá notificações.', 'error');
                     return false;
                 }
                 
-                // Solicitar permissão
-                const permission = await Notification.requestPermission();
+                updateStatus('✅ Permissão concedida! Registrando dispositivo...', 'info');
                 
-                if (permission === 'granted') {
-                    updateStatus('✅ Permissão concedida! Você receberá notificações.', 'success');
-                    notificationPermission = true;
+                // 2. Obter token FCM
+                const token = await messaging.getToken({
+                    vapidKey: 'BLeiKYIi7h5_3ZxZqyL5w_jZEdDpFpMvjZrP8sBzQxYzXvWtUyVzXzYzA-BLeiKYIi7h5_3ZxZqyL5w'
+                });
+                
+                if (token) {
+                    console.log('Token FCM obtido:', token);
                     
-                    // Registrar dispositivo
-                    await registerDevice();
+                    // 3. Registrar no banco de dados
+                    await registerDevice(token);
                     
-                    // Começar a escutar notificações
-                    startListeningForNotifications();
-                    
-                    // Mostrar notificação de boas-vindas
-                    setTimeout(() => {
-                        showSystemNotification('Bem-vindo!', 'Notificações ativadas com sucesso!');
-                    }, 1000);
-                    
+                    updateStatus('✅ Dispositivo registrado! Você receberá notificações push.', 'success');
                     return true;
-                } else if (permission === 'denied') {
-                    updateStatus('❌ Permissão negada. Você precisa ativar manualmente nas configurações do navegador.', 'error');
-                    
-                    // Mostrar instruções
-                    showManualInstructions();
-                    return false;
                 } else {
-                    updateStatus('⚠️ Permissão não concedida. Clique novamente no botão.', 'warning');
+                    updateStatus('❌ Não foi possível obter o token. Verifique sua conexão.', 'error');
                     return false;
                 }
                 
             } catch (error) {
-                console.error('Erro:', error);
-                updateStatus('❌ Erro: ' + error.message, 'error');
+                console.error('Erro no setup de notificações:', error);
+                updateStatus('❌ Erro ao configurar notificações: ' + error.message, 'error');
                 return false;
             }
-        }
-        
-        // Mostrar instruções manuais
-        function showManualInstructions() {
-            const instructions = `
-                <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 8px;">
-                    <strong>📌 Como ativar manualmente:</strong><br>
-                    Chrome/Edge: Clique no ícone 🔒 ao lado da URL → Notificações → Permitir<br>
-                    Firefox: Clique no ícone 🔒 → Permissões → Notificações → Permitir<br>
-                    Depois recarregue a página e clique em "Ativar Notificações" novamente.
-                </div>
-            `;
-            updateStatus(instructions, 'warning');
         }
         
         // Registrar dispositivo no Firebase
-        async function registerDevice() {
-            try {
-                if (!deviceId) {
-                    deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                    localStorage.setItem('deviceId', deviceId);
-                }
-                
-                // Obter dados do usuário
-                const userData = localStorage.getItem('usuario_cadastrado');
-                let userName = 'Usuário';
-                let userPhone = '';
-                let userSchool = '';
-                let userProvince = '';
-                
-                if (userData) {
-                    try {
-                        const user = JSON.parse(userData);
-                        userName = user.nome || 'Usuário';
-                        userPhone = user.numero || '';
-                        userSchool = user.escola || '';
-                        userProvince = user.provincia || '';
-                    } catch(e) {}
-                }
-                
-                // Salvar no Firebase
-                const deviceRef = database.ref('push_devices/' + deviceId);
-                await deviceRef.set({
-                    userName: userName,
-                    phone: userPhone,
-                    school: userSchool,
-                    province: userProvince,
-                    userAgent: navigator.userAgent,
-                    lastSeen: firebase.database.ServerValue.TIMESTAMP,
-                    active: true,
-                    needsUpdate: false,
-                    offensiveName: false,
-                    notificationEnabled: notificationPermission
-                });
-                
-                console.log('✅ Dispositivo registrado!');
-                return true;
-                
-            } catch (error) {
-                console.error('Erro ao registrar:', error);
-                return false;
+        async function registerDevice(token) {
+            // Gerar ID único para o dispositivo
+            deviceId = localStorage.getItem('deviceId');
+            if (!deviceId) {
+                deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('deviceId', deviceId);
             }
+            
+            // Obter dados do usuário
+            const userData = localStorage.getItem('usuario_cadastrado');
+            let userName = 'Usuário';
+            let userPhone = '';
+            let userSchool = '';
+            let userProvince = '';
+            
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    userName = user.nome || 'Usuário';
+                    userPhone = user.numero || '';
+                    userSchool = user.escola || '';
+                    userProvince = user.provincia || '';
+                } catch(e) {}
+            }
+            
+            // Salvar no Firebase
+            const deviceRef = database.ref('push_devices/' + deviceId);
+            await deviceRef.set({
+                token: token,
+                userName: userName,
+                phone: userPhone,
+                school: userSchool,
+                province: userProvince,
+                userAgent: navigator.userAgent,
+                lastSeen: firebase.database.ServerValue.TIMESTAMP,
+                active: true,
+                needsUpdate: false,
+                offensiveName: false
+            });
+            
+            // Salvar também no nó de tokens para fácil acesso
+            const tokenRef = database.ref('fcm_tokens/' + token.replace(/[.#$/[\]]/g, '_'));
+            await tokenRef.set({
+                deviceId: deviceId,
+                userName: userName,
+                lastSeen: firebase.database.ServerValue.TIMESTAMP,
+                active: true
+            });
+            
+            console.log('✅ Dispositivo registrado com sucesso!');
+            return true;
         }
         
-        // Começar a escutar notificações
-        function startListeningForNotifications() {
-            const notificationsRef = database.ref(`notification_queue/${deviceId}`);
+        // Escutar notificações em foreground
+        messaging.onMessage((payload) => {
+            console.log('Notificação recebida em foreground:', payload);
             
-            notificationsRef.on('child_added', (snapshot) => {
+            // Mostrar notificação
+            const notification = {
+                title: payload.notification?.title || payload.data?.title || 'Nova Notificação',
+                body: payload.notification?.body || payload.data?.body || '',
+                link: payload.data?.link || '/',
+                timestamp: Date.now()
+            };
+            
+            // Adicionar à lista
+            addNotificationToList(notification);
+            
+            // Mostrar notificação do sistema
+            if (Notification.permission === 'granted') {
+                new Notification(notification.title, {
+                    body: notification.body,
+                    icon: '/favicon.ico',
+                    data: { link: notification.link }
+                });
+            }
+        });
+        
+        // Escutar notificações da fila do usuário
+        function listenToUserNotifications() {
+            const userNotificationsRef = database.ref(`notification_queue/${userId || deviceId}`);
+            
+            userNotificationsRef.on('child_added', async (snapshot) => {
                 const notification = snapshot.val();
                 const notificationId = snapshot.key;
                 
                 if (!notification.delivered) {
-                    console.log('Nova notificação recebida:', notification);
+                    console.log('Nova notificação da fila:', notification);
                     
-                    // Mostrar na lista
+                    // Mostrar notificação
                     addNotificationToList(notification);
                     
                     // Mostrar notificação do sistema
-                    if (notificationPermission) {
-                        showSystemNotification(notification.title, notification.body, notification.link);
+                    if (Notification.permission === 'granted') {
+                        new Notification(notification.title, {
+                            body: notification.body,
+                            icon: '/favicon.ico',
+                            data: { link: notification.link }
+                        });
                     }
                     
                     // Marcar como entregue
-                    notificationsRef.child(notificationId).update({
+                    await userNotificationsRef.child(notificationId).update({
                         delivered: true,
                         deliveredAt: firebase.database.ServerValue.TIMESTAMP
                     });
@@ -333,44 +269,20 @@
             });
         }
         
-        // Mostrar notificação do sistema
-        function showSystemNotification(title, body, link = '/') {
-            if (Notification.permission === 'granted') {
-                const notification = new Notification(title, {
-                    body: body,
-                    icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"%3E%3Cpath d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.93 6 11v5l-2 2v1h16v-1l-2-2z"%3E%3C/path%3E%3C/svg%3E',
-                    silent: false
-                });
-                
-                notification.onclick = function() {
-                    window.focus();
-                    if (link && link !== '/') {
-                        window.location.href = link;
-                    }
-                };
-            }
-        }
-        
-        // Adicionar notificação à lista
+        // Adicionar notificação à lista na tela
         function addNotificationToList(notification) {
             const listDiv = document.getElementById('notificationsList');
-            
-            // Remover mensagem "nenhuma notificação"
-            if (listDiv.children.length === 1 && listDiv.children[0].tagName === 'P') {
-                listDiv.innerHTML = '';
-            }
-            
             const notificationDiv = document.createElement('div');
             notificationDiv.className = 'notification-item';
             notificationDiv.innerHTML = `
-                <div class="notification-title">
-                    ${escapeHtml(notification.title)}
-                    <span class="badge success">Nova</span>
-                </div>
-                <div class="notification-body">${escapeHtml(notification.body)}</div>
-                <div class="notification-time">${new Date(notification.timestamp).toLocaleString('pt-MZ')}</div>
+                <div class="notification-title">${notification.title}</div>
+                <div class="notification-body">${notification.body}</div>
+                <div class="notification-time">${new Date(notification.timestamp).toLocaleString()}</div>
             `;
             
+            if (listDiv.firstChild && listDiv.firstChild.tagName === 'P') {
+                listDiv.innerHTML = '';
+            }
             listDiv.insertBefore(notificationDiv, listDiv.firstChild);
             
             // Manter apenas últimas 10 notificações
@@ -379,124 +291,75 @@
             }
         }
         
-        // Verificar status da permissão
-        function checkPermissionStatus() {
-            if (!('Notification' in window)) {
-                updateStatus('❌ Navegador não suporta notificações', 'error');
-                return;
-            }
-            
-            const status = Notification.permission;
-            
-            if (status === 'granted') {
-                updateStatus('✅ Permissão concedida! Você receberá notificações.', 'success');
-                notificationPermission = true;
-                registerDevice();
-                startListeningForNotifications();
-            } else if (status === 'denied') {
-                updateStatus('❌ Permissão negada. Ative manualmente nas configurações do navegador.', 'error');
-                showManualInstructions();
-            } else {
-                updateStatus('⚠️ Permissão não concedida. Clique em "Ativar Notificações".', 'warning');
-            }
-        }
-        
-        // Testar notificação local
-        function testLocalNotification() {
-            if (Notification.permission === 'granted') {
-                showSystemNotification(
-                    '🔔 Teste de Notificação',
-                    'Se você está vendo isso, as notificações estão funcionando corretamente!'
-                );
-                updateStatus('✅ Notificação de teste enviada!', 'success');
-                
-                // Adicionar notificação de teste na lista
-                addNotificationToList({
-                    title: '🔔 Teste de Notificação',
-                    body: 'Sistema de notificações está funcionando!',
-                    timestamp: Date.now()
-                });
-            } else {
-                updateStatus('❌ Permissão não concedida. Clique em "Ativar Notificações" primeiro.', 'error');
-                // Tentar solicitar novamente
-                requestNotificationPermission();
-            }
-        }
-        
         // Atualizar status na tela
         function updateStatus(message, type) {
             const statusDiv = document.getElementById('statusMessage');
-            if (type === 'warning') {
-                statusDiv.innerHTML = message;
-                statusDiv.className = `status warning`;
-            } else {
-                statusDiv.textContent = message;
-                statusDiv.className = `status ${type}`;
-            }
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
         }
         
-        // Função para escapar HTML
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        // Testar notificação local
+        function testNotification() {
+            if (Notification.permission === 'granted') {
+                new Notification('Teste de Notificação', {
+                    body: 'Se você está vendo isso, as notificações estão funcionando!',
+                    icon: '/favicon.ico'
+                });
+                updateStatus('✅ Notificação de teste enviada!', 'success');
+            } else {
+                updateStatus('❌ Permissão não concedida. Clique no botão de permissão.', 'error');
+            }
         }
         
         // Atualizar lastSeen periodicamente
         function updateLastSeen() {
-            if (deviceId && notificationPermission) {
+            if (deviceId) {
                 database.ref('push_devices/' + deviceId).update({
                     lastSeen: firebase.database.ServerValue.TIMESTAMP,
-                    active: true,
-                    notificationEnabled: notificationPermission
+                    active: true
                 });
             }
         }
         
         // Carregar notificações anteriores
         async function loadPreviousNotifications() {
-            try {
-                if (!deviceId) return;
-                
-                const notificationsRef = database.ref(`notification_queue/${deviceId}`);
-                const snapshot = await notificationsRef.orderByChild('timestamp').limitToLast(10).once('value');
-                
-                const notifications = [];
-                snapshot.forEach(child => {
-                    const notif = child.val();
-                    if (notif.delivered) {
-                        notifications.push(notif);
-                    }
+            const userNotificationsRef = database.ref(`notification_queue/${userId || deviceId}`);
+            const snapshot = await userNotificationsRef.orderByChild('timestamp').limitToLast(10).once('value');
+            
+            const notifications = [];
+            snapshot.forEach(child => {
+                notifications.push(child.val());
+            });
+            
+            if (notifications.length > 0) {
+                notifications.reverse().forEach(notif => {
+                    addNotificationToList(notif);
                 });
-                
-                if (notifications.length > 0) {
-                    notifications.reverse().forEach(notif => {
-                        addNotificationToList(notif);
-                    });
-                }
-                
-            } catch (error) {
-                console.error('Erro ao carregar notificações:', error);
             }
         }
         
-        // Verificar permissão ao carregar
+        // Inicialização
         async function init() {
-            // Verificar se já tem permissão
-            if (Notification.permission === 'granted') {
-                notificationPermission = true;
-                updateStatus('✅ Notificações ativas! Você receberá alertas.', 'success');
-                await registerDevice();
-                startListeningForNotifications();
+            // Obter ou criar userId
+            userId = localStorage.getItem('userId');
+            if (!userId) {
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('userId', userId);
+            }
+            
+            deviceId = localStorage.getItem('deviceId');
+            
+            // Configurar notificações push
+            const pushSetup = await setupPushNotifications();
+            
+            if (pushSetup) {
+                // Escutar notificações
+                listenToUserNotifications();
                 await loadPreviousNotifications();
                 
-                // Atualizar lastSeen a cada 30 segundos
-                setInterval(updateLastSeen, 30000);
+                // Atualizar lastSeen a cada minuto
+                setInterval(updateLastSeen, 60000);
                 updateLastSeen();
-            } else if (Notification.permission === 'denied') {
-                updateStatus('❌ Notificações bloqueadas. Ative nas configurações do navegador.', 'error');
-            } else {
-                updateStatus('🔔 Clique em "Ativar Notificações" para receber alertas.', 'info');
             }
         }
         
@@ -504,9 +367,7 @@
         init();
         
         // Expor funções globais
-        window.requestNotificationPermission = requestNotificationPermission;
-        window.checkPermissionStatus = checkPermissionStatus;
-        window.testLocalNotification = testLocalNotification;
+        window.testNotification = testNotification;
     </script>
 </body>
 </html>
