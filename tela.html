@@ -519,11 +519,6 @@
     .quinzenal-btn .title { font-weight: 600; font-size: 1rem; }
     .quinzenal-btn .desc { font-size: 0.75rem; color: #888; margin-top: 4px; }
     
-    /* Botão recarregar conta - SEM COR ESPECIAL, igual aos outros */
-    .nav-btn.cart-btn {
-      /* mesma cor dos outros botões */
-    }
-    
     /* Loading silencioso - sem texto */
     .silent-loading {
       position: fixed;
@@ -648,20 +643,338 @@
     </div>
   </div>
 
-  <!-- MODAIS (mantidos os mesmos) -->
-  <div class="modal" id="modalGerarPlanoNovo">...</div>
-  <div class="modal" id="modalDisciplinasGerais">...</div>
-  <div class="modal" id="modalLinguas">...</div>
-  <div class="modal" id="modalCaderno">...</div>
-  <div class="modal" id="modalCadernoQuinzenal">...</div>
-  <div class="modal" id="modalTemas">...</div>
-  <div class="modal" id="modalEstatisticas">...</div>
-  <div class="modal" id="modalConfirmSair">...</div>
-  <div class="modal" id="modalSobre">...</div>
-  <div class="modal" id="modalPartilha">...</div>
-  <div class="modal" id="modalDoacoes">...</div>
-  <div class="modal" id="modalAtualizarPerfil">...</div>
-  <div class="modal" id="modalContato">...</div>
+  <!-- ==================== MODAIS COMPLETOS ==================== -->
+  
+  <!-- Modal Gerar Plano Novo -->
+  <div class="modal" id="modalGerarPlanoNovo">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-plus-circle"></i> Escolha o tipo de plano</h3>
+        <button class="modal-close" onclick="fecharModal('modalGerarPlanoNovo')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="option-item" id="disciplinasGeraisModalBtn">
+          <i class="fas fa-book-open"></i>
+          <div>
+            <h4>Disciplinas Gerais</h4>
+            <p>Estático ou com I.A</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </div>
+        <a href="fisica.html" class="option-item">
+          <i class="fas fa-futbol"></i>
+          <div>
+            <h4>Educação Física</h4>
+            <p>Planos para EF</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <div class="option-item" id="linguagensModalBtn">
+          <i class="fas fa-language"></i>
+          <div>
+            <h4>Línguas</h4>
+            <p>Inglês | Francês</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </div>
+        <a href="quin.html" class="option-item">
+          <i class="fas fa-calendar-week"></i>
+          <div>
+            <h4>Plano Quinzenal</h4>
+            <p>15 dias de aula</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Disciplinas Gerais -->
+  <div class="modal" id="modalDisciplinasGerais">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-book-open"></i> Disciplinas Gerais</h3>
+        <button class="modal-close" onclick="fecharModal('modalDisciplinasGerais')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <a href="planovip.html" class="option-item">
+          <i class="fas fa-file-alt"></i>
+          <div>
+            <h4>Gerar Plano Estático</h4>
+            <p>Plano de aula padrão</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="inteligente.html" class="option-item">
+          <i class="fas fa-robot"></i>
+          <div>
+            <h4>Gerar Plano Inteligente (I.A)</h4>
+            <p>Com inteligência artificial</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Línguas -->
+  <div class="modal" id="modalLinguas">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-language"></i> Escolha o idioma</h3>
+        <button class="modal-close" onclick="fecharModal('modalLinguas')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <a href="ingles.html" class="option-item">
+          <i class="fas fa-flag-usa"></i>
+          <div>
+            <h4>Inglês</h4>
+            <p>Plano de aula de Inglês</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <div class="option-item" id="francesEmDesenvolvimento">
+          <i class="fas fa-flag-france"></i>
+          <div>
+            <h4>Francês</h4>
+            <p>Em desenvolvimento</p>
+          </div>
+          <i class="fas fa-clock"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Caderno -->
+  <div class="modal" id="modalCaderno">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-book"></i> Caderno de Planificação</h3>
+        <button class="modal-close" onclick="fecharModal('modalCaderno')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <a href="blocoingles.html" class="option-item">
+          <i class="fas fa-flag-usa"></i>
+          <div>
+            <h4>Caderno de Inglês</h4>
+            <p>Planificação para aulas de Inglês</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="bloco.html" class="option-item">
+          <i class="fas fa-book-open"></i>
+          <div>
+            <h4>Caderno de Disciplinas Gerais</h4>
+            <p>Planificação para todas as disciplinas</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="educacaofisica.html" class="option-item">
+          <i class="fas fa-futbol"></i>
+          <div>
+            <h4>Caderno de Educação Física</h4>
+            <p>Planificação para Educação Física</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <div class="option-item" id="cadernoQuinzenalBtn">
+          <i class="fas fa-calendar-week"></i>
+          <div>
+            <h4>Caderno de Planificação Quinzenal</h4>
+            <p>Planificação quinzenal organizada</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Caderno Quinzenal -->
+  <div class="modal" id="modalCadernoQuinzenal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-calendar-week"></i> Caderno Quinzenal</h3>
+        <button class="modal-close" onclick="fecharModal('modalCadernoQuinzenal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="quinzenal-options">
+          <a href="competencias.html" class="quinzenal-btn">
+            <i class="fas fa-trophy"></i>
+            <div class="info">
+              <div class="title">Caderno com Competências</div>
+              <div class="desc">Planificação focada em competências específicas</div>
+            </div>
+            <i class="fas fa-chevron-right"></i>
+          </a>
+          <a href="semcompetencias.html" class="quinzenal-btn">
+            <i class="fas fa-book"></i>
+            <div class="info">
+              <div class="title">Caderno sem Competências</div>
+              <div class="desc">Planificação padrão sem competências</div>
+            </div>
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Temas -->
+  <div class="modal" id="modalTemas">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-palette"></i> Escolha o Tema</h3>
+        <button class="modal-close" onclick="fecharModal('modalTemas')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="theme-grid" id="themeGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Estatísticas -->
+  <div class="modal" id="modalEstatisticas">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-chart-line"></i> Estatísticas</h3>
+        <button class="modal-close" onclick="fecharModal('modalEstatisticas')">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <p style="font-size:2rem;font-weight:bold;">2.847</p>
+        <p>Acessos Totais</p>
+        <p style="font-size:2rem;font-weight:bold;margin-top:15px;">1.219</p>
+        <p>Planos Gerados</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Confirmar Sair -->
+  <div class="modal" id="modalConfirmSair">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-question-circle"></i> Confirmar Saída</h3>
+        <button class="modal-close" onclick="fecharModal('modalConfirmSair')">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <p style="margin-bottom:15px;">Tem certeza que pretende sair do aplicativo?</p>
+        <div class="confirm-buttons">
+          <button class="confirm-btn yes" id="confirmSairSim">Sim</button>
+          <button class="confirm-btn no" id="confirmSairNao">Não</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Sobre -->
+  <div class="modal" id="modalSobre">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-info-circle"></i> Sobre o App</h3>
+        <button class="modal-close" onclick="fecharModal('modalSobre')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Plano de Aula Moçambicano</strong></p>
+        <p>Versão: 2.1.0</p>
+        <p>Desenvolvido por: Prof. Edmilson Nhanombe</p>
+        <p>© 2025 - Todos os direitos reservados</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Partilha -->
+  <div class="modal" id="modalPartilha">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-share-alt"></i> Partilhar App</h3>
+        <button class="modal-close" onclick="fecharModal('modalPartilha')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="option-item" onclick="partilharWhatsApp()">
+          <i class="fab fa-whatsapp"></i>
+          <div>
+            <h4>WhatsApp</h4>
+            <p>Partilhar via WhatsApp</p>
+          </div>
+        </div>
+        <div class="option-item" onclick="partilharFacebook()">
+          <i class="fab fa-facebook"></i>
+          <div>
+            <h4>Facebook</h4>
+            <p>Partilhar no Facebook</p>
+          </div>
+        </div>
+        <div class="option-item" onclick="copiarLinkApp()">
+          <i class="fas fa-copy"></i>
+          <div>
+            <h4>Copiar Link</h4>
+            <p>Copiar link do aplicativo</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Doações -->
+  <div class="modal" id="modalDoacoes">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-hand-holding-heart"></i> Doações</h3>
+        <button class="modal-close" onclick="fecharModal('modalDoacoes')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="option-item">
+          <i class="fas fa-mobile-alt"></i>
+          <div>
+            <h4>Emola: 876393961</h4>
+          </div>
+          <button onclick="copiarNumero('876393961')">Copiar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Atualizar Perfil -->
+  <div class="modal" id="modalAtualizarPerfil">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-edit"></i> Actualizar Perfil</h3>
+        <button class="modal-close" onclick="fecharModal('modalAtualizarPerfil')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom:15px;text-align:center;"><i class="fas fa-info-circle"></i> Complete seu cadastro com seus dados profissionais</p>
+        <button class="profile-save-btn" id="irAtualizarBtn" style="background:var(--secondary);"><i class="fas fa-arrow-right"></i> Completar Cadastro</button>
+        <button class="profile-save-btn" id="verPerfilAtualBtn" style="background:var(--accent);margin-top:10px;"><i class="fas fa-eye"></i> Ver Dados Atuais</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Contato -->
+  <div class="modal" id="modalContato">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-headset"></i> Equipa Técnica</h3>
+        <button class="modal-close" onclick="fecharModal('modalContato')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="contact-item">
+          <span><i class="fas fa-phone"></i> 87 639 3961</span>
+          <button onclick="ligarTelefone('876393961')">Ligar</button>
+        </div>
+        <div class="contact-item">
+          <span><i class="fas fa-phone"></i> 83 489 0828</span>
+          <button onclick="ligarTelefone('834890828')">Ligar</button>
+        </div>
+        <div class="contact-item">
+          <span><i class="fas fa-phone"></i> 84 639 3962</span>
+          <button onclick="ligarTelefone('846393962')">Ligar</button>
+        </div>
+        <div class="contact-item">
+          <span><i class="fas fa-envelope"></i> Email</span>
+          <button onclick="enviarEmail()">edmilsonnhanombe62@gmail.com</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- BOTÃO DO CHAT -->
   <a href="chat.html" class="chat-button" id="chatButton">
@@ -673,7 +986,7 @@
     <button class="nav-btn active" id="navHome"><i class="fas fa-home"></i><span>Início</span></button>
     <a href="permuta.html" class="nav-btn"><i class="fas fa-exchange-alt"></i><span>Permuta</span></a>
     <button class="nav-btn" id="navAtualizarPerfil"><i class="fas fa-user-edit"></i><span>Actualizar Perfil</span></button>
-    <button class="nav-btn cart-btn" id="navRecarregarConta">
+    <button class="nav-btn" id="navRecarregarConta">
       <i class="fas fa-shopping-cart"></i>
       <span>Recarregar Conta</span>
     </button>
@@ -827,6 +1140,7 @@
       localStorage.setItem('facebook_visitas', contadorVisitas);
       if (contadorVisitas >= 2) setTimeout(() => mostrarFacebookOverlay(), 1000);
     }
+    
     function mostrarFacebookOverlay() {
       const fbOverlay = document.getElementById('facebookOverlay');
       if (fbOverlay) {
@@ -836,6 +1150,7 @@
         fbOverlay.style.pointerEvents = 'auto';
       }
     }
+    
     function fecharFacebookOverlay() {
       const fbOverlay = document.getElementById('facebookOverlay');
       if (fbOverlay) {
@@ -844,6 +1159,7 @@
         document.body.style.pointerEvents = 'auto';
       }
     }
+    
     function seguirFacebook() {
       window.open('https://www.facebook.com/profile.php?id=61584540906521', '_blank');
       localStorage.setItem('facebook_seguido', 'true');
@@ -859,27 +1175,50 @@
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), duracao);
     }
-    function abrirModal(id) { const modal = document.getElementById(id); if (modal) modal.style.display = 'flex'; }
-    function fecharModal(id) { const modal = document.getElementById(id); if (modal) modal.style.display = 'none'; }
-    function ligarTelefone(numero) { window.location.href = `tel:+258${numero}`; }
-    function enviarEmail() { window.location.href = 'mailto:edmilsonnhanombe62@gmail.com'; }
-    function copiarNumero(num) { navigator.clipboard.writeText(num); mostrarToast(`✅ Número ${num} copiado!`, 3000); }
+    
+    function abrirModal(id) { 
+      const modal = document.getElementById(id); 
+      if (modal) modal.style.display = 'flex'; 
+    }
+    
+    function fecharModal(id) { 
+      const modal = document.getElementById(id); 
+      if (modal) modal.style.display = 'none'; 
+    }
+    
+    function ligarTelefone(numero) { 
+      window.location.href = `tel:+258${numero}`; 
+    }
+    
+    function enviarEmail() { 
+      window.location.href = 'mailto:edmilsonnhanombe62@gmail.com'; 
+    }
+    
+    function copiarNumero(num) { 
+      navigator.clipboard.writeText(num); 
+      mostrarToast(`✅ Número ${num} copiado!`, 3000); 
+    }
+    
     function partilharWhatsApp() { 
       const linkApp = 'https://nhanomb3.github.io/Planodeaula-/';
       window.open(`https://wa.me/?text=${encodeURIComponent('📚 Baixe o app Plano de Aula MZ - Facilite a criação dos seus planos de aula! Acesse: ' + linkApp)}`, '_blank'); 
     }
+    
     function partilharFacebook() { 
       const linkApp = 'https://nhanomb3.github.io/Planodeaula-/';
       window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(linkApp)}`, '_blank'); 
     }
+    
     function copiarLinkApp() { 
       const linkApp = 'https://nhanomb3.github.io/Planodeaula-/';
       navigator.clipboard.writeText(linkApp); 
       mostrarToast('✅ Link do app copiado!', 3000); 
     }
+    
     function irParaAtualizarPerfil() { 
       window.location.href = 'index.html?update=true';
     }
+    
     function verDadosAtuais() { 
       const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}'); 
       const cadastro = JSON.parse(localStorage.getItem('usuario_cadastrado') || '{}');
@@ -929,49 +1268,78 @@
     const temas = ['default','blue','red','pink','purple','indigo','teal','green','yellow','orange','brown','grey','black'];
     const temaNomes = ['Padrão','Azul','Vermelho','Rosa','Roxo','Índigo','Verde Azulado','Verde','Amarelo','Laranja','Marrom','Cinza','Preto'];
     const temaCores = ['#2c3e50','#1e3c72','#8b0000','#c2185b','#4a148c','#1a237e','#00695c','#1b5e20','#f57f17','#e65100','#4e2e2a','#424242','#000000'];
-    function aplicarTema(tema) { document.body.className = `theme-${tema}`; localStorage.setItem('tema_atual', tema); atualizarTemaAtivo(tema); mostrarToast(`🎨 Tema ${temaNomes[temas.indexOf(tema)]} aplicado!`, 2000); }
-    function carregarTema() { const tema = localStorage.getItem('tema_atual') || 'brown'; document.body.className = `theme-${tema}`; atualizarTemaAtivo(tema); }
-    function atualizarTemaAtivo(tema) { document.querySelectorAll('.theme-option').forEach(opt => { if(opt.dataset.tema === tema) opt.classList.add('active'); else opt.classList.remove('active'); }); }
-    function carregarTemasModal() { const grid = document.getElementById('themeGrid'); if(!grid) return; grid.innerHTML = temas.map((t,i) => `<div class="theme-option" data-tema="${t}" onclick="aplicarTema('${t}')"><div class="theme-color" style="background:${temaCores[i]}"></div><span>${temaNomes[i]}</span></div>`).join(''); atualizarTemaAtivo(localStorage.getItem('tema_atual') || 'brown'); }
+    
+    function aplicarTema(tema) { 
+      document.body.className = `theme-${tema}`; 
+      localStorage.setItem('tema_atual', tema); 
+      atualizarTemaAtivo(tema); 
+      mostrarToast(`🎨 Tema ${temaNomes[temas.indexOf(tema)]} aplicado!`, 2000); 
+    }
+    
+    function carregarTema() { 
+      const tema = localStorage.getItem('tema_atual') || 'brown'; 
+      document.body.className = `theme-${tema}`; 
+      atualizarTemaAtivo(tema); 
+    }
+    
+    function atualizarTemaAtivo(tema) { 
+      document.querySelectorAll('.theme-option').forEach(opt => { 
+        if(opt.dataset.tema === tema) opt.classList.add('active'); 
+        else opt.classList.remove('active'); 
+      }); 
+    }
+    
+    function carregarTemasModal() { 
+      const grid = document.getElementById('themeGrid'); 
+      if(!grid) return; 
+      grid.innerHTML = temas.map((t,i) => `<div class="theme-option" data-tema="${t}" onclick="aplicarTema('${t}')"><div class="theme-color" style="background:${temaCores[i]}"></div><span>${temaNomes[i]}</span></div>`).join(''); 
+      atualizarTemaAtivo(localStorage.getItem('tema_atual') || 'brown'); 
+    }
     
     // ==================== SIDEBAR ====================
     let sidebarOpen = false;
-    function toggleSidebar() { sidebarOpen = !sidebarOpen; document.getElementById('sidebar').classList.toggle('open', sidebarOpen); document.getElementById('overlay').classList.toggle('open', sidebarOpen); }
-    function closeSidebar() { sidebarOpen = false; document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+    function toggleSidebar() { 
+      sidebarOpen = !sidebarOpen; 
+      document.getElementById('sidebar').classList.toggle('open', sidebarOpen); 
+      document.getElementById('overlay').classList.toggle('open', sidebarOpen); 
+    }
+    
+    function closeSidebar() { 
+      sidebarOpen = false; 
+      document.getElementById('sidebar').classList.remove('open'); 
+      document.getElementById('overlay').classList.remove('open'); 
+    }
     
     // ==================== EVENTOS ====================
     document.addEventListener('DOMContentLoaded', () => {
       carregarTema();
       carregarTemasModal();
       
+      // Botões do header
       document.getElementById('menuBtn').addEventListener('click', toggleSidebar);
       document.getElementById('overlay').addEventListener('click', closeSidebar);
       document.getElementById('supportBtn').addEventListener('click', () => abrirModal('modalContato'));
-      document.getElementById('cadernoBtn').addEventListener('click', () => abrirModal('modalCaderno'));
-      document.getElementById('cadernoQuinzenalBtn').addEventListener('click', () => { fecharModal('modalCaderno'); abrirModal('modalCadernoQuinzenal'); });
       
+      // Botões de planos
+      document.getElementById('cadernoBtn').addEventListener('click', () => abrirModal('modalCaderno'));
       document.getElementById('gerarPlanoNovoBtn').addEventListener('click', () => abrirModal('modalGerarPlanoNovo'));
       document.getElementById('disciplinasGeraisBtn').addEventListener('click', () => abrirModal('modalDisciplinasGerais'));
-      document.getElementById('disciplinasGeraisModalBtn').addEventListener('click', () => { fecharModal('modalGerarPlanoNovo'); abrirModal('modalDisciplinasGerais'); });
       document.getElementById('linguagensBtn').addEventListener('click', () => abrirModal('modalLinguas'));
-      document.getElementById('linguagensModalBtn').addEventListener('click', () => { fecharModal('modalGerarPlanoNovo'); abrirModal('modalLinguas'); });
       document.getElementById('francesEmDesenvolvimento').addEventListener('click', () => mostrarToast('📚 Plano de Francês em desenvolvimento!', 3000));
+      document.getElementById('doacoesBtn').addEventListener('click', () => abrirModal('modalDoacoes'));
       
+      // Sidebar items
       document.getElementById('definicoesBtn').addEventListener('click', () => { closeSidebar(); abrirModal('modalEstatisticas'); });
       document.getElementById('temasBtn').addEventListener('click', () => { closeSidebar(); abrirModal('modalTemas'); });
       document.getElementById('atualizacaoBtn').addEventListener('click', () => { closeSidebar(); mostrarToast('✅ App actualizado! Versão 2.1', 3000); });
       document.getElementById('partilhaBtn').addEventListener('click', () => { closeSidebar(); abrirModal('modalPartilha'); });
       document.getElementById('estatisticasBtn').addEventListener('click', () => { closeSidebar(); abrirModal('modalEstatisticas'); });
       document.getElementById('sobreBtn').addEventListener('click', () => { closeSidebar(); abrirModal('modalSobre'); });
-      document.getElementById('doacoesBtn').addEventListener('click', () => abrirModal('modalDoacoes'));
-      document.getElementById('navAtualizarPerfil').addEventListener('click', () => abrirModal('modalAtualizarPerfil'));
-      document.getElementById('irAtualizarBtn').addEventListener('click', irParaAtualizarPerfil);
-      document.getElementById('verPerfilAtualBtn').addEventListener('click', verDadosAtuais);
       document.getElementById('sairBtn').addEventListener('click', () => { closeSidebar(); abrirModal('modalConfirmSair'); });
-      document.getElementById('confirmSairSim').addEventListener('click', sairAplicativo);
-      document.getElementById('confirmSairNao').addEventListener('click', () => fecharModal('modalConfirmSair'));
-      document.getElementById('navRecarregarConta').addEventListener('click', irParaRecarregarConta);
       
+      // Bottom nav
+      document.getElementById('navAtualizarPerfil').addEventListener('click', () => abrirModal('modalAtualizarPerfil'));
+      document.getElementById('navRecarregarConta').addEventListener('click', irParaRecarregarConta);
       document.getElementById('navHome').addEventListener('click', () => {
         document.getElementById('mainContent').style.display = 'block';
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -979,8 +1347,19 @@
         closeSidebar();
       });
       
+      // Botões dos modais
+      document.getElementById('cadernoQuinzenalBtn').addEventListener('click', () => { fecharModal('modalCaderno'); abrirModal('modalCadernoQuinzenal'); });
+      document.getElementById('disciplinasGeraisModalBtn').addEventListener('click', () => { fecharModal('modalGerarPlanoNovo'); abrirModal('modalDisciplinasGerais'); });
+      document.getElementById('linguagensModalBtn').addEventListener('click', () => { fecharModal('modalGerarPlanoNovo'); abrirModal('modalLinguas'); });
+      document.getElementById('irAtualizarBtn').addEventListener('click', irParaAtualizarPerfil);
+      document.getElementById('verPerfilAtualBtn').addEventListener('click', verDadosAtuais);
+      document.getElementById('confirmSairSim').addEventListener('click', sairAplicativo);
+      document.getElementById('confirmSairNao').addEventListener('click', () => fecharModal('modalConfirmSair'));
+      
+      // Fechar modais clicando fora
       document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if(e.target === m) m.style.display = 'none'; }));
       
+      // Chat notifications
       window.addEventListener('focus', () => {
         lastReadTimestamp = Date.now();
         localStorage.setItem('last_read_chat', lastReadTimestamp);
@@ -993,6 +1372,7 @@
       }, 2000);
     });
     
+    // Expor funções globais
     window.fecharModal = fecharModal;
     window.abrirModal = abrirModal;
     window.ligarTelefone = ligarTelefone;
