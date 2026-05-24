@@ -71,6 +71,18 @@
         }
         .toggle-password:hover { color: #667eea; }
         
+        /* Alerta de confirmação de senha */
+        .senha-alerta {
+            font-size: 12px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .senha-alerta.valid { color: #27ae60; }
+        .senha-alerta.invalid { color: #e74c3c; }
+        .senha-alerta i { font-size: 12px; }
+        
         .btn {
             width: 100%;
             padding: 14px;
@@ -97,17 +109,6 @@
             margin-top: 10px;
         }
         .btn-google:hover { border-color: #ccc; background: #fafafa; }
-        .btn-whatsapp {
-            background: #25D366;
-            color: white;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .btn-whatsapp:hover { background: #128C7E; box-shadow: 0 8px 25px rgba(37,211,102,0.4); }
         
         .message { margin-top: 15px; padding: 12px 15px; border-radius: 10px; text-align: center; display: none; font-size: 14px; }
         .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
@@ -182,20 +183,49 @@
             border-top: 1px solid #eee;
         }
         
+        /* Suporte expansível */
         .support-section {
             background: #f0f7ff;
-            padding: 15px;
             border-radius: 12px;
             margin-top: 15px;
-            border: 1px solid #d4e4fc;
+            overflow: hidden;
         }
-        .support-section h4 {
+        .support-header {
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            background: #f0f7ff;
+            transition: background 0.2s;
+        }
+        .support-header:hover {
+            background: #e8f0fe;
+        }
+        .support-header h4 {
             font-size: 14px;
             color: #2c3e50;
-            margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 8px;
+            margin: 0;
+        }
+        .support-header i.fa-chevron-down {
+            transition: transform 0.3s;
+            color: #667eea;
+        }
+        .support-header.open i.fa-chevron-down {
+            transform: rotate(180deg);
+        }
+        .support-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 15px;
+        }
+        .support-content.open {
+            max-height: 300px;
+            padding: 0 15px 15px 15px;
         }
         .support-buttons {
             display: flex;
@@ -282,9 +312,20 @@
                     </svg>                    Entrar com Google
                 </button>
                 
-                <!-- Seção de Suporte -->
-                <div class="support-section">
+                <div class="message" id="loginMessage"></div>
+            </form>
+            
+            <div class="link">
+                <a id="irParaCadastro">📝 Não tem conta? Cadastre-se aqui</a>
+            </div>
+            
+            <!-- Seção de Suporte Expansível (agora depois do link) -->
+            <div class="support-section" id="supportSection">
+                <div class="support-header" id="supportHeader">
                     <h4><i class="fas fa-headset"></i> Precisa de ajuda?</h4>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="support-content" id="supportContent">
                     <div class="support-buttons">
                         <a href="https://chat.whatsapp.com/JXb16aohQKSFVgxHzfRC5L" target="_blank" class="support-btn-sm whatsapp">
                             <i class="fab fa-whatsapp"></i> Grupo de Suporte WhatsApp
@@ -300,12 +341,6 @@
                         </a>
                     </div>
                 </div>
-                
-                <div class="message" id="loginMessage"></div>
-            </form>
-            
-            <div class="link">
-                <a id="irParaCadastro">📝 Não tem conta? Cadastre-se aqui</a>
             </div>
         </div>
         <div class="footer-note">
@@ -389,6 +424,9 @@
                             <i class="far fa-eye"></i>
                         </button>
                     </div>
+                    <div id="senhaAlerta" class="senha-alerta" style="display: none;">
+                        <i class="fas fa-check-circle"></i> <span id="senhaAlertaMsg"></span>
+                    </div>
                     <span class="error-text" id="confirmarSenhaError"></span>
                 </div>
 
@@ -406,9 +444,19 @@
                     Criar conta com Google
                 </button>
                 
-                <!-- Seção de Suporte também no cadastro -->
-                <div class="support-section">
+                <div class="message" id="cadastroMessage"></div>
+            </form>            
+            <div class="link">
+                <a id="voltarLogin">🔐 Já tenho conta? Faça login</a>
+            </div>
+            
+            <!-- Seção de Suporte Expansível também no cadastro -->
+            <div class="support-section" id="supportSectionCad">
+                <div class="support-header" id="supportHeaderCad">
                     <h4><i class="fas fa-headset"></i> Precisa de ajuda?</h4>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="support-content" id="supportContentCad">
                     <div class="support-buttons">
                         <a href="https://chat.whatsapp.com/JXb16aohQKSFVgxHzfRC5L" target="_blank" class="support-btn-sm whatsapp">
                             <i class="fab fa-whatsapp"></i> Grupo de Suporte WhatsApp
@@ -421,11 +469,6 @@
                         </a>
                     </div>
                 </div>
-                
-                <div class="message" id="cadastroMessage"></div>
-            </form>            
-            <div class="link">
-                <a id="voltarLogin">🔐 Já tenho conta? Faça login</a>
             </div>
         </div>
         <div class="footer-note">
@@ -448,6 +491,66 @@
                 btn.innerHTML = '<i class="far fa-eye"></i>';
             }
         }
+        
+        // Função para expandir/colapsar suporte
+        function initSupportToggle() {
+            const supportHeader = document.getElementById('supportHeader');
+            const supportContent = document.getElementById('supportContent');
+            if (supportHeader && supportContent) {
+                supportHeader.addEventListener('click', () => {
+                    supportHeader.classList.toggle('open');
+                    supportContent.classList.toggle('open');
+                });
+            }
+            
+            const supportHeaderCad = document.getElementById('supportHeaderCad');
+            const supportContentCad = document.getElementById('supportContentCad');
+            if (supportHeaderCad && supportContentCad) {
+                supportHeaderCad.addEventListener('click', () => {
+                    supportHeaderCad.classList.toggle('open');
+                    supportContentCad.classList.toggle('open');
+                });
+            }
+        }
+        
+        // Função para verificar confirmação de senha em tempo real
+        function initSenhaConfirmacao() {
+            const senhaInput = document.getElementById('senha');
+            const confirmarInput = document.getElementById('confirmarSenha');
+            const alertaDiv = document.getElementById('senhaAlerta');
+            const alertaMsg = document.getElementById('senhaAlertaMsg');
+            
+            function verificarSenha() {
+                const senha = senhaInput.value;
+                const confirmar = confirmarInput.value;
+                
+                if (confirmar.length === 0) {
+                    alertaDiv.style.display = 'none';
+                    return;
+                }
+                
+                alertaDiv.style.display = 'flex';
+                if (senha === confirmar && senha.length >= 6) {
+                    alertaDiv.className = 'senha-alerta valid';
+                    alertaMsg.innerHTML = '✓ As senhas coincidem';
+                } else if (senha === confirmar && senha.length < 6) {
+                    alertaDiv.className = 'senha-alerta invalid';
+                    alertaMsg.innerHTML = '⚠ A senha precisa ter pelo menos 6 caracteres';
+                } else {
+                    alertaDiv.className = 'senha-alerta invalid';
+                    alertaMsg.innerHTML = '✗ As senhas não coincidem';
+                }
+            }
+            
+            senhaInput.addEventListener('input', verificarSenha);
+            confirmarInput.addEventListener('input', verificarSenha);
+        }
+        
+        // Inicializar quando o DOM carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            initSupportToggle();
+            initSenhaConfirmacao();
+        });
     </script>
 
     <!-- ==================== FIREBASE MODULAR SDK (v9+) ==================== -->
@@ -589,7 +692,6 @@
             }
         }
         
-        // Função para atualizar cadastro incompleto
         async function atualizarCadastroIncompleto(uid, dados, email) {
             try {
                 await setDoc(doc(db, 'usuarios', uid), {
@@ -610,7 +712,6 @@
             }
         }
         
-        // Verificar se cadastro está completo
         async function verificarCadastroCompleto(uid) {
             try {
                 const docSnap = await getDoc(doc(db, 'usuarios', uid));
@@ -679,6 +780,16 @@
                 await enviarParaGoogleSheets(dados, email);
                 salvarSessaoLocalStorage(user.uid, email, { ...dados, cadastroCompleto: true });
                 
+                // Salvar também no perfil_professor
+                localStorage.setItem('perfil_professor', JSON.stringify({
+                    nome: dados.nome,
+                    escola: dados.escola,
+                    provincia: dados.provincia,
+                    telefone: dados.numero,
+                    email: email,
+                    uid: user.uid
+                }));
+                
                 return { success: true, email: email };
                 
             } catch (error) {
@@ -687,14 +798,12 @@
             }
         }
         
-        // Função especial para atualizar cadastro incompleto (usuário já existe)
         async function atualizarCadastroExistente(uid, dados, email) {
             try {
                 await atualizarCadastroIncompleto(uid, dados, email);
                 await enviarParaGoogleSheets(dados, email);
                 salvarSessaoLocalStorage(uid, email, { ...dados, cadastroCompleto: true });
                 
-                // Salvar também no perfil_professor para a tela
                 localStorage.setItem('perfil_professor', JSON.stringify({
                     nome: dados.nome,
                     escola: dados.escola,
@@ -725,6 +834,17 @@
                     nome: dados.nome || '', 
                     cadastroCompleto: cadastroCompleto 
                 });
+                
+                if (cadastroCompleto && dados.nome && dados.escola) {
+                    localStorage.setItem('perfil_professor', JSON.stringify({
+                        nome: dados.nome,
+                        escola: dados.escola,
+                        provincia: dados.provincia,
+                        telefone: dados.telefone,
+                        email: user.email,
+                        uid: user.uid
+                    }));
+                }
                 
                 return { success: true, cadastroCompleto: cadastroCompleto };
                 
@@ -860,14 +980,11 @@
             return valido;
         }
         
-        // Verificar se veio para completar cadastro (modo update)
         function verificarModoUpdate() {
             if (isUpdateMode) {
-                // Mostrar tela de cadastro para completar
                 loginContainer.style.display = 'none';
                 cadastroContainer.style.display = 'block';
                 
-                // Preencher email se disponível
                 const userEmail = localStorage.getItem('user_email');
                 if (userEmail && emailInput) {
                     emailInput.value = userEmail;
@@ -875,7 +992,6 @@
                     emailInput.style.backgroundColor = '#f5f5f5';
                 }
                 
-                // Mudar título e botão
                 const headerTitle = document.querySelector('#cadastroContainer .header h1');
                 if (headerTitle) headerTitle.innerHTML = '📝 Completar Cadastro';
                 
@@ -885,7 +1001,6 @@
                     cadastroBtn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
                 }
                 
-                // Esconder opção de Google no modo update
                 const googleBtn = document.getElementById('btnCadastroGoogle');
                 if (googleBtn) googleBtn.style.display = 'none';
                 
@@ -898,7 +1013,6 @@
         // 🎯 EVENT HANDLERS
         // ═══════════════════════════════════════════════════════════════
         
-        // Cadastro com Email/Senha (completo ou atualização)
         document.getElementById('btnCadastroEmail').onclick = async () => {
             if (!validarCadastro()) return;
             
@@ -916,7 +1030,6 @@
             let result;
             
             if (isUpdateMode) {
-                // Modo de atualização - usuário já existe, só salvar dados
                 const uid = localStorage.getItem('user_uid');
                 if (uid) {
                     result = await atualizarCadastroExistente(uid, dados, dados.email);
@@ -924,7 +1037,6 @@
                     result = { success: false, error: 'Sessão expirada. Faça login novamente.' };
                 }
             } else {
-                // Cadastro normal
                 result = await criarContaEmailSenha(dados, senhaInput.value);
             }
             
@@ -937,7 +1049,6 @@
             }
         };
         
-        // Cadastro com Google
         document.getElementById('btnCadastroGoogle').onclick = async () => {
             const btn = document.getElementById('btnCadastroGoogle');
             toggleLoading(btn, true, 'Abrindo Google...');
@@ -946,7 +1057,6 @@
             
             if (result.success) {
                 if (!result.cadastroCompleto) {
-                    // Cadastro incompleto, redirecionar para completar
                     showMessage(cadastroMessage, `✅ Conta Google criada! Complete seu cadastro...`, 'success');
                     setTimeout(() => { 
                         window.location.href = 'index.html?update=true';
@@ -962,7 +1072,6 @@
             }
         };
         
-        // Login com Email/Senha
         document.getElementById('loginForm').onsubmit = async (e) => {
             e.preventDefault();
             if (!validarLogin()) return;
@@ -973,7 +1082,6 @@
             
             if (result.success) {
                 if (!result.cadastroCompleto) {
-                    // Cadastro incompleto, pedir para completar
                     showMessage(loginMessage, '⚠️ Complete seu cadastro para continuar!', 'info');
                     setTimeout(() => { 
                         window.location.href = 'index.html?update=true';
@@ -988,7 +1096,6 @@
             }
         };
         
-        // Login com Google
         document.getElementById('btnLoginGoogle').onclick = async () => {
             toggleLoading(loginBtn, true, 'Abrindo Google...');
             
@@ -1010,7 +1117,6 @@
             }
         };
         
-        // Navegação entre telas
         document.getElementById('irParaCadastro').onclick = () => {
             loginContainer.style.display = 'none';
             cadastroContainer.style.display = 'block';
@@ -1023,12 +1129,10 @@
             clearAllErrors();
         };
         
-        // Máscara para telefone
         numeroInput.addEventListener('input', (e) => {
             e.target.value = e.target.value.replace(/\D/g, '').slice(0, 9);
         });
         
-        // Limpar erro ao digitar
         ['loginEmail','loginSenha','nome','email','numero','escola','senha','confirmarSenha'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('input', () => clearError(id));
@@ -1042,16 +1146,13 @@
             loadingScreen.style.display = 'none';
             
             if (user && !isUpdateMode) {
-                // Verificar se cadastro está completo
                 verificarCadastroCompleto(user.uid).then(completo => {
                     if (completo) {
                         window.location.href = 'tela.html';
                     } else {
-                        // Cadastro incompleto, mostrar tela de cadastro
                         loginContainer.style.display = 'none';
                         cadastroContainer.style.display = 'block';
                         
-                        // Preencher email
                         if (emailInput) {
                             emailInput.value = user.email;
                             emailInput.readOnly = true;
@@ -1071,14 +1172,12 @@
             } else if (!user && !isUpdateMode) {
                 loginContainer.style.display = 'block';
             } else if (isUpdateMode) {
-                // Modo update - mostrar cadastro
                 loginContainer.style.display = 'none';
                 cadastroContainer.style.display = 'block';
                 verificarModoUpdate();
             }
         });
         
-        // Expor funções para debug
         window.firebaseDebug = { auth, db, signOut, limparSessao: limparSessaoCompleta };
         window.togglePasswordVisibility = togglePasswordVisibility;
     </script>
