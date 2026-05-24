@@ -184,7 +184,6 @@
     .welcome-card h2 { font-size: 1.3rem; margin-bottom: 5px; }
     .welcome-card p { font-size: 0.85rem; opacity: 0.9; }
     
-    /* Botão Gerar Plano Novo com animação de cores pulsantes */
     .btn-gerar-novo {
       background: linear-gradient(135deg, var(--accent), #d35400);
       border: none;
@@ -520,8 +519,8 @@
     .quinzenal-btn .title { font-weight: 600; font-size: 1rem; }
     .quinzenal-btn .desc { font-size: 0.75rem; color: #888; margin-top: 4px; }
     
-    /* Botão carrinho no rodapé */
-    .cart-btn {
+    /* Botão carrinho no rodapé - cor laranja/accent para destaque */
+    .nav-btn.cart-btn {
       background: var(--accent);
       color: white;
       border-radius: 30px;
@@ -530,16 +529,39 @@
       align-items: center;
       gap: 8px;
     }
-    .cart-btn i { font-size: 1rem; margin: 0; }
-    .cart-btn span { font-size: 0.7rem; }
+    .nav-btn.cart-btn i { font-size: 1rem; margin: 0; color: white; }
+    .nav-btn.cart-btn span { font-size: 0.7rem; color: white; }
+    .nav-btn.cart-btn:active { transform: scale(0.96); }
+    
+    /* Loading silencioso - sem texto visível */
+    .silent-loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      z-index: 10000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    .silent-loading .spinner {
+      border: 4px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top: 4px solid white;
+      width: 45px;
+      height: 45px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body class="theme-brown" oncontextmenu="return false" onkeydown="return disableKeys(event)">
 
-  <!-- Loading screen para verificação de autenticação -->
-  <div class="loading" id="loadingScreen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);z-index:10000;display:flex;justify-content:center;align-items:center;flex-direction:column;">
-    <div class="spinner" style="border-color:rgba(255,255,255,0.3);border-top-color:white;"></div>
-    <p style="color:white;margin-top:20px;">Verificando autenticação...</p>
+  <!-- Loading silencioso (sem texto) -->
+  <div class="silent-loading" id="silentLoading">
+    <div class="spinner"></div>
   </div>
 
   <div class="header">
@@ -573,7 +595,6 @@
       <p id="welcomeMessage">Simplifique a criação dos seus planos de aula</p>
     </div>
 
-    <!-- BOTÃO GERAR PLANO NOVO COM ANIMAÇÃO DE CORES -->
     <button class="btn-gerar-novo" id="gerarPlanoNovoBtn">
       <i class="fas fa-plus-circle"></i> Gerar Plano Novo
       <i class="fas fa-arrow-right"></i>
@@ -744,7 +765,7 @@
   <div class="modal" id="modalSobre"><div class="modal-content"><div class="modal-header"><h3><i class="fas fa-info-circle"></i> Sobre o App</h3><button class="modal-close" onclick="fecharModal('modalSobre')">&times;</button></div><div class="modal-body"><p><strong>Plano de Aula Moçambicano</strong></p><p>Versão: 2.1.0</p><p>Desenvolvido por: Prof. Edmilson Nhanombe</p><p>© 2025 - Todos os direitos reservados</p></div></div></div>
   <div class="modal" id="modalPartilha"><div class="modal-content"><div class="modal-header"><h3><i class="fas fa-share-alt"></i> Partilhar App</h3><button class="modal-close" onclick="fecharModal('modalPartilha')">&times;</button></div><div class="modal-body"><div class="option-item" onclick="partilharWhatsApp()"><i class="fab fa-whatsapp"></i><div><h4>WhatsApp</h4><p>Partilhar via WhatsApp</p></div></div><div class="option-item" onclick="partilharFacebook()"><i class="fab fa-facebook"></i><div><h4>Facebook</h4><p>Partilhar no Facebook</p></div></div><div class="option-item" onclick="copiarLinkApp()"><i class="fas fa-copy"></i><div><h4>Copiar Link</h4><p>Copiar link do aplicativo</p></div></div></div></div></div>
   <div class="modal" id="modalDoacoes"><div class="modal-content"><div class="modal-header"><h3><i class="fas fa-hand-holding-heart"></i> Doações</h3><button class="modal-close" onclick="fecharModal('modalDoacoes')">&times;</button></div><div class="modal-body"><div class="option-item"><i class="fas fa-mobile-alt"></i><div><h4>Emola: 876393961</h4></div><button onclick="copiarNumero('876393961')">Copiar</button></div></div></div></div>
-  <div class="modal" id="modalAtualizarPerfil"><div class="modal-content"><div class="modal-header"><h3><i class="fas fa-user-edit"></i> Actualizar Perfil</h3><button class="modal-close" onclick="fecharModal('modalAtualizarPerfil')">&times;</button></div><div class="modal-body"><p style="margin-bottom:15px;text-align:center;"><i class="fas fa-info-circle"></i> Você será redirecionado para actualizar seus dados</p><button class="profile-save-btn" id="irAtualizarBtn" style="background:var(--secondary);"><i class="fas fa-arrow-right"></i> Ir para Actualização</button><button class="profile-save-btn" id="verPerfilAtualBtn" style="background:var(--accent);margin-top:10px;"><i class="fas fa-eye"></i> Ver Dados Atuais</button></div></div></div>
+  <div class="modal" id="modalAtualizarPerfil"><div class="modal-content"><div class="modal-header"><h3><i class="fas fa-user-edit"></i> Actualizar Perfil</h3><button class="modal-close" onclick="fecharModal('modalAtualizarPerfil')">&times;</button></div><div class="modal-body"><p style="margin-bottom:15px;text-align:center;"><i class="fas fa-info-circle"></i> Complete seu cadastro com seus dados profissionais</p><button class="profile-save-btn" id="irAtualizarBtn" style="background:var(--secondary);"><i class="fas fa-arrow-right"></i> Completar Cadastro</button><button class="profile-save-btn" id="verPerfilAtualBtn" style="background:var(--accent);margin-top:10px;"><i class="fas fa-eye"></i> Ver Dados Atuais</button></div></div></div>
   <div class="modal" id="modalContato"><div class="modal-content"><div class="modal-header"><h3><i class="fas fa-headset"></i> Equipa Técnica</h3><button class="modal-close" onclick="fecharModal('modalContato')">&times;</button></div><div class="modal-body"><div class="contact-item"><span><i class="fas fa-phone"></i> 87 639 3961</span><button onclick="ligarTelefone('876393961')">Ligar</button></div><div class="contact-item"><span><i class="fas fa-phone"></i> 83 489 0828</span><button onclick="ligarTelefone('834890828')">Ligar</button></div><div class="contact-item"><span><i class="fas fa-phone"></i> 84 639 3962</span><button onclick="ligarTelefone('846393962')">Ligar</button></div><div class="contact-item"><span><i class="fas fa-envelope"></i> Email</span><button onclick="enviarEmail()">edmilsonnhanombe62@gmail.com</button></div></div></div></div>
 
   <!-- BOTÃO DO CHAT -->
@@ -757,19 +778,11 @@
     <button class="nav-btn active" id="navHome"><i class="fas fa-home"></i><span>Início</span></button>
     <a href="permuta.html" class="nav-btn"><i class="fas fa-exchange-alt"></i><span>Permuta</span></a>
     <button class="nav-btn" id="navAtualizarPerfil"><i class="fas fa-user-edit"></i><span>Actualizar Perfil</span></button>
-    <!-- NOVO BOTÃO CARRINHO - RECARREGAR CONTA -->
     <button class="nav-btn cart-btn" id="navRecarregarConta">
       <i class="fas fa-shopping-cart"></i>
       <span>Recarregar Conta</span>
     </button>
   </div>
-
-  <style>
-    .loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index: 10000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
-    .loading .spinner { border: 4px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 4px solid white; width: 45px; height: 45px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .loading p { color: white; margin-top: 20px; }
-  </style>
 
   <script>
     // ==================== CONFIGURAÇÃO FIREBASE ====================
@@ -790,24 +803,53 @@
     const auth = firebase.auth();
     const database = firebase.database();
     
-    // ==================== VERIFICAÇÃO DE AUTENTICAÇÃO ====================
-    const loadingScreen = document.getElementById('loadingScreen');
+    // ==================== LOADING SILENCIOSO ====================
+    const silentLoading = document.getElementById('silentLoading');
     
-    // Função para mostrar conteúdo principal
-    function showMainContent() {
-      loadingScreen.style.display = 'none';
+    function showSilentLoading() {
+      silentLoading.style.display = 'flex';
+    }
+    
+    function hideSilentLoading() {
+      silentLoading.style.display = 'none';
+    }
+    
+    // ==================== VERIFICAÇÃO DE AUTENTICAÇÃO ====================
+    // Função para verificar se cadastro está completo
+    async function verificarCadastroCompleto(uid) {
+      try {
+        // Tentar buscar do Firestore via REST (simplificado)
+        // Como fallback, verificar localStorage
+        const perfil = localStorage.getItem('perfil_professor');
+        if (perfil) {
+          const dados = JSON.parse(perfil);
+          if (dados.nome && dados.escola && dados.provincia) {
+            return true;
+          }
+        }
+        
+        // Se não tiver no localStorage, considerar incompleto
+        const cadastroSalvo = localStorage.getItem('usuario_cadastrado');
+        if (cadastroSalvo) {
+          const dados = JSON.parse(cadastroSalvo);
+          return dados.cadastroCompleto === true;
+        }
+        
+        return false;
+      } catch(e) {
+        return false;
+      }
     }
     
     // Função de logout
     async function fazerLogout() {
+      showSilentLoading();
       try {
         await auth.signOut();
-        // Limpar dados locais
         localStorage.removeItem('user_uid');
         localStorage.removeItem('user_email');
         localStorage.removeItem('usuario_cadastrado');
         localStorage.removeItem('perfil_professor');
-        // Redirecionar para login
         window.location.href = 'index.html';
       } catch(e) {
         console.error('Erro ao fazer logout:', e);
@@ -815,59 +857,47 @@
       }
     }
     
-    // Verificar autenticação ao carregar
-    auth.onAuthStateChanged((user) => {
+    // Verificar autenticação ao carregar (silenciosamente)
+    auth.onAuthStateChanged(async (user) => {
       if (!user) {
-        // Usuário não está logado, redirecionar para index.html
-        console.log('Usuário não autenticado, redirecionando para login...');
         window.location.href = 'index.html';
         return;
       }
       
-      // Usuário logado, carregar dados
-      console.log('Usuário autenticado:', user.email);
+      // Usuário logado, verificar se cadastro está completo
+      const cadastroCompleto = await verificarCadastroCompleto(user.uid);
       
-      // Salvar dados do usuário no localStorage
+      if (!cadastroCompleto) {
+        // Cadastro incompleto, redirecionar para completar
+        window.location.href = 'index.html?update=true';
+        return;
+      }
+      
+      // Salvar dados do usuário
       localStorage.setItem('user_uid', user.uid);
       localStorage.setItem('user_email', user.email);
       
-      // Carregar dados do Firestore (se necessário)
-      carregarDadosUsuario(user.uid, user.email);
+      // Carregar dados do perfil
+      carregarPerfilSilencioso();
       
-      // Mostrar conteúdo após verificação
+      // Esconder loading silencioso e mostrar conteúdo
+      hideSilentLoading();
+      
+      // Inicializar outros componentes
       setTimeout(() => {
-        showMainContent();
         carregarPerfil();
         mostrarBoasVindas();
         verificarMostrarFacebook();
         initChatNotifications();
-      }, 500);
+      }, 100);
     });
     
-    // Função para carregar dados do usuário do Firestore
-    async function carregarDadosUsuario(uid, email) {
-      try {
-        // Tentar buscar do Firestore via REST (já que estamos usando compat)
-        // Como alternativa, usar localStorage existente
-        const perfilSalvo = localStorage.getItem('perfil_professor');
-        if (!perfilSalvo) {
-          // Criar perfil básico
-          const nomeParts = email.split('@')[0].split('.');
-          const nomeBase = nomeParts[0] || 'Professor';
-          localStorage.setItem('perfil_professor', JSON.stringify({
-            nome: nomeBase,
-            email: email,
-            uid: uid
-          }));
-        }
-        
-        // Atualizar sidebar
-        const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}');
-        document.getElementById('sidebarNome').innerHTML = perfil.nome ? `Prof. ${perfil.nome.split(' ')[0]}` : 'Professor Visitante';
-        document.getElementById('sidebarEmail').innerHTML = email;
-      } catch(e) {
-        console.error('Erro ao carregar dados:', e);
-      }
+    // Carregar perfil silenciosamente
+    function carregarPerfilSilencioso() {
+      const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}');
+      const email = localStorage.getItem('user_email') || '';
+      document.getElementById('sidebarNome').innerHTML = perfil.nome ? `Prof. ${perfil.nome.split(' ')[0]}` : 'Professor';
+      document.getElementById('sidebarEmail').innerHTML = email;
     }
     
     // ==================== BLOQUEIO ====================
@@ -961,13 +991,32 @@
     function ligarTelefone(numero) { window.location.href = `tel:+258${numero}`; }
     function enviarEmail() { window.location.href = 'mailto:edmilsonnhanombe62@gmail.com'; }
     function copiarNumero(num) { navigator.clipboard.writeText(num); mostrarToast(`✅ Número ${num} copiado!`, 3000); }
-    function partilharWhatsApp() { window.open(`https://wa.me/?text=${encodeURIComponent('Baixe o app Plano de Aula MZ - Facilite a criação dos seus planos de aula!')}`, '_blank'); }
-    function partilharFacebook() { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.href)}`, '_blank'); }
-    function copiarLinkApp() { navigator.clipboard.writeText(location.href); mostrarToast('✅ Link copiado!', 3000); }
-    function irParaAtualizarPerfil() { window.location.href = 'index.html?update=true'; }
-    function verDadosAtuais() { const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}'); alert(`📋 DADOS DO PERFIL:\n👤 Nome: ${perfil.nome || 'Não cadastrado'}\n🏫 Escola: ${perfil.escola || 'Não informada'}`); }
+    function partilharWhatsApp() { 
+      const linkApp = 'https://nhanomb3.github.io/Planodeaula-/';
+      window.open(`https://wa.me/?text=${encodeURIComponent('📚 Baixe o app Plano de Aula MZ - Facilite a criação dos seus planos de aula! Acesse: ' + linkApp)}`, '_blank'); 
+    }
+    function partilharFacebook() { 
+      const linkApp = 'https://nhanomb3.github.io/Planodeaula-/';
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(linkApp)}`, '_blank'); 
+    }
+    function copiarLinkApp() { 
+      const linkApp = 'https://nhanomb3.github.io/Planodeaula-/';
+      navigator.clipboard.writeText(linkApp); 
+      mostrarToast('✅ Link do app copiado!', 3000); 
+    }
+    function irParaAtualizarPerfil() { 
+      // Redirecionar para index com modo update (completar cadastro)
+      window.location.href = 'index.html?update=true';
+    }
+    function verDadosAtuais() { 
+      const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}'); 
+      const cadastro = JSON.parse(localStorage.getItem('usuario_cadastrado') || '{}');
+      const nome = perfil.nome || cadastro.nome || 'Não cadastrado';
+      const escola = perfil.escola || cadastro.escola || 'Não informada';
+      const provincia = perfil.provincia || cadastro.provincia || 'Não informada';
+      alert(`📋 DADOS DO PERFIL:\n👤 Nome: ${nome}\n🏫 Escola: ${escola}\n📍 Província: ${provincia}`);
+    }
     
-    // Botão Recarregar Conta - chama estrela.html
     function irParaRecarregarConta() {
       window.location.href = 'estrela.html';
     }
@@ -978,7 +1027,7 @@
       if (!localStorage.getItem('ja_cumprimentou')) {
         setTimeout(() => {
           if (nome) mostrarToast(`🎉 Bem-vindo de volta, Professor ${nome.split(' ')[0]}!`, 4000);
-          else mostrarToast(`🎉 Bem-vindo ao Plano de Aula MZ! Configure seu perfil no menu.`, 4000);
+          else mostrarToast(`🎉 Bem-vindo ao Plano de Aula MZ!`, 4000);
           localStorage.setItem('ja_cumprimentou', 'true');
         }, 500);
       }
@@ -994,7 +1043,7 @@
         welcomeMessage.innerHTML = perfil.escola ? `Escola ${perfil.escola} - Vamos planificar hoje?` : 'Prepare-se para mais uma aula incrível!';
       } else {
         welcomeTitle.innerHTML = `📚 Bem-vindo, Professor!`;
-        welcomeMessage.innerHTML = 'Configure seu perfil no menu "Actualizar Perfil"';
+        welcomeMessage.innerHTML = 'Complete seu cadastro no menu "Actualizar Perfil"';
       }
     }
     
@@ -1019,58 +1068,6 @@
     let sidebarOpen = false;
     function toggleSidebar() { sidebarOpen = !sidebarOpen; document.getElementById('sidebar').classList.toggle('open', sidebarOpen); document.getElementById('overlay').classList.toggle('open', sidebarOpen); }
     function closeSidebar() { sidebarOpen = false; document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
-    
-    // ==================== PUSH NOTIFICATIONS ====================
-    const FCM_VAPID_KEY = "BBZvwJyvzBzEo5eujMiAiv7ys50uOQjkmOJv8_NZdUf96SDtPlpKnsjNEmSLfgMx7vKA5xUxB8RHQN2vCzZpywc";
-    
-    async function initPushReceiver() {
-      try {
-        if (!('Notification' in window)) return;
-        if (typeof firebase === 'undefined' || !firebase.messaging) return;
-        
-        let registration;
-        try {
-          registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        } catch (err) { return; }
-        
-        if (Notification.permission === 'granted') {
-          await getAndSaveToken(registration);
-        } else if (Notification.permission !== 'denied') {
-          setTimeout(async () => {
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-              await getAndSaveToken(registration);
-              mostrarToast('🔔 Notificações ativadas!', 4000);
-            }
-          }, 3000);
-        }
-      } catch (error) { console.error('Push error:', error); }
-    }
-    
-    async function getAndSaveToken(registration) {
-      try {
-        const messaging = firebase.messaging();
-        if (FCM_VAPID_KEY) messaging.usePublicVapidKey(FCM_VAPID_KEY);
-        const token = await messaging.getToken({ vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: registration });
-        if (token) {
-          let deviceId = localStorage.getItem('push_device_id');
-          if (!deviceId) {
-            deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('push_device_id', deviceId);
-          }
-          const deviceRef = database.ref(`push_devices/${deviceId}`);
-          await deviceRef.set({ token: token, userAgent: navigator.userAgent, lastSeen: firebase.database.ServerValue.TIMESTAMP, active: true, firstSeen: firebase.database.ServerValue.TIMESTAMP });
-          messaging.onMessage((payload) => { if (payload.notification) mostrarToast(`${payload.notification.title}: ${payload.notification.body}`, 6000); });
-        }
-      } catch (error) { console.error('Token error:', error); }
-    }
-    
-    setInterval(() => {
-      const deviceId = localStorage.getItem('push_device_id');
-      if (deviceId && database) {
-        database.ref(`push_devices/${deviceId}`).update({ lastSeen: firebase.database.ServerValue.TIMESTAMP, active: true }).catch(() => {});
-      }
-    }, 60000);
     
     // ==================== EVENTOS ====================
     document.addEventListener('DOMContentLoaded', () => {
@@ -1103,8 +1100,6 @@
       document.getElementById('sairBtn').addEventListener('click', () => { closeSidebar(); abrirModal('modalConfirmSair'); });
       document.getElementById('confirmSairSim').addEventListener('click', sairAplicativo);
       document.getElementById('confirmSairNao').addEventListener('click', () => fecharModal('modalConfirmSair'));
-      
-      // Botão Recarregar Conta
       document.getElementById('navRecarregarConta').addEventListener('click', irParaRecarregarConta);
       
       document.getElementById('navHome').addEventListener('click', () => {
@@ -1126,10 +1121,6 @@
         localStorage.setItem('last_read_chat', lastReadTimestamp);
         updateNotificationCount();
       }, 2000);
-      
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.ready.then(() => setTimeout(initPushReceiver, 1000));
-      }
     });
     
     // Expor funções globais
@@ -1145,7 +1136,6 @@
     window.disableKeys = disableKeys;
     window.seguirFacebook = seguirFacebook;
     window.irParaRecarregarConta = irParaRecarregarConta;
-    window.fazerLogout = fazerLogout;
   </script>
 </body>
 </html>

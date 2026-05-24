@@ -47,7 +47,29 @@
             border-radius: 12px;
             font-size: 15px;
             transition: border-color 0.2s;
-        }        input:focus, select:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
+        }
+        input:focus, select:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
+        
+        /* Container para senha com botão de olho */
+        .password-container {
+            position: relative;
+        }
+        .password-container input {
+            padding-right: 45px;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #999;
+            padding: 8px;
+        }
+        .toggle-password:hover { color: #667eea; }
         
         .btn {
             width: 100%;
@@ -75,6 +97,17 @@
             margin-top: 10px;
         }
         .btn-google:hover { border-color: #ccc; background: #fafafa; }
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn-whatsapp:hover { background: #128C7E; box-shadow: 0 8px 25px rgba(37,211,102,0.4); }
         
         .message { margin-top: 15px; padding: 12px 15px; border-radius: 10px; text-align: center; display: none; font-size: 14px; }
         .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
@@ -145,8 +178,55 @@
             padding: 15px;
             font-size: 12px;
             color: #888;
-            background: #f8f9fa;            border-top: 1px solid #eee;
+            background: #f8f9fa;
+            border-top: 1px solid #eee;
         }
+        
+        .support-section {
+            background: #f0f7ff;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+            border: 1px solid #d4e4fc;
+        }
+        .support-section h4 {
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .support-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .support-btn-sm {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .support-btn-sm.whatsapp {
+            background: #25D366;
+            color: white;
+        }
+        .support-btn-sm.call {
+            background: #3498db;
+            color: white;
+        }
+        .support-btn-sm.sms {
+            background: #95a5a6;
+            color: white;
+        }
+        .support-btn-sm:hover { opacity: 0.9; transform: translateY(-2px); }
         
         @media (max-width: 480px) {
             .container { border-radius: 16px; }
@@ -180,7 +260,12 @@
                 
                 <div class="form-group">
                     <label for="loginSenha">🔒 Senha</label>
-                    <input type="password" id="loginSenha" required placeholder="••••••••" autocomplete="current-password">
+                    <div class="password-container">
+                        <input type="password" id="loginSenha" required placeholder="••••••••" autocomplete="current-password">
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('loginSenha', this)">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
                     <span class="error-text" id="loginSenhaError"></span>
                 </div>
                 
@@ -196,6 +281,25 @@
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>                    Entrar com Google
                 </button>
+                
+                <!-- Seção de Suporte -->
+                <div class="support-section">
+                    <h4><i class="fas fa-headset"></i> Precisa de ajuda?</h4>
+                    <div class="support-buttons">
+                        <a href="https://chat.whatsapp.com/JXb16aohQKSFVgxHzfRC5L" target="_blank" class="support-btn-sm whatsapp">
+                            <i class="fab fa-whatsapp"></i> Grupo de Suporte WhatsApp
+                        </a>
+                        <a href="tel:+258876393961" class="support-btn-sm call">
+                            <i class="fas fa-phone-alt"></i> Ligar: 87 639 3961
+                        </a>
+                        <a href="tel:+258834890828" class="support-btn-sm call">
+                            <i class="fas fa-phone-alt"></i> Ligar: 83 489 0828
+                        </a>
+                        <a href="sms:+258876393961" class="support-btn-sm sms">
+                            <i class="fas fa-sms"></i> SMS: 87 639 3961
+                        </a>
+                    </div>
+                </div>
                 
                 <div class="message" id="loginMessage"></div>
             </form>
@@ -243,7 +347,8 @@
 
                 <div class="form-group">
                     <label for="escola">🏫 Escola *</label>
-                    <input type="text" id="escola" required placeholder="Nome da sua escola" autocomplete="organization">                    <span class="error-text" id="escolaError"></span>
+                    <input type="text" id="escola" required placeholder="Nome da sua escola" autocomplete="organization">
+                    <span class="error-text" id="escolaError"></span>
                 </div>
 
                 <div class="form-group">
@@ -267,13 +372,23 @@
 
                 <div class="form-group">
                     <label for="senha">🔒 Senha *</label>
-                    <input type="password" id="senha" required placeholder="Mínimo 6 caracteres" minlength="6" autocomplete="new-password">
+                    <div class="password-container">
+                        <input type="password" id="senha" required placeholder="Mínimo 6 caracteres" minlength="6" autocomplete="new-password">
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('senha', this)">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
                     <span class="error-text" id="senhaError"></span>
                 </div>
 
                 <div class="form-group">
                     <label for="confirmarSenha">🔒 Confirmar Senha *</label>
-                    <input type="password" id="confirmarSenha" required placeholder="Digite a senha novamente" autocomplete="new-password">
+                    <div class="password-container">
+                        <input type="password" id="confirmarSenha" required placeholder="Digite a senha novamente" autocomplete="new-password">
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('confirmarSenha', this)">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
                     <span class="error-text" id="confirmarSenhaError"></span>
                 </div>
 
@@ -291,6 +406,22 @@
                     Criar conta com Google
                 </button>
                 
+                <!-- Seção de Suporte também no cadastro -->
+                <div class="support-section">
+                    <h4><i class="fas fa-headset"></i> Precisa de ajuda?</h4>
+                    <div class="support-buttons">
+                        <a href="https://chat.whatsapp.com/JXb16aohQKSFVgxHzfRC5L" target="_blank" class="support-btn-sm whatsapp">
+                            <i class="fab fa-whatsapp"></i> Grupo de Suporte WhatsApp
+                        </a>
+                        <a href="tel:+258876393961" class="support-btn-sm call">
+                            <i class="fas fa-phone-alt"></i> Ligar: 87 639 3961
+                        </a>
+                        <a href="tel:+258834890828" class="support-btn-sm call">
+                            <i class="fas fa-phone-alt"></i> Ligar: 83 489 0828
+                        </a>
+                    </div>
+                </div>
+                
                 <div class="message" id="cadastroMessage"></div>
             </form>            
             <div class="link">
@@ -301,6 +432,23 @@
             Ao criar conta, você concorda com nossos termos de uso.
         </div>
     </div>
+
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <script>
+        // Função para toggle da senha (global)
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = '<i class="far fa-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                btn.innerHTML = '<i class="far fa-eye"></i>';
+            }
+        }
+    </script>
 
     <!-- ==================== FIREBASE MODULAR SDK (v9+) ==================== -->
     <script type="module">
@@ -326,7 +474,7 @@
         } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         // ═══════════════════════════════════════════════════════════════
-        // ⚙️ CONFIGURAÇÃO DO FIREBASE (SUAS CREDENCIAIS)
+        // ⚙️ CONFIGURAÇÃO DO FIREBASE
         // ═══════════════════════════════════════════════════════════════
         const firebaseConfig = {
             apiKey: "AIzaSyDCBwanaFABmQNgT91vnhV3Xv1RJn9bYOI",
@@ -341,7 +489,8 @@
         // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);        const googleProvider = new GoogleAuthProvider();
+        const db = getFirestore(app);
+        const googleProvider = new GoogleAuthProvider();
 
         // URL do Google Apps Script (opcional)
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxWsH88RWwFLK1bbjVjaFRNx894boMEyKeNsIjNctkdxOx90CzkCNRaXEwNZpY8JPA25Q/exec';
@@ -368,6 +517,10 @@
         const senhaInput = document.getElementById('senha');
         const confirmarSenhaInput = document.getElementById('confirmarSenha');
         const cadastroMessage = document.getElementById('cadastroMessage');
+
+        // Flag para saber se veio de atualização de perfil
+        const urlParams = new URLSearchParams(window.location.search);
+        const isUpdateMode = urlParams.get('update') === 'true';
 
         // ═══════════════════════════════════════════════════════════════
         // 🎨 FUNÇÕES DE UI
@@ -412,7 +565,7 @@
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // 💾 PERSISTÊNCIA DE DADOS
+        // 💾 PERSISTÊNCIA DE DADOS NO FIRESTORE
         // ═══════════════════════════════════════════════════════════════
         async function salvarNoFirestore(uid, dados, email) {
             try {
@@ -422,14 +575,52 @@
                     telefone: dados.numero,
                     escola: dados.escola,
                     provincia: dados.provincia,
+                    cadastroCompleto: true,
                     estrelas: 0,
                     ofertasCompradas: [],
                     dataCadastro: new Date().toLocaleString('pt-MZ'),
                     timestamp: serverTimestamp()
                 }, { merge: true });
+                console.log('✅ Dados salvos no Firestore');
                 return true;
             } catch (error) {
                 console.error('❌ Erro Firestore:', error);
+                return false;
+            }
+        }
+        
+        // Função para atualizar cadastro incompleto
+        async function atualizarCadastroIncompleto(uid, dados, email) {
+            try {
+                await setDoc(doc(db, 'usuarios', uid), {
+                    nome: dados.nome,
+                    email: email,
+                    telefone: dados.numero,
+                    escola: dados.escola,
+                    provincia: dados.provincia,
+                    cadastroCompleto: true,
+                    atualizadoEm: new Date().toLocaleString('pt-MZ'),
+                    timestamp: serverTimestamp()
+                }, { merge: true });
+                console.log('✅ Cadastro incompleto atualizado no Firestore');
+                return true;
+            } catch (error) {
+                console.error('❌ Erro ao atualizar Firestore:', error);
+                return false;
+            }
+        }
+        
+        // Verificar se cadastro está completo
+        async function verificarCadastroCompleto(uid) {
+            try {
+                const docSnap = await getDoc(doc(db, 'usuarios', uid));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    return data.cadastroCompleto === true && data.nome && data.escola && data.provincia;
+                }
+                return false;
+            } catch (error) {
+                console.error('Erro ao verificar cadastro:', error);
                 return false;
             }
         }
@@ -439,7 +630,8 @@
                 await fetch(SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },                    body: JSON.stringify({
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
                         nome: dados.nome,
                         numero: dados.numero,
                         escola: dados.escola,
@@ -462,7 +654,8 @@
                 escola: dados?.escola || '',
                 provincia: dados?.provincia || '',
                 email: email,
-                uid: uid
+                uid: uid,
+                cadastroCompleto: dados?.cadastroCompleto || false
             }));
             localStorage.setItem('user_uid', uid);
             localStorage.setItem('user_email', email);
@@ -484,7 +677,7 @@
                 
                 await salvarNoFirestore(user.uid, dados, email);
                 await enviarParaGoogleSheets(dados, email);
-                salvarSessaoLocalStorage(user.uid, email, dados);
+                salvarSessaoLocalStorage(user.uid, email, { ...dados, cadastroCompleto: true });
                 
                 return { success: true, email: email };
                 
@@ -492,7 +685,32 @@
                 console.error('❌ Erro email/senha:', error);
                 return tratarErroFirebase(error);
             }
-        }        
+        }
+        
+        // Função especial para atualizar cadastro incompleto (usuário já existe)
+        async function atualizarCadastroExistente(uid, dados, email) {
+            try {
+                await atualizarCadastroIncompleto(uid, dados, email);
+                await enviarParaGoogleSheets(dados, email);
+                salvarSessaoLocalStorage(uid, email, { ...dados, cadastroCompleto: true });
+                
+                // Salvar também no perfil_professor para a tela
+                localStorage.setItem('perfil_professor', JSON.stringify({
+                    nome: dados.nome,
+                    escola: dados.escola,
+                    provincia: dados.provincia,
+                    telefone: dados.numero,
+                    email: email,
+                    uid: uid
+                }));
+                
+                return { success: true, email: email };
+            } catch (error) {
+                console.error('❌ Erro ao atualizar cadastro:', error);
+                return { success: false, error: 'Erro ao salvar dados. Tente novamente.' };
+            }
+        }
+        
         async function fazerLoginEmailSenha(email, senha) {
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), senha);
@@ -501,8 +719,14 @@
                 const docSnap = await getDoc(doc(db, 'usuarios', user.uid));
                 const dados = docSnap.exists() ? docSnap.data() : {};
                 
-                salvarSessaoLocalStorage(user.uid, user.email, dados);
-                return { success: true };
+                const cadastroCompleto = dados.cadastroCompleto === true;
+                
+                salvarSessaoLocalStorage(user.uid, user.email, { 
+                    nome: dados.nome || '', 
+                    cadastroCompleto: cadastroCompleto 
+                });
+                
+                return { success: true, cadastroCompleto: cadastroCompleto };
                 
             } catch (error) {
                 console.error('❌ Erro login:', error);
@@ -519,6 +743,9 @@
                 const user = result.user;
                 const isNewUser = result.additionalUserInfo?.isNewUser;
                 
+                const docSnap = await getDoc(doc(db, 'usuarios', user.uid));
+                let cadastroCompleto = false;
+                
                 if (isNewUser) {
                     await setDoc(doc(db, 'usuarios', user.uid), {
                         nome: user.displayName || '',
@@ -526,22 +753,31 @@
                         telefone: '',
                         escola: '',
                         provincia: '',
+                        cadastroCompleto: false,
                         estrelas: 0,
                         ofertasCompradas: [],
                         dataCadastro: new Date().toLocaleString('pt-MZ'),
                         timestamp: serverTimestamp(),
                         provedor: 'google'
                     });
+                    cadastroCompleto = false;
+                } else {
+                    cadastroCompleto = docSnap.data()?.cadastroCompleto === true;
                 }
                 
-                salvarSessaoLocalStorage(user.uid, user.email, { nome: user.displayName });
-                return { success: true, email: user.email, isNewUser };
+                salvarSessaoLocalStorage(user.uid, user.email, { 
+                    nome: user.displayName || '',
+                    cadastroCompleto: cadastroCompleto 
+                });
+                
+                return { success: true, email: user.email, isNewUser, cadastroCompleto };
                 
             } catch (error) {
                 console.error('❌ Erro Google:', error);
                 return tratarErroFirebase(error);
             }
         }
+        
         // ═══════════════════════════════════════════════════════════════
         // 🚨 TRATAMENTO DE ERROS
         // ═══════════════════════════════════════════════════════════════
@@ -590,7 +826,8 @@
             }
             if (!escola) {
                 showError('escola', 'Digite o nome da escola');
-                valido = false;            }
+                valido = false;
+            }
             if (!provincia) {
                 showError('provincia', 'Selecione a província');
                 valido = false;
@@ -622,12 +859,46 @@
             }
             return valido;
         }
+        
+        // Verificar se veio para completar cadastro (modo update)
+        function verificarModoUpdate() {
+            if (isUpdateMode) {
+                // Mostrar tela de cadastro para completar
+                loginContainer.style.display = 'none';
+                cadastroContainer.style.display = 'block';
+                
+                // Preencher email se disponível
+                const userEmail = localStorage.getItem('user_email');
+                if (userEmail && emailInput) {
+                    emailInput.value = userEmail;
+                    emailInput.readOnly = true;
+                    emailInput.style.backgroundColor = '#f5f5f5';
+                }
+                
+                // Mudar título e botão
+                const headerTitle = document.querySelector('#cadastroContainer .header h1');
+                if (headerTitle) headerTitle.innerHTML = '📝 Completar Cadastro';
+                
+                const cadastroBtn = document.getElementById('btnCadastroEmail');
+                if (cadastroBtn) {
+                    cadastroBtn.innerHTML = '💾 Completar Cadastro';
+                    cadastroBtn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+                }
+                
+                // Esconder opção de Google no modo update
+                const googleBtn = document.getElementById('btnCadastroGoogle');
+                if (googleBtn) googleBtn.style.display = 'none';
+                
+                const divider = document.querySelector('#cadastroContainer .divider');
+                if (divider) divider.style.display = 'none';
+            }
+        }
 
         // ═══════════════════════════════════════════════════════════════
         // 🎯 EVENT HANDLERS
         // ═══════════════════════════════════════════════════════════════
         
-        // Cadastro com Email/Senha
+        // Cadastro com Email/Senha (completo ou atualização)
         document.getElementById('btnCadastroEmail').onclick = async () => {
             if (!validarCadastro()) return;
             
@@ -639,12 +910,26 @@
                 provincia: provinciaSelect.value
             };
             
-            const btn = document.getElementById('btnCadastroEmail');            toggleLoading(btn, true, 'Criando conta...');
+            const btn = document.getElementById('btnCadastroEmail');
+            toggleLoading(btn, true, 'Processando...');
             
-            const result = await criarContaEmailSenha(dados, senhaInput.value);
+            let result;
+            
+            if (isUpdateMode) {
+                // Modo de atualização - usuário já existe, só salvar dados
+                const uid = localStorage.getItem('user_uid');
+                if (uid) {
+                    result = await atualizarCadastroExistente(uid, dados, dados.email);
+                } else {
+                    result = { success: false, error: 'Sessão expirada. Faça login novamente.' };
+                }
+            } else {
+                // Cadastro normal
+                result = await criarContaEmailSenha(dados, senhaInput.value);
+            }
             
             if (result.success) {
-                showMessage(cadastroMessage, `✅ Conta criada! Redirecionando...`, 'success');
+                showMessage(cadastroMessage, `✅ Dados salvos! Redirecionando...`, 'success');
                 setTimeout(() => { window.location.href = 'tela.html'; }, 2000);
             } else {
                 showMessage(cadastroMessage, `❌ ${result.error}`, 'error');
@@ -660,9 +945,17 @@
             const result = await autenticarComGoogle();
             
             if (result.success) {
-                const msg = result.isNewUser ? `✅ Conta criada com Google!` : `✅ Login realizado com Google!`;
-                showMessage(cadastroMessage, msg, 'success');
-                setTimeout(() => { window.location.href = 'tela.html'; }, 2000);
+                if (!result.cadastroCompleto) {
+                    // Cadastro incompleto, redirecionar para completar
+                    showMessage(cadastroMessage, `✅ Conta Google criada! Complete seu cadastro...`, 'success');
+                    setTimeout(() => { 
+                        window.location.href = 'index.html?update=true';
+                    }, 1500);
+                } else {
+                    const msg = result.isNewUser ? `✅ Conta criada com Google!` : `✅ Login realizado com Google!`;
+                    showMessage(cadastroMessage, msg, 'success');
+                    setTimeout(() => { window.location.href = 'tela.html'; }, 2000);
+                }
             } else {
                 showMessage(cadastroMessage, `❌ ${result.error}`, 'error');
                 toggleLoading(btn, false);
@@ -679,8 +972,16 @@
             const result = await fazerLoginEmailSenha(loginEmail.value, loginSenha.value);
             
             if (result.success) {
-                showMessage(loginMessage, '✅ Login realizado! Redirecionando...', 'success');
-                setTimeout(() => { window.location.href = 'tela.html'; }, 1500);
+                if (!result.cadastroCompleto) {
+                    // Cadastro incompleto, pedir para completar
+                    showMessage(loginMessage, '⚠️ Complete seu cadastro para continuar!', 'info');
+                    setTimeout(() => { 
+                        window.location.href = 'index.html?update=true';
+                    }, 1500);
+                } else {
+                    showMessage(loginMessage, '✅ Login realizado! Redirecionando...', 'success');
+                    setTimeout(() => { window.location.href = 'tela.html'; }, 1500);
+                }
             } else {
                 showMessage(loginMessage, `❌ ${result.error}`, 'error');
                 toggleLoading(loginBtn, false);
@@ -688,13 +989,21 @@
         };
         
         // Login com Google
-        document.getElementById('btnLoginGoogle').onclick = async () => {            toggleLoading(loginBtn, true, 'Abrindo Google...');
+        document.getElementById('btnLoginGoogle').onclick = async () => {
+            toggleLoading(loginBtn, true, 'Abrindo Google...');
             
             const result = await autenticarComGoogle();
             
             if (result.success) {
-                showMessage(loginMessage, '✅ Login com Google realizado!', 'success');
-                setTimeout(() => { window.location.href = 'tela.html'; }, 1500);
+                if (!result.cadastroCompleto) {
+                    showMessage(loginMessage, '⚠️ Complete seu cadastro para continuar!', 'info');
+                    setTimeout(() => { 
+                        window.location.href = 'index.html?update=true';
+                    }, 1500);
+                } else {
+                    showMessage(loginMessage, '✅ Login com Google realizado!', 'success');
+                    setTimeout(() => { window.location.href = 'tela.html'; }, 1500);
+                }
             } else {
                 showMessage(loginMessage, `❌ ${result.error}`, 'error');
                 toggleLoading(loginBtn, false);
@@ -727,34 +1036,51 @@
         provinciaSelect?.addEventListener('change', () => clearError('provincia'));
 
         // ═══════════════════════════════════════════════════════════════
-        // 🔄 VERIFICAÇÃO DE SESSÃO - SE JÁ LOGADO, VAI PARA TELA
+        // 🔄 VERIFICAÇÃO DE SESSÃO
         // ═══════════════════════════════════════════════════════════════
         onAuthStateChanged(auth, (user) => {
             loadingScreen.style.display = 'none';
             
-            if (user) {
-                // Usuário já está logado, redireciona para tela principal
-                console.log('✅ Usuário já autenticado:', user.email);
-                window.location.href = 'tela.html';
-            } else {
-                // Mostrar tela de login
+            if (user && !isUpdateMode) {
+                // Verificar se cadastro está completo
+                verificarCadastroCompleto(user.uid).then(completo => {
+                    if (completo) {
+                        window.location.href = 'tela.html';
+                    } else {
+                        // Cadastro incompleto, mostrar tela de cadastro
+                        loginContainer.style.display = 'none';
+                        cadastroContainer.style.display = 'block';
+                        
+                        // Preencher email
+                        if (emailInput) {
+                            emailInput.value = user.email;
+                            emailInput.readOnly = true;
+                            emailInput.style.backgroundColor = '#f5f5f5';
+                        }
+                        
+                        const headerTitle = document.querySelector('#cadastroContainer .header h1');
+                        if (headerTitle) headerTitle.innerHTML = '📝 Completar Cadastro';
+                        
+                        const cadastroBtn = document.getElementById('btnCadastroEmail');
+                        if (cadastroBtn) {
+                            cadastroBtn.innerHTML = '💾 Completar Cadastro';
+                            cadastroBtn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+                        }
+                    }
+                });
+            } else if (!user && !isUpdateMode) {
                 loginContainer.style.display = 'block';
+            } else if (isUpdateMode) {
+                // Modo update - mostrar cadastro
+                loginContainer.style.display = 'none';
+                cadastroContainer.style.display = 'block';
+                verificarModoUpdate();
             }
         });
         
-        // Função de logout exposta para ser chamada de outros lugares (via localStorage)
-        window.firebaseLogout = async () => {
-            try {
-                await signOut(auth);
-                limparSessaoCompleta();
-                window.location.href = 'index.html';
-            } catch(e) {
-                console.error('Erro ao fazer logout:', e);
-            }
-        };
-        
-        // Expor funções para debug (opcional)
-        window.firebaseDebug = { auth, db, signOut, limparSessao: limparSessaoCompleta, logout: window.firebaseLogout };
+        // Expor funções para debug
+        window.firebaseDebug = { auth, db, signOut, limparSessao: limparSessaoCompleta };
+        window.togglePasswordVisibility = togglePasswordVisibility;
     </script>
 </body>
 </html>
