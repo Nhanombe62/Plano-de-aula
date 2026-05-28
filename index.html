@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Admin Panel - Gestão Centralizada</title>
+    <title>Admin Panel Pro - Gestão Avançada</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <!-- Firebase SDKs -->
@@ -12,7 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
-    <!-- Chart.js para gráficos -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
     <style>
@@ -26,6 +26,32 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
+        }
+        
+        /* Timer de Sessão */
+        .session-timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            z-index: 1000;
+            font-family: monospace;
+            border-left: 3px solid #f39c12;
+        }
+        
+        .session-timer.warning {
+            background: #e74c3c;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
         }
         
         /* Tela de Login */
@@ -54,14 +80,8 @@
         }
         
         @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .login-card i {
@@ -75,12 +95,6 @@
             margin-bottom: 10px;
         }
         
-        .login-card p {
-            color: #666;
-            margin-bottom: 25px;
-            font-size: 0.9rem;
-        }
-        
         .login-input {
             width: 100%;
             padding: 15px;
@@ -88,12 +102,6 @@
             border-radius: 15px;
             font-size: 1rem;
             margin-bottom: 15px;
-            transition: all 0.3s;
-        }
-        
-        .login-input:focus {
-            outline: none;
-            border-color: #667eea;
         }
         
         .login-btn {
@@ -106,11 +114,6 @@
             font-weight: bold;
             cursor: pointer;
             width: 100%;
-            transition: transform 0.2s;
-        }
-        
-        .login-btn:active {
-            transform: scale(0.98);
         }
         
         .login-error {
@@ -144,10 +147,6 @@
             font-size: 1.5rem;
         }
         
-        .header h1 i {
-            color: #f39c12;
-        }
-        
         .admin-info {
             display: flex;
             align-items: center;
@@ -160,7 +159,6 @@
             border-radius: 25px;
             color: white;
             font-weight: bold;
-            font-size: 0.85rem;
         }
         
         .logout-btn {
@@ -170,7 +168,6 @@
             padding: 8px 20px;
             border-radius: 25px;
             cursor: pointer;
-            font-weight: bold;
         }
         
         .tabs {
@@ -204,13 +201,13 @@
             animation: fadeIn 0.3s ease;
         }
         
+        .tab-content.active {
+            display: block;
+        }
+        
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
-        }
-        
-        .tab-content.active {
-            display: block;
         }
         
         .stats-grid {
@@ -246,11 +243,6 @@
             color: #2c3e50;
         }
         
-        .stat-card .label {
-            color: #666;
-            font-size: 0.85rem;
-        }
-        
         .card {
             background: white;
             border-radius: 20px;
@@ -263,19 +255,19 @@
             font-weight: bold;
             color: #2c3e50;
             margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
             border-left: 4px solid #f39c12;
             padding-left: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
-        .user-list, .message-list {
+        .user-list, .message-list, .download-list {
             max-height: 500px;
             overflow-y: auto;
         }
         
-        .user-item, .message-item {
+        .user-item, .message-item, .download-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -301,19 +293,19 @@
             flex-wrap: wrap;
         }
         
-        .user-email, .message-text {
+        .user-email {
             font-size: 0.8rem;
             color: #666;
             margin-top: 3px;
         }
         
-        .message-author {
+        .user-stars {
+            font-size: 0.9rem;
+            color: #f39c12;
             font-weight: bold;
-            font-size: 0.85rem;
-            color: #075e54;
         }
         
-        .user-actions, .message-actions {
+        .user-actions {
             display: flex;
             gap: 8px;
         }
@@ -329,33 +321,28 @@
             font-size: 1rem;
         }
         
-        .action-btn.delete {
-            color: #e74c3c;
-        }
-        
-        .action-btn.block {
-            color: #f39c12;
-        }
-        
-        .action-btn.unblock {
-            color: #27ae60;
-        }
-        
-        .action-btn.stars {
-            color: #f39c12;
-        }
+        .action-btn.delete { color: #e74c3c; }
+        .action-btn.block { color: #f39c12; }
+        .action-btn.unblock { color: #27ae60; }
+        .action-btn.stars { color: #f39c12; }
+        .action-btn.freeze { color: #3498db; }
+        .action-btn.reply { color: #667eea; }
         
         .action-btn:hover {
             background: rgba(0,0,0,0.05);
             transform: scale(1.1);
         }
         
-        .blocked-badge {
+        .blocked-badge, .frozen-badge {
             background: #e74c3c;
             color: white;
             padding: 2px 10px;
             border-radius: 20px;
             font-size: 0.7rem;
+        }
+        
+        .frozen-badge {
+            background: #3498db;
         }
         
         .search-bar {
@@ -382,25 +369,55 @@
             font-weight: bold;
         }
         
-        .btn-warning {
-            background: #f39c12;
-        }
+        .btn-warning { background: #f39c12; }
+        .btn-danger { background: #e74c3c; }
+        .btn-success { background: #27ae60; }
         
-        .btn-danger {
-            background: #e74c3c;
-        }
-        
-        .add-stars-form {
+        .stars-control {
             display: flex;
             gap: 10px;
+            align-items: center;
             flex-wrap: wrap;
         }
         
-        .add-stars-input {
-            flex: 1;
-            padding: 12px 15px;
+        .stars-input {
+            padding: 10px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 25px;
+            width: 120px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 20000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .reply-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            margin: 15px 0;
+            font-family: inherit;
+            resize: vertical;
         }
         
         .toast {
@@ -417,14 +434,8 @@
         }
         
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(100px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
         }
         
         .loading {
@@ -448,315 +459,248 @@
             padding: 2px 8px;
             border-radius: 10px;
             font-size: 0.7rem;
-            margin-left: 5px;
+        }
+        
+        .period-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .period-btn {
+            background: #e0e0e0;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        
+        .period-btn.active {
+            background: #667eea;
+            color: white;
         }
         
         @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .user-item, .message-item {
-                flex-direction: column;
-                gap: 10px;
-                text-align: center;
-            }
-            
-            .user-actions, .message-actions {
-                justify-content: center;
-            }
+            .container { padding: 10px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .user-item, .message-item { flex-direction: column; gap: 10px; text-align: center; }
+            .user-actions { justify-content: center; }
         }
     </style>
 </head>
 <body>
+    <!-- Timer de Sessão -->
+    <div class="session-timer" id="sessionTimer">⏱️ 30:00</div>
+    
     <!-- Tela de Login -->
     <div class="login-overlay" id="loginOverlay">
         <div class="login-card">
             <i class="fas fa-shield-alt"></i>
-            <h2>Admin Panel</h2>
-            <p>Digite a chave de acesso para gerenciar o sistema</p>
-            <input type="password" id="adminKey" class="login-input" placeholder="Chave de Administrador">
+            <h2>Admin Panel Pro</h2>
+            <p>Digite a senha de administrador</p>
+            <input type="password" id="adminPassword" class="login-input" placeholder="Senha">
             <button class="login-btn" id="loginBtn">
                 <i class="fas fa-unlock-alt"></i> Acessar
             </button>
             <div class="login-error" id="loginError">
-                <i class="fas fa-exclamation-triangle"></i> Chave incorreta!
+                <i class="fas fa-exclamation-triangle"></i> Senha incorreta!
             </div>
-            <p style="margin-top: 20px; font-size: 0.7rem; color: #999;">
-                <i class="fas fa-info-circle"></i> Acesso restrito - Todos os logs são registrados
-            </p>
         </div>
     </div>
     
     <!-- Painel Principal -->
     <div class="container" id="mainPanel" style="display: none;">
         <div class="header">
-            <h1>
-                <i class="fas fa-crown"></i> 
-                Admin Panel - Gestão Centralizada
-                <span style="font-size: 0.7rem; color: #666;"> v2.0</span>
-            </h1>
+            <h1><i class="fas fa-crown"></i> Admin Panel Pro - Gestão Avançada</h1>
             <div class="admin-info">
-                <span class="admin-badge">
-                    <i class="fas fa-user-shield"></i> Master Admin
-                </span>
-                <button class="logout-btn" id="logoutBtn">
-                    <i class="fas fa-sign-out-alt"></i> Sair
-                </button>
+                <span class="admin-badge"><i class="fas fa-user-shield"></i> Master Admin</span>
+                <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </div>
         </div>
         
         <div class="tabs">
-            <button class="tab-btn active" data-tab="dashboard">
-                <i class="fas fa-chart-line"></i> Dashboard
-            </button>
-            <button class="tab-btn" data-tab="users">
-                <i class="fas fa-users"></i> Usuários
-            </button>
-            <button class="tab-btn" data-tab="messages">
-                <i class="fas fa-comments"></i> Chat
-            </button>
-            <button class="tab-btn" data-tab="stars">
-                <i class="fas fa-star"></i> Estrelas
-            </button>
-            <button class="tab-btn" data-tab="blocked">
-                <i class="fas fa-ban"></i> Bloqueados
-            </button>
-            <button class="tab-btn" data-tab="logs">
-                <i class="fas fa-history"></i> Logs
-            </button>
+            <button class="tab-btn active" data-tab="dashboard"><i class="fas fa-chart-line"></i> Dashboard</button>
+            <button class="tab-btn" data-tab="users"><i class="fas fa-users"></i> Usuários</button>
+            <button class="tab-btn" data-tab="messages"><i class="fas fa-comments"></i> Chat</button>
+            <button class="tab-btn" data-tab="stars"><i class="fas fa-star"></i> Estrelas</button>
+            <button class="tab-btn" data-tab="downloads"><i class="fas fa-download"></i> Downloads</button>
+            <button class="tab-btn" data-tab="ranking"><i class="fas fa-trophy"></i> Ranking</button>
         </div>
         
         <!-- Dashboard -->
         <div class="tab-content active" id="dashboard">
-            <div class="stats-grid" id="statsGrid">
-                <div class="stat-card">
-                    <i class="fas fa-users"></i>
-                    <div class="number" id="totalUsers">0</div>
-                    <div class="label">Total de Usuários</div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-comments"></i>
-                    <div class="number" id="totalMessages">0</div>
-                    <div class="label">Mensagens</div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-ban"></i>
-                    <div class="number" id="totalBlocked">0</div>
-                    <div class="label">Bloqueados</div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-star"></i>
-                    <div class="number" id="totalStars">0</div>
-                    <div class="label">Estrelas</div>
-                </div>
+            <div class="stats-grid">
+                <div class="stat-card"><i class="fas fa-users"></i><div class="number" id="totalUsers">0</div><div class="label">Usuários</div></div>
+                <div class="stat-card"><i class="fas fa-comments"></i><div class="number" id="totalMessages">0</div><div class="label">Mensagens</div></div>
+                <div class="stat-card"><i class="fas fa-ban"></i><div class="number" id="totalBlocked">0</div><div class="label">Bloqueados</div></div>
+                <div class="stat-card"><i class="fas fa-star"></i><div class="number" id="totalStars">0</div><div class="label">Estrelas</div></div>
+                <div class="stat-card"><i class="fas fa-download"></i><div class="number" id="totalDownloads">0</div><div class="label">Downloads</div></div>
+                <div class="stat-card"><i class="fas fa-snowflake"></i><div class="number" id="totalFrozen">0</div><div class="label">Estrelas Congeladas</div></div>
             </div>
             
             <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-chart-simple"></i>
-                    Gráfico de Atividades
+                <div class="card-title">📊 Downloads por Período</div>
+                <div class="period-buttons">
+                    <button class="period-btn active" data-period="day">Hoje</button>
+                    <button class="period-btn" data-period="week">Esta Semana</button>
+                    <button class="period-btn" data-period="month">Este Mês</button>
                 </div>
-                <div class="chart-container">
-                    <canvas id="activityChart"></canvas>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-info-circle"></i>
-                    Status dos Serviços
-                </div>
-                <div id="serviceStatus"></div>
+                <div class="chart-container"><canvas id="downloadsChart"></canvas></div>
             </div>
         </div>
         
         <!-- Usuários -->
         <div class="tab-content" id="users">
             <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-search"></i>
-                    Buscar Usuário
-                </div>
+                <div class="card-title">🔍 Buscar Usuário</div>
                 <div class="search-bar">
                     <input type="text" id="searchUser" class="search-input" placeholder="Nome, email ou ID...">
-                    <button class="btn-primary" id="searchUserBtn">
-                        <i class="fas fa-search"></i> Buscar
-                    </button>
+                    <button class="btn-primary" id="searchUserBtn"><i class="fas fa-search"></i> Buscar</button>
+                    <button class="btn-primary" id="resetSearchBtn"><i class="fas fa-sync"></i> Mostrar Todos</button>
                 </div>
             </div>
-            
             <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-users"></i>
-                    Lista de Usuários
-                    <span id="userCount" class="badge">0</span>
-                </div>
-                <div id="usersList" class="user-list">
-                    <div class="loading">Carregando usuários...</div>
-                </div>
+                <div class="card-title">👥 Lista de Usuários <span id="userCount" class="badge">0</span></div>
+                <div id="usersList" class="user-list"><div class="loading">Carregando...</div></div>
             </div>
         </div>
         
-        <!-- Mensagens -->
+        <!-- Chat -->
         <div class="tab-content" id="messages">
             <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-trash-alt"></i>
-                    Ações Rápidas
-                </div>
+                <div class="card-title">⚡ Ações Rápidas</div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="btn-primary btn-danger" id="clearAllMessages">
-                        <i class="fas fa-trash"></i> Limpar Todas
-                    </button>
-                    <button class="btn-primary" id="refreshMessages">
-                        <i class="fas fa-sync"></i> Recarregar
-                    </button>
+                    <button class="btn-primary btn-danger" id="clearAllMessages"><i class="fas fa-trash"></i> Limpar Todas</button>
+                    <button class="btn-primary" id="refreshMessages"><i class="fas fa-sync"></i> Recarregar</button>
                 </div>
             </div>
-            
             <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-comments"></i>
-                    Últimas Mensagens
-                    <span id="msgCount" class="badge">0</span>
-                </div>
-                <div id="messagesList" class="message-list">
-                    <div class="loading">Carregando mensagens...</div>
-                </div>
+                <div class="card-title">💬 Últimas Mensagens <span id="msgCount" class="badge">0</span></div>
+                <div id="messagesList" class="message-list"><div class="loading">Carregando...</div></div>
             </div>
         </div>
         
         <!-- Estrelas -->
         <div class="tab-content" id="stars">
             <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-plus-circle"></i>
-                    Adicionar Estrelas
-                </div>
-                <div class="add-stars-form">
-                    <input type="text" id="starsUser" class="add-stars-input" placeholder="Email ou ID do usuário">
-                    <input type="number" id="starsAmount" class="add-stars-input" placeholder="Quantidade">
-                    <button class="btn-primary" id="addStarsBtn">
-                        <i class="fas fa-star"></i> Adicionar
-                    </button>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-trophy"></i>
-                    Ranking de Estrelas
-                </div>
-                <div id="rankingList" class="user-list">
-                    <div class="loading">Carregando ranking...</div>
+                <div class="card-title">⭐ Controle de Estrelas</div>
+                <div class="stars-control">
+                    <input type="text" id="starsUser" class="stars-input" placeholder="Email ou ID">
+                    <input type="number" id="starsAmount" class="stars-input" placeholder="Quantidade">
+                    <button class="btn-primary btn-success" id="addStarsBtn"><i class="fas fa-plus"></i> Adicionar</button>
+                    <button class="btn-primary btn-warning" id="removeStarsBtn"><i class="fas fa-minus"></i> Remover</button>
+                    <button class="btn-primary" id="freezeStarsBtn"><i class="fas fa-snowflake"></i> Congelar</button>
+                    <button class="btn-primary btn-success" id="unfreezeStarsBtn"><i class="fas fa-fire"></i> Descongelar</button>
                 </div>
             </div>
         </div>
         
-        <!-- Bloqueados -->
-        <div class="tab-content" id="blocked">
+        <!-- Downloads -->
+        <div class="tab-content" id="downloads">
             <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-ban"></i>
-                    Usuários Bloqueados
+                <div class="card-title">📥 Estatísticas de Downloads</div>
+                <div class="period-buttons">
+                    <button class="period-btn active" data-download-period="day">Hoje</button>
+                    <button class="period-btn" data-download-period="week">Esta Semana</button>
+                    <button class="period-btn" data-download-period="month">Este Mês</button>
                 </div>
-                <div id="blockedList" class="user-list">
-                    <div class="loading">Carregando bloqueados...</div>
-                </div>
+                <div id="downloadsStats"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">📱 Downloads por Usuário</div>
+                <div id="userDownloadsList" class="download-list"><div class="loading">Carregando...</div></div>
             </div>
         </div>
         
-        <!-- Logs -->
-        <div class="tab-content" id="logs">
+        <!-- Ranking -->
+        <div class="tab-content" id="ranking">
             <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-history"></i>
-                    Logs de Ações do Admin
-                </div>
-                <div id="logsList" class="user-list">
-                    <div class="loading">Carregando logs...</div>
-                </div>
+                <div class="card-title">🏆 Ranking de Usuários</div>
+                <div id="rankingList" class="user-list"><div class="loading">Carregando...</div></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Resposta -->
+    <div class="modal" id="replyModal">
+        <div class="modal-content">
+            <h3><i class="fas fa-reply"></i> Responder como Admin</h3>
+            <p><strong>Respondendo a:</strong> <span id="replyToUser"></span></p>
+            <p><strong>Mensagem original:</strong> <span id="originalMessage"></span></p>
+            <textarea id="replyMessage" class="reply-textarea" rows="4" placeholder="Digite sua resposta como administrador..."></textarea>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn-primary btn-danger" id="cancelReplyBtn">Cancelar</button>
+                <button class="btn-primary" id="sendReplyBtn">Enviar Resposta</button>
             </div>
         </div>
     </div>
     
     <script>
         // ==================== CONFIGURAÇÕES ====================
-        // Chave de acesso (pode ser alterada)
-        const ADMIN_KEY = "AdminMZ2024Master@";
+        const ADMIN_PASSWORD = "Nhanombe1@";
+        const SESSION_DURATION = 30 * 60 * 1000; // 30 minutos
+        let sessionTimer = null;
+        let lastActivity = Date.now();
+        let activityInterval = null;
         
-        // Configuração do Firebase do Chat
+        // Firebase Configs
         const CHAT_CONFIG = {
             apiKey: "AIzaSyD4W6l4vXKJEttbGxJ0cQ66SeqDXBvWg_s",
             authDomain: "chat-1ddb5.firebaseapp.com",
             projectId: "chat-1ddb5",
-            storageBucket: "chat-1ddb5.firebasestorage.app",
-            messagingSenderId: "25894955105",
-            appId: "1:25894955105:web:08853721a0267c5fbf6220",
             databaseURL: "https://chat-1ddb5-default-rtdb.firebaseio.com/"
         };
         
-        // Configuração do Firebase do Sistema de Estrelas
         const ESTRELAS_CONFIG = {
             apiKey: "AIzaSyDCBwanaFABmQNgT91vnhV3Xv1RJn9bYOI",
             authDomain: "login-actualizado.firebaseapp.com",
-            projectId: "login-actualizado",
-            storageBucket: "login-actualizado.firebasestorage.app",
-            messagingSenderId: "666275920026",
-            appId: "1:666275920026:web:f7fe76327968619c2c4723"
+            projectId: "login-actualizado"
         };
         
         let chatDb, messagesRef, usuariosRef, bloqueadosRef;
         let estrelasDb;
         let blockedUsers = [];
         let usersCache = {};
-        let activityChart = null;
+        let frozenUsers = [];
+        let downloadsChart = null;
+        let currentSearchTerm = '';
         
-        // Logs do Admin
-        let adminLogs = [];
-        
-        function addLog(action, details) {
-            const log = {
-                id: Date.now(),
-                timestamp: new Date().toISOString(),
-                action: action,
-                details: details,
-                ip: 'remote'
-            };
-            adminLogs.unshift(log);
-            localStorage.setItem('admin_logs', JSON.stringify(adminLogs.slice(0, 100)));
-            renderLogs();
+        // ==================== SESSÃO ====================
+        function startSessionTimer() {
+            let timeLeft = SESSION_DURATION / 1000;
+            const timerElement = document.getElementById('sessionTimer');
+            
+            sessionTimer = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `⏱️ ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 60) {
+                    timerElement.classList.add('warning');
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(sessionTimer);
+                    fazerLogout();
+                    showToast('⏰ Sessão expirada! Faça login novamente.', true);
+                }
+            }, 1000);
         }
         
-        function renderLogs() {
-            const container = document.getElementById('logsList');
-            if (!container) return;
-            
-            if (adminLogs.length === 0) {
-                container.innerHTML = '<div class="loading">Nenhum log registrado</div>';
-                return;
-            }
-            
-            container.innerHTML = adminLogs.map(log => `
-                <div class="user-item">
-                    <div class="user-info">
-                        <div class="user-name">
-                            <i class="fas fa-terminal"></i> ${log.action}
-                        </div>
-                        <div class="user-email">${log.details}</div>
-                        <div style="font-size: 0.7rem; color: #999;">
-                            ${new Date(log.timestamp).toLocaleString()}
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+        function resetSessionTimer() {
+            if (sessionTimer) clearInterval(sessionTimer);
+            startSessionTimer();
         }
         
+        function monitorActivity() {
+            document.addEventListener('mousemove', () => { lastActivity = Date.now(); resetSessionTimer(); });
+            document.addEventListener('click', () => { lastActivity = Date.now(); resetSessionTimer(); });
+            document.addEventListener('keypress', () => { lastActivity = Date.now(); resetSessionTimer(); });
+            document.addEventListener('scroll', () => { lastActivity = Date.now(); resetSessionTimer(); });
+        }
+        
+        // ==================== FUNÇÕES AUXILIARES ====================
         function showToast(message, isError = false) {
             const toast = document.createElement('div');
             toast.className = 'toast';
@@ -773,7 +717,7 @@
             return div.innerHTML;
         }
         
-        // ==================== INICIALIZAR FIREBASE ====================
+        // ==================== INICIALIZAR ====================
         function initializeFirebases() {
             try {
                 firebase.initializeApp(CHAT_CONFIG, "chat");
@@ -785,7 +729,11 @@
                 firebase.initializeApp(ESTRELAS_CONFIG, "estrelas");
                 estrelasDb = firebase.app("estrelas").firestore();
                 
-                console.log("✅ Firebases conectados!");
+                carregarBloqueados();
+                carregarUsuarios();
+                carregarMensagens();
+                carregarDownloads();
+                carregarFrozenUsers();
                 return true;
             } catch(e) {
                 console.error("Erro:", e);
@@ -793,122 +741,113 @@
             }
         }
         
-        // ==================== CARREGAR BLOQUEADOS ====================
+        // ==================== BLOQUEIOS ====================
         function carregarBloqueados() {
             if (!bloqueadosRef) return;
             bloqueadosRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 blockedUsers = [];
-                if (data) {
-                    Object.values(data).forEach(item => {
-                        blockedUsers.push(item.userId);
-                    });
-                }
+                if (data) Object.values(data).forEach(item => blockedUsers.push(item.userId));
                 document.getElementById('totalBlocked').textContent = blockedUsers.length;
-                if (document.getElementById('blocked').classList.contains('active')) {
-                    renderBloqueados();
-                }
+                renderUsers();
             });
         }
         
-        function renderBloqueados() {
-            if (!bloqueadosRef) return;
-            bloqueadosRef.once('value', (snapshot) => {
-                const data = snapshot.val();
-                const bloqueados = [];
-                if (data) {
-                    Object.keys(data).forEach(key => {
-                        bloqueados.push({ id: key, ...data[key] });
-                    });
-                }
-                
-                const container = document.getElementById('blockedList');
-                if (bloqueados.length === 0) {
-                    container.innerHTML = '<div class="loading">Nenhum usuário bloqueado</div>';
-                    return;
-                }
-                
-                container.innerHTML = bloqueados.map(blocked => `
-                    <div class="user-item">
-                        <div class="user-info">
-                            <div class="user-name">${escapeHtml(blocked.userName || 'Usuário')}</div>
-                            <div class="user-email">ID: ${blocked.userId}</div>
-                            <div style="font-size:0.7rem; color:#999;">
-                                Bloqueado: ${new Date(blocked.data).toLocaleString()}
-                            </div>
-                        </div>
-                        <div class="user-actions">
-                            <button class="action-btn unblock" onclick="unblockUser('${blocked.userId}', '${escapeHtml(blocked.userName)}')">
-                                <i class="fas fa-check-circle"></i>
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            });
-        }
-        
-        function isUserBlocked(userId) {
-            return blockedUsers.includes(userId);
-        }
+        function isUserBlocked(userId) { return blockedUsers.includes(userId); }
         
         function blockUser(userId, userName) {
-            if (isUserBlocked(userId)) {
-                showToast('Usuário já está bloqueado!', true);
-                return;
-            }
-            
-            bloqueadosRef.push({
-                userId: userId,
-                userName: userName,
-                data: firebase.database.ServerValue.TIMESTAMP,
-                bloqueadoPor: 'Admin'
-            }).then(() => {
+            if (isUserBlocked(userId)) { showToast('Usuário já está bloqueado!', true); return; }
+            bloqueadosRef.push({ userId, userName, data: firebase.database.ServerValue.TIMESTAMP }).then(() => {
                 showToast(`✅ Usuário ${userName} bloqueado!`);
-                addLog('Bloqueio', `Usuário ${userName} (${userId}) foi bloqueado`);
-                carregarUsuarios();
+                renderUsers();
             });
         }
         
         window.unblockUser = function(userId, userName) {
             bloqueadosRef.orderByChild('userId').equalTo(userId).once('value', (snapshot) => {
-                snapshot.forEach(child => {
-                    child.ref.remove().then(() => {
-                        showToast(`✅ Usuário ${userName} desbloqueado!`);
-                        addLog('Desbloqueio', `Usuário ${userName} (${userId}) foi desbloqueado`);
-                        carregarUsuarios();
-                        renderBloqueados();
-                    });
-                });
+                snapshot.forEach(child => child.ref.remove());
+                showToast(`✅ Usuário ${userName} desbloqueado!`);
+                renderUsers();
             });
         };
         
-        // ==================== CARREGAR USUÁRIOS ====================
+        // ==================== ESTRELAS CONGELADAS ====================
+        function carregarFrozenUsers() {
+            const frozen = localStorage.getItem('frozen_users');
+            if (frozen) frozenUsers = JSON.parse(frozen);
+            document.getElementById('totalFrozen').textContent = frozenUsers.length;
+        }
+        
+        function isUserFrozen(userId) { return frozenUsers.includes(userId); }
+        
+        function freezeUserStars(userId, userName) {
+            if (isUserFrozen(userId)) { showToast('Usuário já está com estrelas congeladas!', true); return; }
+            frozenUsers.push(userId);
+            localStorage.setItem('frozen_users', JSON.stringify(frozenUsers));
+            showToast(`❄️ Estrelas de ${userName} congeladas! O usuário foi notificado.`);
+            document.getElementById('totalFrozen').textContent = frozenUsers.length;
+            renderUsers();
+        }
+        
+        function unfreezeUserStars(userId, userName) {
+            frozenUsers = frozenUsers.filter(id => id !== userId);
+            localStorage.setItem('frozen_users', JSON.stringify(frozenUsers));
+            showToast(`🔥 Estrelas de ${userName} descongeladas!`);
+            document.getElementById('totalFrozen').textContent = frozenUsers.length;
+            renderUsers();
+        }
+        
+        // ==================== USUÁRIOS ====================
         function carregarUsuarios() {
             if (!usuariosRef) return;
-            usuariosRef.once('value', (snapshot) => {
+            usuariosRef.once('value', async (snapshot) => {
                 const data = snapshot.val();
                 usersCache = {};
                 if (data) {
-                    Object.keys(data).forEach(key => {
-                        usersCache[key] = { id: key, ...data[key] };
-                    });
+                    for (const key of Object.keys(data)) {
+                        const userData = data[key];
+                        let estrelas = 0;
+                        let isFrozen = false;
+                        
+                        try {
+                            const userDoc = await estrelasDb.collection('usuarios').where('email', '==', userData.email).get();
+                            if (!userDoc.empty) {
+                                estrelas = userDoc.docs[0].data().estrelas || 0;
+                            }
+                            isFrozen = isUserFrozen(key);
+                        } catch(e) {}
+                        
+                        usersCache[key] = { 
+                            id: key, 
+                            ...userData, 
+                            estrelas: estrelas,
+                            isFrozen: isFrozen
+                        };
+                    }
                 }
                 document.getElementById('totalUsers').textContent = Object.keys(usersCache).length;
                 document.getElementById('userCount').textContent = Object.keys(usersCache).length;
-                
-                const searchTerm = document.getElementById('searchUser')?.value.toLowerCase() || '';
-                renderUsers(searchTerm);
-                atualizarGrafico();
+                renderUsers();
+                atualizarTotalEstrelas();
             });
         }
         
-        function renderUsers(searchTerm = '') {
+        async function atualizarTotalEstrelas() {
+            try {
+                const snapshot = await estrelasDb.collection('usuarios').get();
+                let total = 0;
+                snapshot.forEach(doc => total += doc.data().estrelas || 0);
+                document.getElementById('totalStars').textContent = total;
+            } catch(e) {}
+        }
+        
+        function renderUsers() {
             let users = Object.values(usersCache);
-            if (searchTerm) {
+            if (currentSearchTerm) {
                 users = users.filter(u => 
-                    u.nome?.toLowerCase().includes(searchTerm) || 
-                    u.email?.toLowerCase().includes(searchTerm) ||
-                    u.id?.toLowerCase().includes(searchTerm)
+                    u.nome?.toLowerCase().includes(currentSearchTerm) || 
+                    u.email?.toLowerCase().includes(currentSearchTerm) ||
+                    u.id?.toLowerCase().includes(currentSearchTerm)
                 );
             }
             
@@ -920,35 +859,30 @@
             
             container.innerHTML = users.map(user => {
                 const isBlocked = isUserBlocked(user.id);
+                const isFrozen = user.isFrozen;
                 return `
                     <div class="user-item">
                         <div class="user-info">
                             <div class="user-name">
                                 ${escapeHtml(user.nome || 'Anônimo')}
                                 ${isBlocked ? '<span class="blocked-badge"><i class="fas fa-ban"></i> Bloqueado</span>' : ''}
+                                ${isFrozen ? '<span class="frozen-badge"><i class="fas fa-snowflake"></i> Estrelas Congeladas</span>' : ''}
                             </div>
-                            <div class="user-email">
-                                <i class="fas fa-envelope"></i> ${escapeHtml(user.email || 'Sem email')}
-                            </div>
-                            <div class="user-email" style="font-size:0.7rem;">
-                                <i class="fas fa-id-card"></i> ID: ${user.id.substring(0, 15)}...
-                            </div>
+                            <div class="user-email"><i class="fas fa-envelope"></i> ${escapeHtml(user.email || 'Sem email')}</div>
+                            <div class="user-stars"><i class="fas fa-star"></i> ${user.estrelas} estrelas</div>
+                            <div class="user-email" style="font-size:0.7rem;">ID: ${user.id.substring(0, 15)}...</div>
                         </div>
                         <div class="user-actions">
                             ${isBlocked ? 
-                                `<button class="action-btn unblock" onclick="unblockUser('${user.id}', '${escapeHtml(user.nome)}')">
-                                    <i class="fas fa-check-circle"></i>
-                                </button>` :
-                                `<button class="action-btn block" onclick="blockUser('${user.id}', '${escapeHtml(user.nome)}')">
-                                    <i class="fas fa-ban"></i>
-                                </button>`
+                                `<button class="action-btn unblock" onclick="unblockUser('${user.id}', '${escapeHtml(user.nome)}')" title="Desbloquear"><i class="fas fa-check-circle"></i></button>` :
+                                `<button class="action-btn block" onclick="blockUser('${user.id}', '${escapeHtml(user.nome)}')" title="Bloquear"><i class="fas fa-ban"></i></button>`
                             }
-                            <button class="action-btn delete" onclick="deleteUserMessages('${user.id}', '${escapeHtml(user.nome)}')">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                            <button class="action-btn stars" onclick="openAddStars('${user.id}', '${escapeHtml(user.nome)}')">
-                                <i class="fas fa-star"></i>
-                            </button>
+                            ${isFrozen ?
+                                `<button class="action-btn stars" onclick="unfreezeUserStars('${user.id}', '${escapeHtml(user.nome)}')" title="Descongelar Estrelas"><i class="fas fa-fire"></i></button>` :
+                                `<button class="action-btn freeze" onclick="freezeUserStars('${user.id}', '${escapeHtml(user.nome)}')" title="Congelar Estrelas"><i class="fas fa-snowflake"></i></button>`
+                            }
+                            <button class="action-btn delete" onclick="deleteUserMessages('${user.id}', '${escapeHtml(user.nome)}')" title="Apagar Mensagens"><i class="fas fa-trash-alt"></i></button>
+                            <button class="action-btn stars" onclick="openStarsControl('${user.id}', '${escapeHtml(user.nome)}', ${user.estrelas})" title="Gerenciar Estrelas"><i class="fas fa-star"></i></button>
                         </div>
                     </div>
                 `;
@@ -959,26 +893,21 @@
             if (confirm(`Apagar TODAS as mensagens de ${userName}?`)) {
                 messagesRef.orderByChild('autorId').equalTo(userId).once('value', (snapshot) => {
                     const updates = {};
-                    snapshot.forEach(child => {
-                        updates[child.key] = null;
-                    });
+                    snapshot.forEach(child => updates[child.key] = null);
                     messagesRef.update(updates).then(() => {
                         showToast(`✅ Mensagens de ${userName} apagadas!`);
-                        addLog('Limpeza', `Todas mensagens de ${userName} (${userId}) foram apagadas`);
                         carregarMensagens();
                     });
                 });
             }
         };
         
-        // ==================== CARREGAR MENSAGENS ====================
+        // ==================== MENSAGENS ====================
         function carregarMensagens() {
             if (!messagesRef) return;
             messagesRef.orderByChild('timestamp').limitToLast(100).once('value', (snapshot) => {
                 const messages = [];
-                snapshot.forEach(child => {
-                    messages.push({ id: child.key, ...child.val() });
-                });
+                snapshot.forEach(child => messages.push({ id: child.key, ...child.val() }));
                 messages.reverse();
                 document.getElementById('totalMessages').textContent = messages.length;
                 document.getElementById('msgCount').textContent = messages.length;
@@ -989,7 +918,7 @@
         function renderMessages(messages) {
             const container = document.getElementById('messagesList');
             if (messages.length === 0) {
-                container.innerHTML = '<div class="loading">Nenhuma mensagem encontrada</div>';
+                container.innerHTML = '<div class="loading">Nenhuma mensagem</div>';
                 return;
             }
             
@@ -1000,18 +929,12 @@
                             <i class="fas fa-user"></i> ${escapeHtml(msg.autor || 'Anônimo')}
                             ${msg.isAdmin ? '<span class="badge" style="background:#ff9800;">ADM</span>' : ''}
                         </div>
-                        <div class="message-text">
-                            ${escapeHtml(msg.texto?.substring(0, 100))}${msg.texto?.length > 100 ? '...' : ''}
-                            ${msg.imagem ? ' <i class="fas fa-image" style="color:#3498db;"></i>' : ''}
-                        </div>
-                        <div style="font-size:0.7rem; color:#999;">
-                            ${msg.timestamp ? new Date(msg.timestamp).toLocaleString() : 'Data desconhecida'}
-                        </div>
+                        <div class="message-text">${escapeHtml(msg.texto?.substring(0, 100))}${msg.texto?.length > 100 ? '...' : ''}</div>
+                        <div style="font-size:0.7rem; color:#999;">${msg.timestamp ? new Date(msg.timestamp).toLocaleString() : 'Data desconhecida'}</div>
                     </div>
-                    <div class="message-actions">
-                        <button class="action-btn delete" onclick="deleteMessage('${msg.id}')">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
+                    <div class="user-actions">
+                        <button class="action-btn reply" onclick="openReplyModal('${escapeHtml(msg.autor)}', '${escapeHtml(msg.texto)}', '${msg.id}')" title="Responder"><i class="fas fa-reply"></i></button>
+                        <button class="action-btn delete" onclick="deleteMessage('${msg.id}')" title="Apagar"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -1019,230 +942,255 @@
         
         window.deleteMessage = function(msgId) {
             if (confirm('Apagar esta mensagem?')) {
-                messagesRef.child(msgId).remove().then(() => {
-                    showToast('✅ Mensagem apagada!');
-                    addLog('Remoção', `Mensagem ${msgId} foi apagada`);
-                    carregarMensagens();
-                });
+                messagesRef.child(msgId).remove();
+                showToast('✅ Mensagem apagada!');
+                carregarMensagens();
             }
         };
         
+        let currentReplyTo = null;
+        window.openReplyModal = function(author, message, msgId) {
+            currentReplyTo = { author, message, msgId };
+            document.getElementById('replyToUser').textContent = author;
+            document.getElementById('originalMessage').textContent = message;
+            document.getElementById('replyModal').style.display = 'flex';
+        };
+        
+        async function sendReplyAsAdmin() {
+            const replyText = document.getElementById('replyMessage').value.trim();
+            if (!replyText) { showToast('Digite uma resposta!', true); return; }
+            
+            const replyMsg = {
+                texto: `🔹 RESPOSTA DO ADMINISTRADOR 🔹\n\n${replyText}\n\n---\nRespondendo a: ${currentReplyTo.author}`,
+                autor: "📢 ADMINISTRADOR",
+                autorId: "admin_system",
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                isAdmin: true,
+                replyTo: { msgId: currentReplyTo.msgId, autor: currentReplyTo.author }
+            };
+            
+            await messagesRef.push(replyMsg);
+            showToast('✅ Resposta enviada como Administrador!');
+            document.getElementById('replyModal').style.display = 'none';
+            document.getElementById('replyMessage').value = '';
+            carregarMensagens();
+        }
+        
         function clearAllMessages() {
-            if (confirm('⚠️ ATENÇÃO! Isso apagará TODAS as mensagens do chat. Continuar?')) {
-                messagesRef.remove().then(() => {
-                    showToast('✅ Todas mensagens apagadas!');
-                    addLog('Limpeza Total', 'Todas as mensagens do chat foram apagadas');
-                    carregarMensagens();
-                });
+            if (confirm('⚠️ ATENÇÃO! Isso apagará TODAS as mensagens. Continuar?')) {
+                messagesRef.remove();
+                showToast('✅ Todas mensagens apagadas!');
+                carregarMensagens();
             }
         }
         
-        // ==================== GERENCIAR ESTRELAS ====================
+        // ==================== ESTRELAS ====================
         async function adicionarEstrelas(userIdentifier, quantidade) {
             try {
-                let userDoc;
                 const emailQuery = await estrelasDb.collection('usuarios').where('email', '==', userIdentifier).limit(1).get();
-                if (!emailQuery.empty) {
-                    userDoc = emailQuery.docs[0];
-                } else {
+                if (emailQuery.empty) {
                     const idQuery = await estrelasDb.collection('usuarios').doc(userIdentifier).get();
-                    if (idQuery.exists) {
-                        userDoc = idQuery;
-                    } else {
-                        showToast('❌ Usuário não encontrado!', true);
-                        return false;
-                    }
-                }
+                    if (!idQuery.exists) { showToast('❌ Usuário não encontrado!', true); return false; }
+                    var userDoc = idQuery;
+                } else { var userDoc = emailQuery.docs[0]; }
+                
+                if (isUserFrozen(userDoc.id)) { showToast('❌ Usuário com estrelas congeladas!', true); return false; }
                 
                 const userData = userDoc.data();
                 const novasEstrelas = (userData.estrelas || 0) + quantidade;
                 await userDoc.ref.update({ estrelas: novasEstrelas });
-                
-                showToast(`✅ +${quantidade} estrelas para ${userData.email || userIdentifier}`);
-                addLog('Adição de Estrelas', `+${quantidade} estrelas para ${userData.email || userIdentifier}`);
-                carregarRanking();
-                atualizarEstatisticas();
+                showToast(`✅ +${quantidade} estrelas para ${userData.email}`);
+                carregarUsuarios();
+                atualizarTotalEstrelas();
                 return true;
-            } catch(error) {
-                console.error('Erro:', error);
-                showToast('❌ Erro ao adicionar estrelas!', true);
-                return false;
-            }
+            } catch(error) { showToast('❌ Erro!', true); return false; }
         }
         
-        async function carregarRanking() {
+        async function removerEstrelas(userIdentifier, quantidade) {
             try {
-                const snapshot = await estrelasDb.collection('usuarios')
-                    .orderBy('estrelas', 'desc')
-                    .limit(50)
-                    .get();
-                
-                const usuarios = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    usuarios.push({
-                        id: doc.id,
-                        email: data.email || 'Sem email',
-                        estrelas: data.estrelas || 0,
-                        nome: data.nome || data.email?.split('@')[0] || 'Usuário'
-                    });
-                });
-                
-                let totalStars = 0;
-                usuarios.forEach(u => totalStars += u.estrelas);
-                document.getElementById('totalStars').textContent = totalStars;
-                
-                renderRanking(usuarios);
-            } catch(error) {
-                console.error('Erro ranking:', error);
-            }
+                const emailQuery = await estrelasDb.collection('usuarios').where('email', '==', userIdentifier).limit(1).get();
+                if (emailQuery.empty) { showToast('❌ Usuário não encontrado!', true); return false; }
+                const userDoc = emailQuery.docs[0];
+                const userData = userDoc.data();
+                const novasEstrelas = Math.max(0, (userData.estrelas || 0) - quantidade);
+                await userDoc.ref.update({ estrelas: novasEstrelas });
+                showToast(`✅ -${quantidade} estrelas de ${userData.email}`);
+                carregarUsuarios();
+                atualizarTotalEstrelas();
+                return true;
+            } catch(error) { showToast('❌ Erro!', true); return false; }
         }
         
-        function renderRanking(usuarios) {
-            const container = document.getElementById('rankingList');
-            if (usuarios.length === 0) {
-                container.innerHTML = '<div class="loading">Nenhum usuário encontrado</div>';
-                return;
+        window.openStarsControl = function(userId, userName, estrelasAtuais) {
+            const acao = prompt(`Gerenciar estrelas de ${userName}\nEstrelas atuais: ${estrelasAtuais}\n\nDigite: +[quantidade] para adicionar\n- [quantidade] para remover\nEx: +10 ou -5`);
+            if (acao) {
+                if (acao.startsWith('+')) {
+                    const qtd = parseInt(acao.substring(1));
+                    if (!isNaN(qtd)) adicionarEstrelas(userId, qtd);
+                } else if (acao.startsWith('-')) {
+                    const qtd = parseInt(acao.substring(1));
+                    if (!isNaN(qtd)) removerEstrelas(userId, qtd);
+                } else { showToast('Formato inválido! Use +10 ou -5', true); }
+            }
+        };
+        
+        // ==================== DOWNLOADS ====================
+        let downloadsData = JSON.parse(localStorage.getItem('downloads_log') || '[]');
+        let currentPeriod = 'day';
+        
+        function registrarDownload(usuarioId, plano) {
+            const download = { usuarioId, plano, data: new Date().toISOString() };
+            downloadsData.push(download);
+            localStorage.setItem('downloads_log', JSON.stringify(downloadsData.slice(-1000)));
+            carregarDownloads();
+        }
+        
+        function carregarDownloads() {
+            const period = currentPeriod;
+            const now = new Date();
+            let filtered = [];
+            
+            if (period === 'day') {
+                const today = now.toDateString();
+                filtered = downloadsData.filter(d => new Date(d.data).toDateString() === today);
+            } else if (period === 'week') {
+                const weekAgo = new Date(now.setDate(now.getDate() - 7));
+                filtered = downloadsData.filter(d => new Date(d.data) >= weekAgo);
+            } else {
+                const monthAgo = new Date(now.setMonth(now.getMonth() - 1));
+                filtered = downloadsData.filter(d => new Date(d.data) >= monthAgo);
             }
             
-            container.innerHTML = usuarios.map((user, index) => `
-                <div class="user-item">
-                    <div class="user-info">
-                        <div class="user-name">
-                            ${index === 0 ? '🏆 ' : index === 1 ? '🥈 ' : index === 2 ? '🥉 ' : ''}
-                            ${index + 1}. ${escapeHtml(user.nome)}
+            document.getElementById('totalDownloads').textContent = filtered.length;
+            
+            // Downloads por usuário
+            const userDownloads = {};
+            filtered.forEach(d => { userDownloads[d.usuarioId] = (userDownloads[d.usuarioId] || 0) + 1; });
+            
+            const sortedUsers = Object.entries(userDownloads).sort((a,b) => b[1] - a[1]);
+            const userDownloadsList = document.getElementById('userDownloadsList');
+            if (sortedUsers.length === 0) {
+                userDownloadsList.innerHTML = '<div class="loading">Nenhum download registrado</div>';
+            } else {
+                userDownloadsList.innerHTML = sortedUsers.map(([userId, count]) => `
+                    <div class="download-item">
+                        <div class="user-info">
+                            <div class="user-name">${escapeHtml(usersCache[userId]?.nome || userId.substring(0,15))}</div>
+                            <div class="user-email">${escapeHtml(usersCache[userId]?.email || 'Email não disponível')}</div>
                         </div>
-                        <div class="user-email">${escapeHtml(user.email)}</div>
+                        <div class="user-actions">
+                            <span style="background:#27ae60; padding:5px 12px; border-radius:20px; color:white;"><i class="fas fa-download"></i> ${count} downloads</span>
+                        </div>
                     </div>
-                    <div class="user-actions">
-                        <span style="background:#f39c12; padding:5px 12px; border-radius:20px; color:white; font-weight:bold;">
-                            <i class="fas fa-star"></i> ${user.estrelas}
-                        </span>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        async function atualizarEstatisticas() {
-            try {
-                const snapshot = await estrelasDb.collection('usuarios').get();
-                let totalStars = 0;
-                snapshot.forEach(doc => {
-                    totalStars += doc.data().estrelas || 0;
-                });
-                document.getElementById('totalStars').textContent = totalStars;
-            } catch(e) {}
-        }
-        
-        function openAddStars(userId, userName) {
-            const quantidade = prompt(`Adicionar estrelas para ${userName}:`, "10");
-            if (quantidade && !isNaN(quantidade) && parseInt(quantidade) > 0) {
-                adicionarEstrelas(userId, parseInt(quantidade));
+                `).join('');
             }
+            
+            atualizarGraficoDownloads(filtered);
         }
-        window.openAddStars = openAddStars;
         
-        // ==================== GRÁFICO ====================
-        function atualizarGrafico() {
-            const ctx = document.getElementById('activityChart').getContext('2d');
-            const dias = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-            const dados = [12, 19, 15, 17, 14, 10, 8];
+        function atualizarGraficoDownloads(downloads) {
+            const ctx = document.getElementById('downloadsChart').getContext('2d');
+            const ultimos7Dias = [];
+            for (let i = 6; i >= 0; i--) {
+                const data = new Date();
+                data.setDate(data.getDate() - i);
+                ultimos7Dias.push(data.toLocaleDateString('pt'));
+            }
             
-            if (activityChart) activityChart.destroy();
+            const contagem = ultimos7Dias.map(dia => {
+                return downloads.filter(d => new Date(d.data).toLocaleDateString('pt') === dia).length;
+            });
             
-            activityChart = new Chart(ctx, {
+            if (downloadsChart) downloadsChart.destroy();
+            downloadsChart = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: dias,
-                    datasets: [{
-                        label: 'Atividade',
-                        data: dados,
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { position: 'top' }
-                    }
-                }
+                data: { labels: ultimos7Dias, datasets: [{ label: 'Downloads', data: contagem, borderColor: '#667eea', backgroundColor: 'rgba(102,126,234,0.1)', tension: 0.4, fill: true }] },
+                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } } }
             });
         }
         
-        function updateServiceStatus() {
-            const container = document.getElementById('serviceStatus');
-            container.innerHTML = `
-                <div style="display: grid; gap: 10px;">
-                    <div style="padding: 10px; background: #e8f5e9; border-radius: 10px;">
-                        <i class="fas fa-check-circle" style="color:#27ae60;"></i> Chat Service: Online
+        // ==================== RANKING ====================
+        async function carregarRanking() {
+            try {
+                const snapshot = await estrelasDb.collection('usuarios').orderBy('estrelas', 'desc').limit(50).get();
+                const usuarios = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const userDownloads = downloadsData.filter(d => d.usuarioId === doc.id || d.usuarioId === data.email).length;
+                    usuarios.push({
+                        id: doc.id,
+                        email: data.email,
+                        estrelas: data.estrelas || 0,
+                        nome: data.nome || data.email?.split('@')[0] || 'Usuário',
+                        downloads: userDownloads
+                    });
+                });
+                
+                const container = document.getElementById('rankingList');
+                container.innerHTML = usuarios.map((user, index) => `
+                    <div class="user-item">
+                        <div class="user-info">
+                            <div class="user-name">
+                                ${index === 0 ? '🏆 ' : index === 1 ? '🥈 ' : index === 2 ? '🥉 ' : ''}
+                                ${index + 1}. ${escapeHtml(user.nome)}
+                            </div>
+                            <div class="user-email">${escapeHtml(user.email)}</div>
+                            <div><i class="fas fa-star" style="color:#f39c12"></i> ${user.estrelas} estrelas</div>
+                            <div><i class="fas fa-download"></i> ${user.downloads} downloads</div>
+                        </div>
+                        <div class="user-actions">
+                            <span style="background:#667eea; padding:5px 12px; border-radius:20px; color:white;">Score: ${user.estrelas + user.downloads}</span>
+                        </div>
                     </div>
-                    <div style="padding: 10px; background: #e8f5e9; border-radius: 10px;">
-                        <i class="fas fa-check-circle" style="color:#27ae60;"></i> Estrelas Service: Online
-                    </div>
-                    <div style="padding: 10px; background: #e8f5e9; border-radius: 10px;">
-                        <i class="fas fa-check-circle" style="color:#27ae60;"></i> Database: Connected
-                    </div>
-                </div>
-            `;
+                `).join('');
+            } catch(e) { console.error(e); }
         }
         
         // ==================== LOGIN ====================
         function fazerLogin() {
-            const key = document.getElementById('adminKey').value;
-            if (key === ADMIN_KEY) {
+            const password = document.getElementById('adminPassword').value;
+            if (password === ADMIN_PASSWORD) {
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('mainPanel').style.display = 'block';
-                showToast('✅ Login realizado com sucesso!');
-                addLog('Login', 'Administrador acessou o painel');
-                
+                showToast('✅ Login realizado! Sessão de 30 minutos');
                 initializeFirebases();
-                carregarBloqueados();
-                carregarUsuarios();
-                carregarMensagens();
-                carregarRanking();
-                updateServiceStatus();
-                
-                const logs = localStorage.getItem('admin_logs');
-                if (logs) adminLogs = JSON.parse(logs);
-                renderLogs();
-                
+                monitorActivity();
+                startSessionTimer();
                 setupTabs();
+                carregarRanking();
             } else {
                 document.getElementById('loginError').style.display = 'block';
-                setTimeout(() => {
-                    document.getElementById('loginError').style.display = 'none';
-                }, 3000);
+                setTimeout(() => document.getElementById('loginError').style.display = 'none', 3000);
             }
         }
         
         function fazerLogout() {
-            if (confirm('Sair do painel administrativo?')) {
-                addLog('Logout', 'Administrador saiu do painel');
-                document.getElementById('loginOverlay').style.display = 'flex';
-                document.getElementById('mainPanel').style.display = 'none';
-                document.getElementById('adminKey').value = '';
-                showToast('👋 Você saiu do painel');
-            }
+            if (sessionTimer) clearInterval(sessionTimer);
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('mainPanel').style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+            showToast('👋 Você saiu do painel');
         }
         
         function setupTabs() {
-            const tabs = document.querySelectorAll('.tab-btn');
-            tabs.forEach(tab => {
+            document.querySelectorAll('.tab-btn').forEach(tab => {
                 tab.addEventListener('click', () => {
                     const tabId = tab.dataset.tab;
-                    tabs.forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
                     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
                     document.getElementById(tabId).classList.add('active');
-                    
-                    if (tabId === 'users') carregarUsuarios();
-                    if (tabId === 'messages') carregarMensagens();
-                    if (tabId === 'stars') carregarRanking();
-                    if (tabId === 'blocked') renderBloqueados();
+                    if (tabId === 'ranking') carregarRanking();
+                    if (tabId === 'downloads') carregarDownloads();
+                });
+            });
+            
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentPeriod = btn.dataset.period || btn.dataset.downloadPeriod;
+                    carregarDownloads();
                 });
             });
         }
@@ -1251,28 +1199,47 @@
         document.getElementById('loginBtn').addEventListener('click', fazerLogin);
         document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
         document.getElementById('searchUserBtn').addEventListener('click', () => {
-            const term = document.getElementById('searchUser').value;
-            renderUsers(term);
+            currentSearchTerm = document.getElementById('searchUser').value.toLowerCase();
+            renderUsers();
+        });
+        document.getElementById('resetSearchBtn').addEventListener('click', () => {
+            currentSearchTerm = '';
+            document.getElementById('searchUser').value = '';
+            renderUsers();
         });
         document.getElementById('clearAllMessages').addEventListener('click', clearAllMessages);
         document.getElementById('refreshMessages').addEventListener('click', carregarMensagens);
         document.getElementById('addStarsBtn').addEventListener('click', () => {
             const user = document.getElementById('starsUser').value;
             const amount = parseInt(document.getElementById('starsAmount').value);
-            if (user && amount > 0) {
-                adicionarEstrelas(user, amount);
-                document.getElementById('starsAmount').value = '';
-            } else {
-                showToast('Preencha usuário e quantidade válida!', true);
-            }
+            if (user && amount > 0) adicionarEstrelas(user, amount);
+            else showToast('Preencha usuário e quantidade!', true);
         });
-        
-        document.getElementById('adminKey').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') fazerLogin();
+        document.getElementById('removeStarsBtn').addEventListener('click', () => {
+            const user = document.getElementById('starsUser').value;
+            const amount = parseInt(document.getElementById('starsAmount').value);
+            if (user && amount > 0) removerEstrelas(user, amount);
+            else showToast('Preencha usuário e quantidade!', true);
         });
+        document.getElementById('freezeStarsBtn').addEventListener('click', () => {
+            const user = document.getElementById('starsUser').value;
+            if (user) freezeUserStars(user, user);
+            else showToast('Digite o ID ou email do usuário!', true);
+        });
+        document.getElementById('unfreezeStarsBtn').addEventListener('click', () => {
+            const user = document.getElementById('starsUser').value;
+            if (user) unfreezeUserStars(user, user);
+            else showToast('Digite o ID ou email do usuário!', true);
+        });
+        document.getElementById('sendReplyBtn').addEventListener('click', sendReplyAsAdmin);
+        document.getElementById('cancelReplyBtn').addEventListener('click', () => {
+            document.getElementById('replyModal').style.display = 'none';
+            document.getElementById('replyMessage').value = '';
+        });
+        document.getElementById('adminPassword').addEventListener('keypress', (e) => { if (e.key === 'Enter') fazerLogin(); });
         
-        console.log('🎮 Admin Panel - Sistema de Gestão Centralizada');
-        console.log('🔐 Chave de acesso:', ADMIN_KEY);
+        console.log('🎮 Admin Panel Pro v2.0');
+        console.log('🔐 Senha:', ADMIN_PASSWORD);
     </script>
 </body>
-    </html>
+</html>
