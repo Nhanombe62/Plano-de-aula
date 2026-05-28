@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Admin Panel - Sistema Completo</title>
+    <title>Admin Panel - Chat & Estrelas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -36,12 +36,7 @@
         }
         
         .session-timer.warning { background: #e74c3c; animation: pulse 1s infinite; }
-        
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
         
         .login-overlay {
             position: fixed;
@@ -112,7 +107,6 @@
         }
         
         .header h1 { color: #2c3e50; font-size: 1.5rem; }
-        
         .admin-info { display: flex; align-items: center; gap: 15px; }
         .admin-badge { background: linear-gradient(135deg, #f39c12, #e67e22); padding: 8px 15px; border-radius: 25px; color: white; font-weight: bold; }
         .logout-btn { background: #e74c3c; color: white; border: none; padding: 8px 20px; border-radius: 25px; cursor: pointer; }
@@ -151,7 +145,6 @@
             border-radius: 20px;
             padding: 20px;
             text-align: center;
-            cursor: pointer;
             transition: transform 0.2s;
         }
         
@@ -213,11 +206,10 @@
         .action-btn.block { color: #f39c12; }
         .action-btn.unblock { color: #27ae60; }
         .action-btn.stars { color: #f39c12; }
-        .action-btn.freeze { color: #3498db; }
         .action-btn.reply { color: #667eea; }
         .action-btn:hover { background: rgba(0,0,0,0.05); transform: scale(1.1); }
         
-        .blocked-badge, .frozen-badge {
+        .blocked-badge {
             background: #e74c3c;
             color: white;
             padding: 2px 10px;
@@ -225,22 +217,8 @@
             font-size: 0.7rem;
         }
         
-        .frozen-badge { background: #3498db; }
-        
-        .search-bar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .search-input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
-            font-size: 0.9rem;
-        }
+        .search-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-input { flex: 1; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 25px; font-size: 0.9rem; }
         
         .btn-primary {
             background: linear-gradient(135deg, #667eea, #764ba2);
@@ -300,7 +278,6 @@
             border-radius: 30px;
             z-index: 11000;
             animation: slideIn 0.3s ease;
-            max-width: 300px;
         }
         
         @keyframes slideIn { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
@@ -323,12 +300,11 @@
     <div class="login-overlay" id="loginOverlay">
         <div class="login-card">
             <i class="fas fa-shield-alt"></i>
-            <h2>Admin Panel Pro</h2>
+            <h2>Admin Panel</h2>
             <p>Digite a senha de administrador</p>
             <input type="password" id="adminPassword" class="login-input" placeholder="Senha">
             <button class="login-btn" id="loginBtn"><i class="fas fa-unlock-alt"></i> Acessar</button>
             <div class="login-error" id="loginError">Senha incorreta!</div>
-            <p style="margin-top: 20px; font-size: 0.7rem; color: #999;"><i class="fas fa-info-circle"></i> Sessão expira após 30 minutos</p>
         </div>
     </div>
     
@@ -355,38 +331,36 @@
                 <div class="stat-card"><i class="fas fa-users"></i><div class="number" id="totalUsers">0</div><div>Usuários</div></div>
                 <div class="stat-card"><i class="fas fa-comments"></i><div class="number" id="totalMessages">0</div><div>Mensagens</div></div>
                 <div class="stat-card"><i class="fas fa-ban"></i><div class="number" id="totalBlocked">0</div><div>Bloqueados</div></div>
-                <div class="stat-card"><i class="fas fa-star"></i><div class="number" id="totalStars">0</div><div>Estrelas Totais</div></div>
-                <div class="stat-card"><i class="fas fa-snowflake"></i><div class="number" id="totalFrozen">0</div><div>Congelados</div></div>
+                <div class="stat-card"><i class="fas fa-star"></i><div class="number" id="totalStars">0</div><div>Estrelas</div></div>
             </div>
-            <div class="card"><div class="card-title">📊 Estatísticas do Sistema</div><canvas id="activityChart" height="200"></canvas></div>
         </div>
         
         <div class="tab-content" id="users">
             <div class="card">
                 <div class="card-title">🔍 Buscar Usuário</div>
                 <div class="search-bar">
-                    <input type="text" id="searchUser" class="search-input" placeholder="Nome, email ou ID...">
+                    <input type="text" id="searchUser" class="search-input" placeholder="Nome ou email...">
                     <button class="btn-primary" id="searchUserBtn"><i class="fas fa-search"></i> Buscar</button>
-                    <button class="btn-primary" id="resetSearchBtn"><i class="fas fa-sync"></i> Mostrar Todos</button>
+                    <button class="btn-primary" id="resetSearchBtn"><i class="fas fa-sync"></i> Todos</button>
                 </div>
             </div>
             <div class="card">
-                <div class="card-title">👥 Lista de Usuários <span id="userCount" class="badge">0</span></div>
+                <div class="card-title">👥 Lista de Usuários</div>
                 <div id="usersList" class="user-list"><div class="loading">Carregando...</div></div>
             </div>
         </div>
         
         <div class="tab-content" id="messages">
             <div class="card">
-                <div class="card-title">⚡ Ações Rápidas</div>
+                <div class="card-title">⚡ Ações</div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <button class="btn-primary btn-danger" id="clearAllMessages"><i class="fas fa-trash"></i> Limpar Todas</button>
                     <button class="btn-primary" id="refreshMessages"><i class="fas fa-sync"></i> Recarregar</button>
                 </div>
             </div>
             <div class="card">
-                <div class="card-title">💬 Mensagens do Chat <span id="msgCount" class="badge">0</span></div>
-                <div id="messagesList" class="message-list"><div class="loading">Carregando...</div></div>
+                <div class="card-title">💬 Mensagens do Chat</div>
+                <div id="messagesList" class="message-list"><div class="loading">Carregando mensagens...</div></div>
             </div>
         </div>
         
@@ -398,14 +372,13 @@
                     <input type="number" id="starsAmount" class="stars-input" placeholder="Quantidade">
                     <button class="btn-success" id="addStarsBtn"><i class="fas fa-plus"></i> Adicionar</button>
                     <button class="btn-warning" id="removeStarsBtn"><i class="fas fa-minus"></i> Remover</button>
-                    <button class="btn-primary" id="freezeStarsBtn"><i class="fas fa-snowflake"></i> Congelar</button>
                 </div>
             </div>
         </div>
         
         <div class="tab-content" id="ranking">
             <div class="card">
-                <div class="card-title">🏆 Ranking de Usuários por Estrelas</div>
+                <div class="card-title">🏆 Ranking de Usuários</div>
                 <div id="rankingList" class="user-list"><div class="loading">Carregando...</div></div>
             </div>
         </div>
@@ -422,11 +395,11 @@
         <div class="modal-content">
             <h3><i class="fas fa-reply"></i> Responder como Admin</h3>
             <p><strong>Respondendo a:</strong> <span id="replyToUser"></span></p>
-            <p><strong>Mensagem original:</strong> <span id="originalMessage"></span></p>
-            <textarea id="replyMessage" class="reply-textarea" rows="4" placeholder="Digite sua resposta como administrador..."></textarea>
+            <p><strong>Mensagem:</strong> <span id="originalMessage"></span></p>
+            <textarea id="replyMessage" class="reply-textarea" rows="4" placeholder="Digite sua resposta..."></textarea>
             <div style="display: flex; gap: 10px; justify-content: flex-end;">
                 <button class="btn-primary btn-danger" id="cancelReplyBtn">Cancelar</button>
-                <button class="btn-primary" id="sendReplyBtn">Enviar Resposta</button>
+                <button class="btn-primary" id="sendReplyBtn">Enviar</button>
             </div>
         </div>
     </div>
@@ -438,24 +411,24 @@
         let sessionTimer = null;
         let inactivityTimer = null;
         
-        // Firebase Configs
+        // CONFIGURAÇÃO DO PROJETO CHAT (mensagens)
         const CHAT_CONFIG = {
             apiKey: "AIzaSyD4W6l4vXKJEttbGxJ0cQ66SeqDXBvWg_s",
             authDomain: "chat-1ddb5.firebaseapp.com",
             databaseURL: "https://chat-1ddb5-default-rtdb.firebaseio.com/"
         };
         
-        const ESTRELAS_CONFIG = {
+        // CONFIGURAÇÃO DO PROJETO LOGIN (estrelas)
+        const LOGIN_CONFIG = {
             apiKey: "AIzaSyDCBwanaFABmQNgT91vnhV3Xv1RJn9bYOI",
             authDomain: "login-actualizado.firebaseapp.com",
             projectId: "login-actualizado"
         };
         
-        let chatDb, messagesRef, usuariosRef, bloqueadosRef;
+        let chatDb, messagesRef, bloqueadosRef;
         let estrelasDb;
         let blockedUsers = [];
-        let usersCache = {};
-        let frozenUsers = [];
+        let usersCache = [];
         let messagesCache = [];
         let currentSearchTerm = '';
         let currentReplyTo = null;
@@ -480,36 +453,37 @@
         function resetInactivity() { if (inactivityTimer) clearTimeout(inactivityTimer); inactivityTimer = setTimeout(() => { if (sessionTimer) { clearInterval(sessionTimer); fazerLogout(); } }, SESSION_DURATION); }
         function monitorActivity() { ['mousemove', 'click', 'keypress', 'scroll'].forEach(e => document.addEventListener(e, resetInactivity)); }
         
-        function showToast(message, isError = false) {
+        function showToast(msg, isErr = false) {
             const toast = document.createElement('div');
             toast.className = 'toast';
-            toast.style.background = isError ? '#e74c3c' : '#333';
-            toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i> ${message}`;
+            toast.style.background = isErr ? '#e74c3c' : '#333';
+            toast.innerHTML = `<i class="fas ${isErr ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i> ${msg}`;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
         }
         
         function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
         
-        // ==================== FIREBASE ====================
+        // ==================== INICIALIZAR FIREBASE ====================
         function initializeFirebases() {
             try {
+                // Inicializar Chat (Realtime Database)
                 firebase.initializeApp(CHAT_CONFIG, "chat");
                 chatDb = firebase.app("chat").database();
                 messagesRef = chatDb.ref('mensagens');
-                usuariosRef = chatDb.ref('usuarios');
                 bloqueadosRef = chatDb.ref('bloqueados');
-                firebase.initializeApp(ESTRELAS_CONFIG, "estrelas");
-                estrelasDb = firebase.app("estrelas").firestore();
-                carregarFrozenUsers();
+                
+                // Inicializar Login (Firestore)
+                firebase.initializeApp(LOGIN_CONFIG, "login");
+                estrelasDb = firebase.app("login").firestore();
+                
+                console.log('✅ Firebase inicializados!');
                 return true;
-            } catch(e) { console.error("Erro:", e); return false; }
+            } catch(e) { 
+                console.error("Erro:", e); 
+                return true; // Pode já estar inicializado
+            }
         }
-        
-        function carregarFrozenUsers() { const frozen = localStorage.getItem('frozen_users'); if (frozen) frozenUsers = JSON.parse(frozen); document.getElementById('totalFrozen').textContent = frozenUsers.length; }
-        function isUserFrozen(userId) { return frozenUsers.includes(userId); }
-        function freezeUserStars(userId, userName) { if (isUserFrozen(userId)) { showToast('Já está congelado!', true); return; } frozenUsers.push(userId); localStorage.setItem('frozen_users', JSON.stringify(frozenUsers)); showToast(`❄️ ${userName} congelado!`); document.getElementById('totalFrozen').textContent = frozenUsers.length; carregarUsuarios(); }
-        function unfreezeUserStars(userId, userName) { frozenUsers = frozenUsers.filter(id => id !== userId); localStorage.setItem('frozen_users', JSON.stringify(frozenUsers)); showToast(`🔥 ${userName} descongelado!`); document.getElementById('totalFrozen').textContent = frozenUsers.length; carregarUsuarios(); }
         
         // ==================== BLOQUEIOS ====================
         function carregarBloqueados() {
@@ -520,7 +494,6 @@
                 if (data) Object.values(data).forEach(item => blockedUsers.push(item.userId));
                 document.getElementById('totalBlocked').textContent = blockedUsers.length;
                 renderBloqueados();
-                carregarUsuarios();
             });
         }
         
@@ -536,7 +509,7 @@
                         <div class="user-info">
                             <div class="user-name">${escapeHtml(blocked.userName || 'Usuário')}</div>
                             <div class="user-email">ID: ${blocked.userId}</div>
-                            <div>${new Date(blocked.data).toLocaleString()}</div>
+                            <div>${blocked.data ? new Date(blocked.data).toLocaleString() : ''}</div>
                         </div>
                         <div class="user-actions">
                             <button class="action-btn unblock" onclick="window.unblockUser('${blocked.userId}', '${escapeHtml(blocked.userName)}')"><i class="fas fa-check-circle"></i></button>
@@ -547,67 +520,71 @@
         }
         
         function isUserBlocked(userId) { return blockedUsers.includes(userId); }
-        function blockUser(userId, userName) { if (isUserBlocked(userId)) { showToast('Já bloqueado!', true); return; } bloqueadosRef.push({ userId, userName, data: firebase.database.ServerValue.TIMESTAMP }).then(() => { showToast(`✅ ${userName} bloqueado!`); carregarUsuarios(); }); }
-        window.unblockUser = function(userId, userName) { bloqueadosRef.orderByChild('userId').equalTo(userId).once('value', (snapshot) => { snapshot.forEach(child => child.ref.remove()); showToast(`✅ ${userName} desbloqueado!`); carregarUsuarios(); renderBloqueados(); }); };
         
-        // ==================== USUÁRIOS ====================
-        async function carregarUsuarios() {
-            if (!usuariosRef) return;
-            usuariosRef.once('value', async (snapshot) => {
-                const data = snapshot.val();
-                usersCache = {};
-                if (data) {
-                    for (const key of Object.keys(data)) {
-                        const userData = data[key];
-                        let estrelas = 0;
-                        try {
-                            if (userData.email) {
-                                const userDoc = await estrelasDb.collection('usuarios').where('email', '==', userData.email).get();
-                                if (!userDoc.empty) estrelas = userDoc.docs[0].data().estrelas || 0;
-                            }
-                        } catch(e) {}
-                        usersCache[key] = { id: key, ...userData, estrelas: estrelas, isFrozen: isUserFrozen(key) };
-                    }
-                }
-                document.getElementById('totalUsers').textContent = Object.keys(usersCache).length;
-                document.getElementById('userCount').textContent = Object.keys(usersCache).length;
-                renderUsers();
-                await atualizarTotalEstrelas();
+        window.blockUser = function(userId, userName) {
+            if (isUserBlocked(userId)) { showToast('Já bloqueado!', true); return; }
+            bloqueadosRef.push({ userId, userName, data: firebase.database.ServerValue.TIMESTAMP }).then(() => { 
+                showToast(`✅ ${userName} bloqueado!`); 
+                carregarUsuarios();
+                carregarBloqueados();
             });
-        }
+        };
         
-        async function atualizarTotalEstrelas() {
+        window.unblockUser = function(userId, userName) {
+            bloqueadosRef.orderByChild('userId').equalTo(userId).once('value', (snapshot) => { 
+                snapshot.forEach(child => child.ref.remove()); 
+                showToast(`✅ ${userName} desbloqueado!`); 
+                carregarUsuarios();
+                carregarBloqueados();
+            });
+        };
+        
+        // ==================== USUÁRIOS (Firestore) ====================
+        async function carregarUsuarios() {
             try {
-                const snapshot = await estrelasDb.collection('usuarios').get();
-                let total = 0;
-                snapshot.forEach(doc => total += doc.data().estrelas || 0);
-                document.getElementById('totalStars').textContent = total;
-            } catch(e) {}
+                const snapshot = await estrelasDb.collection('usuarios').orderBy('estrelas', 'desc').get();
+                usersCache = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    usersCache.push({
+                        id: doc.id,
+                        email: data.email || '',
+                        nome: data.nome || data.email?.split('@')[0] || 'Usuário',
+                        estrelas: data.estrelas || 0
+                    });
+                });
+                document.getElementById('totalUsers').textContent = usersCache.length;
+                let totalStars = usersCache.reduce((sum, u) => sum + u.estrelas, 0);
+                document.getElementById('totalStars').textContent = totalStars;
+                renderUsers();
+            } catch(e) {
+                console.error('Erro usuarios:', e);
+                document.getElementById('usersList').innerHTML = '<div class="loading">Erro ao carregar usuários</div>';
+            }
         }
         
         function renderUsers() {
-            let users = Object.values(usersCache);
-            if (currentSearchTerm) users = users.filter(u => (u.nome || '').toLowerCase().includes(currentSearchTerm) || (u.email || '').toLowerCase().includes(currentSearchTerm));
+            let users = [...usersCache];
+            if (currentSearchTerm) users = users.filter(u => u.nome.toLowerCase().includes(currentSearchTerm) || (u.email || '').toLowerCase().includes(currentSearchTerm));
             const container = document.getElementById('usersList');
             if (users.length === 0) { container.innerHTML = '<div class="loading">Nenhum usuário encontrado</div>'; return; }
             container.innerHTML = users.map(user => {
                 const isBlocked = isUserBlocked(user.id);
-                const isFrozen = user.isFrozen;
                 return `
                     <div class="user-item">
                         <div class="user-info">
                             <div class="user-name">
-                                ${escapeHtml(user.nome || 'Anônimo')}
+                                ${escapeHtml(user.nome)}
                                 ${isBlocked ? '<span class="blocked-badge"><i class="fas fa-ban"></i> Bloqueado</span>' : ''}
-                                ${isFrozen ? '<span class="frozen-badge"><i class="fas fa-snowflake"></i> Congelado</span>' : ''}
                             </div>
-                            <div class="user-email">${escapeHtml(user.email || 'Sem email')}</div>
+                            <div class="user-email">${escapeHtml(user.email)}</div>
                             <div class="user-stars"><i class="fas fa-star"></i> ${user.estrelas} estrelas</div>
                         </div>
                         <div class="user-actions">
-                            ${isBlocked ? `<button class="action-btn unblock" onclick="window.unblockUser('${user.id}', '${escapeHtml(user.nome)}')"><i class="fas fa-check-circle"></i></button>` : `<button class="action-btn block" onclick="blockUser('${user.id}', '${escapeHtml(user.nome)}')"><i class="fas fa-ban"></i></button>`}
-                            ${isFrozen ? `<button class="action-btn freeze" onclick="unfreezeUserStars('${user.id}', '${escapeHtml(user.nome)}')"><i class="fas fa-fire"></i></button>` : `<button class="action-btn freeze" onclick="freezeUserStars('${user.id}', '${escapeHtml(user.nome)}')"><i class="fas fa-snowflake"></i></button>`}
-                            <button class="action-btn delete" onclick="deleteUserMessages('${user.id}', '${escapeHtml(user.nome)}')"><i class="fas fa-trash-alt"></i></button>
+                            ${isBlocked ? 
+                                `<button class="action-btn unblock" onclick="window.unblockUser('${user.id}', '${escapeHtml(user.nome)}')"><i class="fas fa-check-circle"></i></button>` :
+                                `<button class="action-btn block" onclick="window.blockUser('${user.id}', '${escapeHtml(user.nome)}')"><i class="fas fa-ban"></i></button>`
+                            }
                             <button class="action-btn stars" onclick="openStarsModal('${user.id}', '${escapeHtml(user.nome)}', ${user.estrelas})"><i class="fas fa-star"></i></button>
                         </div>
                     </div>
@@ -615,17 +592,7 @@
             }).join('');
         }
         
-        window.deleteUserMessages = function(userId, userName) {
-            if (confirm(`Apagar TODAS as mensagens de ${userName}?`)) {
-                messagesRef.orderByChild('autorId').equalTo(userId).once('value', (snapshot) => {
-                    const updates = {};
-                    snapshot.forEach(child => updates[child.key] = null);
-                    messagesRef.update(updates).then(() => { showToast(`✅ Mensagens de ${userName} apagadas!`); carregarMensagens(); });
-                });
-            }
-        };
-        
-        // ==================== MENSAGENS ====================
+        // ==================== MENSAGENS (Realtime Database) ====================
         function carregarMensagens() {
             if (!messagesRef) return;
             messagesRef.orderByChild('timestamp').once('value', (snapshot) => {
@@ -633,11 +600,8 @@
                 snapshot.forEach(child => messagesCache.push({ id: child.key, ...child.val() }));
                 messagesCache.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                 document.getElementById('totalMessages').textContent = messagesCache.length;
-                document.getElementById('msgCount').textContent = messagesCache.length;
                 renderMessages();
             });
-            messagesRef.on('child_added', (snapshot) => { carregarMensagens(); });
-            messagesRef.on('child_removed', (snapshot) => { carregarMensagens(); });
         }
         
         function renderMessages() {
@@ -653,7 +617,7 @@
                             <div class="message-author"><i class="fas fa-user"></i> ${escapeHtml(msg.autor || 'Anônimo')}${msg.isAdmin ? ' <span class="badge" style="background:#ff9800;">ADM</span>' : ''}</div>
                             <div class="message-text">${escapeHtml(msg.texto || '')}</div>
                             ${msg.imagem ? `<div><img src="${msg.imagem}" style="max-width:100px; max-height:100px; border-radius:10px; margin-top:5px;"></div>` : ''}
-                            <div style="font-size:0.7rem;">${msg.timestamp ? new Date(msg.timestamp).toLocaleString() : 'Data desconhecida'}</div>
+                            <div style="font-size:0.7rem;">${msg.timestamp ? new Date(msg.timestamp).toLocaleString() : ''}</div>
                         </div>
                         <div class="user-actions">
                             <button class="action-btn reply" onclick="openReplyModal('${escapeHtml(msg.autor).replace(/'/g, "\\'")}', '${escapeHtml(msg.texto).replace(/'/g, "\\'")}', '${msg.id}')"><i class="fas fa-reply"></i></button>
@@ -664,7 +628,13 @@
             }).join('');
         }
         
-        window.deleteMessage = function(msgId) { if (confirm('Apagar esta mensagem?')) { messagesRef.child(msgId).remove(); showToast('✅ Mensagem apagada!'); } };
+        window.deleteMessage = function(msgId) { 
+            if (confirm('Apagar esta mensagem?')) { 
+                messagesRef.child(msgId).remove(); 
+                showToast('✅ Mensagem apagada!'); 
+                setTimeout(() => carregarMensagens(), 500);
+            } 
+        };
         
         window.openReplyModal = function(autor, texto, msgId) {
             currentReplyTo = { autor, texto, msgId };
@@ -688,38 +658,42 @@
             showToast('✅ Resposta enviada!');
             document.getElementById('replyModal').style.display = 'none';
             document.getElementById('replyMessage').value = '';
+            setTimeout(() => carregarMensagens(), 500);
         }
         
-        function clearAllMessages() { if (confirm('⚠️ ATENÇÃO! Isso apagará TODAS as mensagens.')) { messagesRef.remove(); showToast('✅ Todas mensagens apagadas!'); } }
+        function clearAllMessages() { 
+            if (confirm('⚠️ ATENÇÃO! Apagar TODAS as mensagens?')) { 
+                messagesRef.remove(); 
+                showToast('✅ Todas mensagens apagadas!'); 
+                setTimeout(() => carregarMensagens(), 500);
+            } 
+        }
         
         // ==================== ESTRELAS ====================
-        async function adicionarEstrelas(userIdentifier, quantidade) {
+        async function adicionarEstrelas(email, quantidade) {
             try {
-                let userDoc = null;
-                const emailQuery = await estrelasDb.collection('usuarios').where('email', '==', userIdentifier).limit(1).get();
-                if (!emailQuery.empty) userDoc = emailQuery.docs[0];
-                else { const idDoc = await estrelasDb.collection('usuarios').doc(userIdentifier).get(); if (idDoc.exists) userDoc = idDoc; }
-                if (!userDoc) { showToast('❌ Usuário não encontrado!', true); return; }
-                if (isUserFrozen(userDoc.id)) { showToast('❌ Usuário congelado!', true); return; }
-                const novasEstrelas = (userDoc.data().estrelas || 0) + quantidade;
-                await userDoc.ref.update({ estrelas: novasEstrelas });
-                showToast(`✅ +${quantidade} estrelas!`);
+                const query = await estrelasDb.collection('usuarios').where('email', '==', email).limit(1).get();
+                if (query.empty) { showToast('❌ Usuário não encontrado!', true); return; }
+                const doc = query.docs[0];
+                const novasEstrelas = (doc.data().estrelas || 0) + quantidade;
+                await doc.ref.update({ estrelas: novasEstrelas });
+                showToast(`✅ +${quantidade} estrelas para ${email}`);
                 carregarUsuarios();
                 carregarRanking();
-            } catch(error) { showToast('❌ Erro!', true); }
+            } catch(e) { showToast('❌ Erro!', true); }
         }
         
-        async function removerEstrelas(userIdentifier, quantidade) {
+        async function removerEstrelas(email, quantidade) {
             try {
-                const emailQuery = await estrelasDb.collection('usuarios').where('email', '==', userIdentifier).limit(1).get();
-                if (emailQuery.empty) { showToast('❌ Usuário não encontrado!', true); return; }
-                const userDoc = emailQuery.docs[0];
-                const novasEstrelas = Math.max(0, (userDoc.data().estrelas || 0) - quantidade);
-                await userDoc.ref.update({ estrelas: novasEstrelas });
-                showToast(`✅ -${quantidade} estrelas!`);
+                const query = await estrelasDb.collection('usuarios').where('email', '==', email).limit(1).get();
+                if (query.empty) { showToast('❌ Usuário não encontrado!', true); return; }
+                const doc = query.docs[0];
+                const novasEstrelas = Math.max(0, (doc.data().estrelas || 0) - quantidade);
+                await doc.ref.update({ estrelas: novasEstrelas });
+                showToast(`✅ -${quantidade} estrelas de ${email}`);
                 carregarUsuarios();
                 carregarRanking();
-            } catch(error) { showToast('❌ Erro!', true); }
+            } catch(e) { showToast('❌ Erro!', true); }
         }
         
         window.openStarsModal = function(userId, userName, estrelasAtuais) {
@@ -736,9 +710,9 @@
             try {
                 const snapshot = await estrelasDb.collection('usuarios').orderBy('estrelas', 'desc').limit(50).get();
                 const usuarios = [];
-                snapshot.forEach(doc => { const data = doc.data(); usuarios.push({ id: doc.id, email: data.email, estrelas: data.estrelas || 0, nome: data.nome || data.email?.split('@')[0] || 'Usuário' }); });
+                snapshot.forEach(doc => { const data = doc.data(); usuarios.push({ nome: data.nome || data.email?.split('@')[0] || 'Usuário', email: data.email, estrelas: data.estrelas || 0 }); });
                 const container = document.getElementById('rankingList');
-                if (usuarios.length === 0) { container.innerHTML = '<div class="loading">Nenhum usuário encontrado</div>'; return; }
+                if (usuarios.length === 0) { container.innerHTML = '<div class="loading">Nenhum usuário</div>'; return; }
                 container.innerHTML = usuarios.map((user, idx) => `
                     <div class="user-item">
                         <div class="user-info">
@@ -752,17 +726,6 @@
             } catch(e) { console.error(e); document.getElementById('rankingList').innerHTML = '<div class="loading">Erro ao carregar ranking</div>'; }
         }
         
-        // ==================== GRÁFICO ====================
-        function atualizarGrafico() {
-            const ctx = document.getElementById('activityChart').getContext('2d');
-            new Chart(ctx, { type: 'bar', data: { labels: ['Usuários', 'Mensagens', 'Bloqueados', 'Estrelas'], datasets: [{ label: 'Quantidade', data: [0, 0, 0, 0], backgroundColor: '#667eea', borderRadius: 10 }] }, options: { responsive: true, maintainAspectRatio: true } });
-            setTimeout(() => {
-                const chart = Chart.getChart('activityChart');
-                if (chart) chart.data.datasets[0].data = [parseInt(document.getElementById('totalUsers').textContent) || 0, parseInt(document.getElementById('totalMessages').textContent) || 0, parseInt(document.getElementById('totalBlocked').textContent) || 0, parseInt(document.getElementById('totalStars').textContent) || 0];
-                if (chart) chart.update();
-            }, 2000);
-        }
-        
         // ==================== LOGIN ====================
         function fazerLogin() {
             const password = document.getElementById('adminPassword').value;
@@ -773,16 +736,27 @@
                 initializeFirebases();
                 monitorActivity();
                 resetSessionTimer();
-                carregarBloqueados();
-                carregarUsuarios();
-                carregarMensagens();
-                carregarRanking();
-                atualizarGrafico();
+                setTimeout(() => {
+                    carregarBloqueados();
+                    carregarUsuarios();
+                    carregarMensagens();
+                    carregarRanking();
+                }, 500);
                 setupTabs();
-            } else { document.getElementById('loginError').style.display = 'block'; setTimeout(() => document.getElementById('loginError').style.display = 'none', 3000); }
+            } else { 
+                document.getElementById('loginError').style.display = 'block'; 
+                setTimeout(() => document.getElementById('loginError').style.display = 'none', 3000);
+            }
         }
         
-        function fazerLogout() { if (sessionTimer) clearInterval(sessionTimer); if (inactivityTimer) clearTimeout(inactivityTimer); document.getElementById('loginOverlay').style.display = 'flex'; document.getElementById('mainPanel').style.display = 'none'; document.getElementById('adminPassword').value = ''; showToast('👋 Você saiu'); }
+        function fazerLogout() { 
+            if (sessionTimer) clearInterval(sessionTimer); 
+            if (inactivityTimer) clearTimeout(inactivityTimer); 
+            document.getElementById('loginOverlay').style.display = 'flex'; 
+            document.getElementById('mainPanel').style.display = 'none'; 
+            document.getElementById('adminPassword').value = ''; 
+            showToast('👋 Você saiu');
+        }
         
         function setupTabs() {
             document.querySelectorAll('.tab-btn').forEach(tab => {
@@ -794,6 +768,8 @@
                     document.getElementById(tabId).classList.add('active');
                     if (tabId === 'ranking') carregarRanking();
                     if (tabId === 'blocked') renderBloqueados();
+                    if (tabId === 'messages') carregarMensagens();
+                    if (tabId === 'users') carregarUsuarios();
                 });
             });
         }
@@ -804,10 +780,9 @@
         document.getElementById('searchUserBtn').addEventListener('click', () => { currentSearchTerm = document.getElementById('searchUser').value.toLowerCase(); renderUsers(); });
         document.getElementById('resetSearchBtn').addEventListener('click', () => { currentSearchTerm = ''; document.getElementById('searchUser').value = ''; renderUsers(); });
         document.getElementById('clearAllMessages').addEventListener('click', clearAllMessages);
-        document.getElementById('refreshMessages').addEventListener('click', carregarMensagens);
-        document.getElementById('addStarsBtn').addEventListener('click', () => { const user = document.getElementById('starsUser').value; const amount = parseInt(document.getElementById('starsAmount').value); if (user && amount > 0) { adicionarEstrelas(user, amount); document.getElementById('starsAmount').value = ''; } else showToast('Preencha usuário e quantidade!', true); });
-        document.getElementById('removeStarsBtn').addEventListener('click', () => { const user = document.getElementById('starsUser').value; const amount = parseInt(document.getElementById('starsAmount').value); if (user && amount > 0) { removerEstrelas(user, amount); document.getElementById('starsAmount').value = ''; } else showToast('Preencha usuário e quantidade!', true); });
-        document.getElementById('freezeStarsBtn').addEventListener('click', () => { const user = document.getElementById('starsUser').value; if (user) freezeUserStars(user, user); else showToast('Digite o email!', true); });
+        document.getElementById('refreshMessages').addEventListener('click', () => carregarMensagens());
+        document.getElementById('addStarsBtn').addEventListener('click', () => { const user = document.getElementById('starsUser').value; const amount = parseInt(document.getElementById('starsAmount').value); if (user && amount > 0) { adicionarEstrelas(user, amount); document.getElementById('starsAmount').value = ''; } else showToast('Preencha email e quantidade!', true); });
+        document.getElementById('removeStarsBtn').addEventListener('click', () => { const user = document.getElementById('starsUser').value; const amount = parseInt(document.getElementById('starsAmount').value); if (user && amount > 0) { removerEstrelas(user, amount); document.getElementById('starsAmount').value = ''; } else showToast('Preencha email e quantidade!', true); });
         document.getElementById('sendReplyBtn').addEventListener('click', sendReply);
         document.getElementById('cancelReplyBtn').addEventListener('click', () => { document.getElementById('replyModal').style.display = 'none'; document.getElementById('replyMessage').value = ''; });
         document.getElementById('adminPassword').addEventListener('keypress', (e) => { if (e.key === 'Enter') fazerLogin(); });
@@ -816,4 +791,4 @@
         console.log('🔐 Senha:', ADMIN_PASSWORD);
     </script>
 </body>
-                </html>
+</html>
