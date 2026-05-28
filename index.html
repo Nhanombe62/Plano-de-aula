@@ -3,24 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Admin Panel Pro - Gestão Avançada</title>
+    <title>Admin Panel - Sistema Completo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -28,7 +21,6 @@
             min-height: 100vh;
         }
         
-        /* Timer de Sessão */
         .session-timer {
             position: fixed;
             top: 20px;
@@ -41,13 +33,9 @@
             z-index: 1000;
             font-family: monospace;
             border-left: 3px solid #f39c12;
-            font-weight: bold;
         }
         
-        .session-timer.warning {
-            background: #e74c3c;
-            animation: pulse 1s infinite;
-        }
+        .session-timer.warning { background: #e74c3c; animation: pulse 1s infinite; }
         
         @keyframes pulse {
             0% { opacity: 1; }
@@ -55,7 +43,6 @@
             100% { opacity: 1; }
         }
         
-        /* Tela de Login */
         .login-overlay {
             position: fixed;
             top: 0;
@@ -77,36 +64,11 @@
             max-width: 400px;
             text-align: center;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: slideUp 0.5s ease;
         }
         
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .login-card i {
-            font-size: 70px;
-            color: #667eea;
-            margin-bottom: 20px;
-        }
-        
-        .login-card h2 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        
-        .login-card p {
-            color: #666;
-            margin-bottom: 25px;
-            font-size: 0.9rem;
-        }
+        .login-card i { font-size: 70px; color: #667eea; margin-bottom: 20px; }
+        .login-card h2 { color: #2c3e50; margin-bottom: 10px; }
+        .login-card p { color: #666; margin-bottom: 25px; }
         
         .login-input {
             width: 100%;
@@ -129,14 +91,8 @@
             width: 100%;
         }
         
-        .login-error {
-            color: #e74c3c;
-            font-size: 0.85rem;
-            margin-top: 15px;
-            display: none;
-        }
+        .login-error { color: #e74c3c; font-size: 0.85rem; margin-top: 15px; display: none; }
         
-        /* Painel Principal */
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -155,40 +111,13 @@
             gap: 15px;
         }
         
-        .header h1 {
-            color: #2c3e50;
-            font-size: 1.5rem;
-        }
+        .header h1 { color: #2c3e50; font-size: 1.5rem; }
         
-        .admin-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .admin-info { display: flex; align-items: center; gap: 15px; }
+        .admin-badge { background: linear-gradient(135deg, #f39c12, #e67e22); padding: 8px 15px; border-radius: 25px; color: white; font-weight: bold; }
+        .logout-btn { background: #e74c3c; color: white; border: none; padding: 8px 20px; border-radius: 25px; cursor: pointer; }
         
-        .admin-badge {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            padding: 8px 15px;
-            border-radius: 25px;
-            color: white;
-            font-weight: bold;
-        }
-        
-        .logout-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         
         .tab-btn {
             background: rgba(255,255,255,0.1);
@@ -204,28 +133,15 @@
             gap: 8px;
         }
         
-        .tab-btn.active {
-            background: white;
-            color: #667eea;
-        }
+        .tab-btn.active { background: white; color: #667eea; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
         
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -235,26 +151,13 @@
             border-radius: 20px;
             padding: 20px;
             text-align: center;
-            transition: transform 0.2s;
             cursor: pointer;
+            transition: transform 0.2s;
         }
         
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        .stat-card i {
-            font-size: 2rem;
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-        
-        .stat-card .number {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #2c3e50;
-        }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .stat-card i { font-size: 2rem; color: #667eea; margin-bottom: 10px; }
+        .stat-card .number { font-size: 1.8rem; font-weight: bold; color: #2c3e50; }
         
         .card {
             background: white;
@@ -275,10 +178,7 @@
             align-items: center;
         }
         
-        .user-list, .message-list {
-            max-height: 500px;
-            overflow-y: auto;
-        }
+        .user-list, .message-list { max-height: 500px; overflow-y: auto; }
         
         .user-item, .message-item {
             display: flex;
@@ -289,45 +189,14 @@
             transition: background 0.2s;
         }
         
-        .user-item:hover, .message-item:hover {
-            background: #f8f9fa;
-        }
+        .user-item:hover, .message-item:hover { background: #f8f9fa; }
+        .user-info, .message-info { flex: 1; }
+        .user-name { font-weight: bold; color: #2c3e50; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .user-email, .message-text { font-size: 0.8rem; color: #666; margin-top: 3px; }
+        .user-stars { font-size: 0.85rem; color: #f39c12; margin-top: 3px; }
+        .message-author { font-weight: bold; font-size: 0.85rem; color: #075e54; }
         
-        .user-info, .message-info {
-            flex: 1;
-        }
-        
-        .user-name {
-            font-weight: bold;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .user-email, .message-text {
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 3px;
-        }
-        
-        .user-stars {
-            font-size: 0.85rem;
-            color: #f39c12;
-            margin-top: 3px;
-        }
-        
-        .message-author {
-            font-weight: bold;
-            font-size: 0.85rem;
-            color: #075e54;
-        }
-        
-        .user-actions, .message-actions {
-            display: flex;
-            gap: 8px;
-        }
+        .user-actions, .message-actions { display: flex; gap: 8px; }
         
         .action-btn {
             background: none;
@@ -346,11 +215,7 @@
         .action-btn.stars { color: #f39c12; }
         .action-btn.freeze { color: #3498db; }
         .action-btn.reply { color: #667eea; }
-        
-        .action-btn:hover {
-            background: rgba(0,0,0,0.05);
-            transform: scale(1.1);
-        }
+        .action-btn:hover { background: rgba(0,0,0,0.05); transform: scale(1.1); }
         
         .blocked-badge, .frozen-badge {
             background: #e74c3c;
@@ -360,14 +225,13 @@
             font-size: 0.7rem;
         }
         
-        .frozen-badge {
-            background: #3498db;
-        }
+        .frozen-badge { background: #3498db; }
         
         .search-bar {
-            margin-bottom: 20px;
             display: flex;
             gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         
         .search-input {
@@ -392,19 +256,8 @@
         .btn-danger { background: #e74c3c; }
         .btn-success { background: #27ae60; }
         
-        .stars-control {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .stars-input {
-            padding: 10px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
-            width: 200px;
-        }
+        .stars-control { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .stars-input { padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 25px; width: 200px; }
         
         .modal {
             display: none;
@@ -450,43 +303,11 @@
             max-width: 300px;
         }
         
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(100px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
         
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        
-        .badge {
-            background: #e74c3c;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.7rem;
-        }
-        
-        .period-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .period-btn {
-            background: #e0e0e0;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-        
-        .period-btn.active {
-            background: #667eea;
-            color: white;
-        }
+        .badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; }
+        .loading { text-align: center; padding: 40px; color: #666; }
+        .reply-indicator { background: #e8f5e9; padding: 5px 10px; border-radius: 10px; font-size: 0.7rem; margin-bottom: 5px; color: #2e7d32; }
         
         @media (max-width: 768px) {
             .container { padding: 10px; }
@@ -497,10 +318,8 @@
     </style>
 </head>
 <body>
-    <!-- Timer de Sessão -->
     <div class="session-timer" id="sessionTimer">⏱️ 30:00</div>
     
-    <!-- Tela de Login -->
     <div class="login-overlay" id="loginOverlay">
         <div class="login-card">
             <i class="fas fa-shield-alt"></i>
@@ -509,16 +328,13 @@
             <input type="password" id="adminPassword" class="login-input" placeholder="Senha">
             <button class="login-btn" id="loginBtn"><i class="fas fa-unlock-alt"></i> Acessar</button>
             <div class="login-error" id="loginError">Senha incorreta!</div>
-            <p style="margin-top: 20px; font-size: 0.7rem; color: #999;">
-                <i class="fas fa-info-circle"></i> Sessão expira após 30 minutos de inatividade
-            </p>
+            <p style="margin-top: 20px; font-size: 0.7rem; color: #999;"><i class="fas fa-info-circle"></i> Sessão expira após 30 minutos</p>
         </div>
     </div>
     
-    <!-- Painel Principal -->
     <div class="container" id="mainPanel" style="display: none;">
         <div class="header">
-            <h1><i class="fas fa-crown"></i> Admin Panel Pro - Gestão Avançada</h1>
+            <h1><i class="fas fa-crown"></i> Admin Panel - Gestão Completa</h1>
             <div class="admin-info">
                 <span class="admin-badge"><i class="fas fa-user-shield"></i> Master Admin</span>
                 <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair</button>
@@ -534,24 +350,17 @@
             <button class="tab-btn" data-tab="blocked"><i class="fas fa-ban"></i> Bloqueados</button>
         </div>
         
-        <!-- Dashboard -->
         <div class="tab-content active" id="dashboard">
             <div class="stats-grid">
-                <div class="stat-card"><i class="fas fa-users"></i><div class="number" id="totalUsers">0</div><div class="label">Usuários</div></div>
-                <div class="stat-card"><i class="fas fa-comments"></i><div class="number" id="totalMessages">0</div><div class="label">Mensagens</div></div>
-                <div class="stat-card"><i class="fas fa-ban"></i><div class="number" id="totalBlocked">0</div><div class="label">Bloqueados</div></div>
-                <div class="stat-card"><i class="fas fa-star"></i><div class="number" id="totalStars">0</div><div class="label">Estrelas</div></div>
-                <div class="stat-card"><i class="fas fa-download"></i><div class="number" id="totalDownloads">0</div><div class="label">Downloads Hoje</div></div>
-                <div class="stat-card"><i class="fas fa-snowflake"></i><div class="number" id="totalFrozen">0</div><div class="label">Congelados</div></div>
+                <div class="stat-card"><i class="fas fa-users"></i><div class="number" id="totalUsers">0</div><div>Usuários</div></div>
+                <div class="stat-card"><i class="fas fa-comments"></i><div class="number" id="totalMessages">0</div><div>Mensagens</div></div>
+                <div class="stat-card"><i class="fas fa-ban"></i><div class="number" id="totalBlocked">0</div><div>Bloqueados</div></div>
+                <div class="stat-card"><i class="fas fa-star"></i><div class="number" id="totalStars">0</div><div>Estrelas Totais</div></div>
+                <div class="stat-card"><i class="fas fa-snowflake"></i><div class="number" id="totalFrozen">0</div><div>Congelados</div></div>
             </div>
-            
-            <div class="card">
-                <div class="card-title">📊 Atividade nos Últimos 7 Dias</div>
-                <div class="chart-container"><canvas id="activityChart"></canvas></div>
-            </div>
+            <div class="card"><div class="card-title">📊 Estatísticas do Sistema</div><canvas id="activityChart" height="200"></canvas></div>
         </div>
         
-        <!-- Usuários -->
         <div class="tab-content" id="users">
             <div class="card">
                 <div class="card-title">🔍 Buscar Usuário</div>
@@ -567,7 +376,6 @@
             </div>
         </div>
         
-        <!-- Chat -->
         <div class="tab-content" id="messages">
             <div class="card">
                 <div class="card-title">⚡ Ações Rápidas</div>
@@ -577,34 +385,31 @@
                 </div>
             </div>
             <div class="card">
-                <div class="card-title">💬 Últimas Mensagens <span id="msgCount" class="badge">0</span></div>
+                <div class="card-title">💬 Mensagens do Chat <span id="msgCount" class="badge">0</span></div>
                 <div id="messagesList" class="message-list"><div class="loading">Carregando...</div></div>
             </div>
         </div>
         
-        <!-- Estrelas -->
         <div class="tab-content" id="stars">
             <div class="card">
                 <div class="card-title">⭐ Controle de Estrelas</div>
                 <div class="stars-control">
                     <input type="text" id="starsUser" class="stars-input" placeholder="Email do usuário">
                     <input type="number" id="starsAmount" class="stars-input" placeholder="Quantidade">
-                    <button class="btn-success" id="addStarsBtn" style="padding:10px 20px; border-radius:25px; border:none;"><i class="fas fa-plus"></i> Adicionar</button>
-                    <button class="btn-warning" id="removeStarsBtn" style="padding:10px 20px; border-radius:25px; border:none;"><i class="fas fa-minus"></i> Remover</button>
-                    <button class="btn-primary" id="freezeStarsBtn" style="padding:10px 20px; border-radius:25px; border:none;"><i class="fas fa-snowflake"></i> Congelar</button>
+                    <button class="btn-success" id="addStarsBtn"><i class="fas fa-plus"></i> Adicionar</button>
+                    <button class="btn-warning" id="removeStarsBtn"><i class="fas fa-minus"></i> Remover</button>
+                    <button class="btn-primary" id="freezeStarsBtn"><i class="fas fa-snowflake"></i> Congelar</button>
                 </div>
             </div>
         </div>
         
-        <!-- Ranking -->
         <div class="tab-content" id="ranking">
             <div class="card">
-                <div class="card-title">🏆 Ranking de Usuários</div>
+                <div class="card-title">🏆 Ranking de Usuários por Estrelas</div>
                 <div id="rankingList" class="user-list"><div class="loading">Carregando...</div></div>
             </div>
         </div>
         
-        <!-- Bloqueados -->
         <div class="tab-content" id="blocked">
             <div class="card">
                 <div class="card-title">🚫 Usuários Bloqueados</div>
@@ -613,7 +418,6 @@
         </div>
     </div>
     
-    <!-- Modal de Resposta -->
     <div class="modal" id="replyModal">
         <div class="modal-content">
             <h3><i class="fas fa-reply"></i> Responder como Admin</h3>
@@ -630,7 +434,7 @@
     <script>
         // ==================== CONFIGURAÇÕES ====================
         const ADMIN_PASSWORD = "Nhanombe1@";
-        const SESSION_DURATION = 30 * 60 * 1000; // 30 minutos
+        const SESSION_DURATION = 30 * 60 * 1000;
         let sessionTimer = null;
         let inactivityTimer = null;
         
@@ -638,7 +442,6 @@
         const CHAT_CONFIG = {
             apiKey: "AIzaSyD4W6l4vXKJEttbGxJ0cQ66SeqDXBvWg_s",
             authDomain: "chat-1ddb5.firebaseapp.com",
-            projectId: "chat-1ddb5",
             databaseURL: "https://chat-1ddb5-default-rtdb.firebaseio.com/"
         };
         
@@ -653,8 +456,7 @@
         let blockedUsers = [];
         let usersCache = {};
         let frozenUsers = [];
-        let downloadsData = [];
-        let activityChart = null;
+        let messagesCache = [];
         let currentSearchTerm = '';
         let currentReplyTo = null;
         
@@ -662,56 +464,22 @@
         function resetSessionTimer() {
             if (sessionTimer) clearInterval(sessionTimer);
             if (inactivityTimer) clearTimeout(inactivityTimer);
-            
             let timeLeft = SESSION_DURATION / 1000;
             const timerElement = document.getElementById('sessionTimer');
-            
             sessionTimer = setInterval(() => {
                 timeLeft--;
                 const minutes = Math.floor(timeLeft / 60);
                 const seconds = timeLeft % 60;
                 timerElement.textContent = `⏱️ ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
-                if (timeLeft <= 60) {
-                    timerElement.classList.add('warning');
-                }
-                
-                if (timeLeft <= 0) {
-                    clearInterval(sessionTimer);
-                    fazerLogout();
-                    showToast('⏰ Sessão expirada! Faça login novamente.', true);
-                }
+                if (timeLeft <= 60) timerElement.classList.add('warning');
+                if (timeLeft <= 0) { clearInterval(sessionTimer); fazerLogout(); showToast('⏰ Sessão expirada!', true); }
             }, 1000);
-            
-            // Timer de inatividade
-            inactivityTimer = setTimeout(() => {
-                if (sessionTimer) {
-                    clearInterval(sessionTimer);
-                    fazerLogout();
-                    showToast('⏰ Sessão expirada por inatividade!', true);
-                }
-            }, SESSION_DURATION);
+            inactivityTimer = setTimeout(() => { if (sessionTimer) { clearInterval(sessionTimer); fazerLogout(); } }, SESSION_DURATION);
         }
         
-        function resetInactivity() {
-            if (inactivityTimer) clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(() => {
-                if (sessionTimer) {
-                    clearInterval(sessionTimer);
-                    fazerLogout();
-                    showToast('⏰ Sessão expirada por inatividade!', true);
-                }
-            }, SESSION_DURATION);
-        }
+        function resetInactivity() { if (inactivityTimer) clearTimeout(inactivityTimer); inactivityTimer = setTimeout(() => { if (sessionTimer) { clearInterval(sessionTimer); fazerLogout(); } }, SESSION_DURATION); }
+        function monitorActivity() { ['mousemove', 'click', 'keypress', 'scroll'].forEach(e => document.addEventListener(e, resetInactivity)); }
         
-        function monitorActivity() {
-            const events = ['mousemove', 'click', 'keypress', 'scroll', 'touchstart'];
-            events.forEach(event => {
-                document.addEventListener(event, resetInactivity);
-            });
-        }
-        
-        // ==================== FUNÇÕES AUXILIARES ====================
         function showToast(message, isError = false) {
             const toast = document.createElement('div');
             toast.className = 'toast';
@@ -721,14 +489,9 @@
             setTimeout(() => toast.remove(), 3000);
         }
         
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+        function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
         
-        // ==================== INICIALIZAR ====================
+        // ==================== FIREBASE ====================
         function initializeFirebases() {
             try {
                 firebase.initializeApp(CHAT_CONFIG, "chat");
@@ -736,64 +499,17 @@
                 messagesRef = chatDb.ref('mensagens');
                 usuariosRef = chatDb.ref('usuarios');
                 bloqueadosRef = chatDb.ref('bloqueados');
-                
                 firebase.initializeApp(ESTRELAS_CONFIG, "estrelas");
                 estrelasDb = firebase.app("estrelas").firestore();
-                
                 carregarFrozenUsers();
-                carregarDownloads();
                 return true;
-            } catch(e) {
-                console.error("Erro:", e);
-                return false;
-            }
+            } catch(e) { console.error("Erro:", e); return false; }
         }
         
-        // ==================== ESTRELAS CONGELADAS ====================
-        function carregarFrozenUsers() {
-            const frozen = localStorage.getItem('frozen_users');
-            if (frozen) frozenUsers = JSON.parse(frozen);
-            document.getElementById('totalFrozen').textContent = frozenUsers.length;
-        }
-        
+        function carregarFrozenUsers() { const frozen = localStorage.getItem('frozen_users'); if (frozen) frozenUsers = JSON.parse(frozen); document.getElementById('totalFrozen').textContent = frozenUsers.length; }
         function isUserFrozen(userId) { return frozenUsers.includes(userId); }
-        
-        function freezeUserStars(userId, userName) {
-            if (isUserFrozen(userId)) {
-                showToast('Usuário já está com estrelas congeladas!', true);
-                return;
-            }
-            frozenUsers.push(userId);
-            localStorage.setItem('frozen_users', JSON.stringify(frozenUsers));
-            showToast(`❄️ Estrelas de ${userName} congeladas!`);
-            document.getElementById('totalFrozen').textContent = frozenUsers.length;
-            carregarUsuarios();
-        }
-        
-        function unfreezeUserStars(userId, userName) {
-            frozenUsers = frozenUsers.filter(id => id !== userId);
-            localStorage.setItem('frozen_users', JSON.stringify(frozenUsers));
-            showToast(`🔥 Estrelas de ${userName} descongeladas!`);
-            document.getElementById('totalFrozen').textContent = frozenUsers.length;
-            carregarUsuarios();
-        }
-        
-        // ==================== DOWNLOADS ====================
-        function carregarDownloads() {
-            const downloads = localStorage.getItem('downloads_log');
-            if (downloads) downloadsData = JSON.parse(downloads);
-            
-            const hoje = new Date().toDateString();
-            const downloadsHoje = downloadsData.filter(d => new Date(d.data).toDateString() === hoje).length;
-            document.getElementById('totalDownloads').textContent = downloadsHoje;
-        }
-        
-        function registrarDownload(usuarioId, plano) {
-            const download = { usuarioId, plano, data: new Date().toISOString() };
-            downloadsData.push(download);
-            localStorage.setItem('downloads_log', JSON.stringify(downloadsData.slice(-500)));
-            carregarDownloads();
-        }
+        function freezeUserStars(userId, userName) { if (isUserFrozen(userId)) { showToast('Já está congelado!', true); return; } frozenUsers.push(userId); localStorage.setItem('frozen_users', JSON.stringify(frozenUsers)); showToast(`❄️ ${userName} congelado!`); document.getElementById('totalFrozen').textContent = frozenUsers.length; carregarUsuarios(); }
+        function unfreezeUserStars(userId, userName) { frozenUsers = frozenUsers.filter(id => id !== userId); localStorage.setItem('frozen_users', JSON.stringify(frozenUsers)); showToast(`🔥 ${userName} descongelado!`); document.getElementById('totalFrozen').textContent = frozenUsers.length; carregarUsuarios(); }
         
         // ==================== BLOQUEIOS ====================
         function carregarBloqueados() {
@@ -801,15 +517,9 @@
             bloqueadosRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 blockedUsers = [];
-                if (data) {
-                    Object.values(data).forEach(item => {
-                        blockedUsers.push(item.userId);
-                    });
-                }
+                if (data) Object.values(data).forEach(item => blockedUsers.push(item.userId));
                 document.getElementById('totalBlocked').textContent = blockedUsers.length;
-                if (document.getElementById('blocked').classList.contains('active')) {
-                    renderBloqueados();
-                }
+                renderBloqueados();
                 carregarUsuarios();
             });
         }
@@ -818,30 +528,18 @@
             if (!bloqueadosRef) return;
             bloqueadosRef.once('value', (snapshot) => {
                 const data = snapshot.val();
-                const bloqueados = [];
-                if (data) {
-                    Object.keys(data).forEach(key => {
-                        bloqueados.push({ id: key, ...data[key] });
-                    });
-                }
-                
+                const bloqueados = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
                 const container = document.getElementById('blockedList');
-                if (bloqueados.length === 0) {
-                    container.innerHTML = '<div class="loading">Nenhum usuário bloqueado</div>';
-                    return;
-                }
-                
+                if (bloqueados.length === 0) { container.innerHTML = '<div class="loading">Nenhum usuário bloqueado</div>'; return; }
                 container.innerHTML = bloqueados.map(blocked => `
                     <div class="user-item">
                         <div class="user-info">
                             <div class="user-name">${escapeHtml(blocked.userName || 'Usuário')}</div>
                             <div class="user-email">ID: ${blocked.userId}</div>
-                            <div style="font-size:0.7rem;">Bloqueado: ${new Date(blocked.data).toLocaleString()}</div>
+                            <div>${new Date(blocked.data).toLocaleString()}</div>
                         </div>
                         <div class="user-actions">
-                            <button class="action-btn unblock" onclick="unblockUser('${blocked.userId}', '${escapeHtml(blocked.userName)}')">
-                                <i class="fas fa-check-circle"></i>
-                            </button>
+                            <button class="action-btn unblock" onclick="window.unblockUser('${blocked.userId}', '${escapeHtml(blocked.userName)}')"><i class="fas fa-check-circle"></i></button>
                         </div>
                     </div>
                 `).join('');
@@ -849,26 +547,11 @@
         }
         
         function isUserBlocked(userId) { return blockedUsers.includes(userId); }
-        
-        function blockUser(userId, userName) {
-            if (isUserBlocked(userId)) { showToast('Usuário já está bloqueado!', true); return; }
-            bloqueadosRef.push({ userId, userName, data: firebase.database.ServerValue.TIMESTAMP }).then(() => {
-                showToast(`✅ Usuário ${userName} bloqueado!`);
-                carregarUsuarios();
-            });
-        }
-        
-        window.unblockUser = function(userId, userName) {
-            bloqueadosRef.orderByChild('userId').equalTo(userId).once('value', (snapshot) => {
-                snapshot.forEach(child => child.ref.remove());
-                showToast(`✅ Usuário ${userName} desbloqueado!`);
-                carregarUsuarios();
-                renderBloqueados();
-            });
-        };
+        function blockUser(userId, userName) { if (isUserBlocked(userId)) { showToast('Já bloqueado!', true); return; } bloqueadosRef.push({ userId, userName, data: firebase.database.ServerValue.TIMESTAMP }).then(() => { showToast(`✅ ${userName} bloqueado!`); carregarUsuarios(); }); }
+        window.unblockUser = function(userId, userName) { bloqueadosRef.orderByChild('userId').equalTo(userId).once('value', (snapshot) => { snapshot.forEach(child => child.ref.remove()); showToast(`✅ ${userName} desbloqueado!`); carregarUsuarios(); renderBloqueados(); }); };
         
         // ==================== USUÁRIOS ====================
-        function carregarUsuarios() {
+        async function carregarUsuarios() {
             if (!usuariosRef) return;
             usuariosRef.once('value', async (snapshot) => {
                 const data = snapshot.val();
@@ -878,17 +561,18 @@
                         const userData = data[key];
                         let estrelas = 0;
                         try {
-                            const userDoc = await estrelasDb.collection('usuarios').where('email', '==', userData.email).get();
-                            if (!userDoc.empty) estrelas = userDoc.docs[0].data().estrelas || 0;
+                            if (userData.email) {
+                                const userDoc = await estrelasDb.collection('usuarios').where('email', '==', userData.email).get();
+                                if (!userDoc.empty) estrelas = userDoc.docs[0].data().estrelas || 0;
+                            }
                         } catch(e) {}
-                        
                         usersCache[key] = { id: key, ...userData, estrelas: estrelas, isFrozen: isUserFrozen(key) };
                     }
                 }
                 document.getElementById('totalUsers').textContent = Object.keys(usersCache).length;
                 document.getElementById('userCount').textContent = Object.keys(usersCache).length;
                 renderUsers();
-                atualizarTotalEstrelas();
+                await atualizarTotalEstrelas();
             });
         }
         
@@ -903,20 +587,9 @@
         
         function renderUsers() {
             let users = Object.values(usersCache);
-            if (currentSearchTerm) {
-                users = users.filter(u => 
-                    u.nome?.toLowerCase().includes(currentSearchTerm) || 
-                    u.email?.toLowerCase().includes(currentSearchTerm) ||
-                    u.id?.toLowerCase().includes(currentSearchTerm)
-                );
-            }
-            
+            if (currentSearchTerm) users = users.filter(u => (u.nome || '').toLowerCase().includes(currentSearchTerm) || (u.email || '').toLowerCase().includes(currentSearchTerm));
             const container = document.getElementById('usersList');
-            if (users.length === 0) {
-                container.innerHTML = '<div class="loading">Nenhum usuário encontrado</div>';
-                return;
-            }
-            
+            if (users.length === 0) { container.innerHTML = '<div class="loading">Nenhum usuário encontrado</div>'; return; }
             container.innerHTML = users.map(user => {
                 const isBlocked = isUserBlocked(user.id);
                 const isFrozen = user.isFrozen;
@@ -932,16 +605,10 @@
                             <div class="user-stars"><i class="fas fa-star"></i> ${user.estrelas} estrelas</div>
                         </div>
                         <div class="user-actions">
-                            ${isBlocked ? 
-                                `<button class="action-btn unblock" onclick="unblockUser('${user.id}', '${escapeHtml(user.nome)}')" title="Desbloquear"><i class="fas fa-check-circle"></i></button>` :
-                                `<button class="action-btn block" onclick="blockUser('${user.id}', '${escapeHtml(user.nome)}')" title="Bloquear"><i class="fas fa-ban"></i></button>`
-                            }
-                            ${isFrozen ?
-                                `<button class="action-btn stars" onclick="unfreezeUserStars('${user.id}', '${escapeHtml(user.nome)}')" title="Descongelar"><i class="fas fa-fire"></i></button>` :
-                                `<button class="action-btn freeze" onclick="freezeUserStars('${user.id}', '${escapeHtml(user.nome)}')" title="Congelar"><i class="fas fa-snowflake"></i></button>`
-                            }
-                            <button class="action-btn delete" onclick="deleteUserMessages('${user.id}', '${escapeHtml(user.nome)}')" title="Apagar Mensagens"><i class="fas fa-trash-alt"></i></button>
-                            <button class="action-btn stars" onclick="openStarsModal('${user.id}', '${escapeHtml(user.nome)}', ${user.estrelas})" title="Gerenciar Estrelas"><i class="fas fa-star"></i></button>
+                            ${isBlocked ? `<button class="action-btn unblock" onclick="window.unblockUser('${user.id}', '${escapeHtml(user.nome)}')"><i class="fas fa-check-circle"></i></button>` : `<button class="action-btn block" onclick="blockUser('${user.id}', '${escapeHtml(user.nome)}')"><i class="fas fa-ban"></i></button>`}
+                            ${isFrozen ? `<button class="action-btn freeze" onclick="unfreezeUserStars('${user.id}', '${escapeHtml(user.nome)}')"><i class="fas fa-fire"></i></button>` : `<button class="action-btn freeze" onclick="freezeUserStars('${user.id}', '${escapeHtml(user.nome)}')"><i class="fas fa-snowflake"></i></button>`}
+                            <button class="action-btn delete" onclick="deleteUserMessages('${user.id}', '${escapeHtml(user.nome)}')"><i class="fas fa-trash-alt"></i></button>
+                            <button class="action-btn stars" onclick="openStarsModal('${user.id}', '${escapeHtml(user.nome)}', ${user.estrelas})"><i class="fas fa-star"></i></button>
                         </div>
                     </div>
                 `;
@@ -953,10 +620,7 @@
                 messagesRef.orderByChild('autorId').equalTo(userId).once('value', (snapshot) => {
                     const updates = {};
                     snapshot.forEach(child => updates[child.key] = null);
-                    messagesRef.update(updates).then(() => {
-                        showToast(`✅ Mensagens de ${userName} apagadas!`);
-                        carregarMensagens();
-                    });
+                    messagesRef.update(updates).then(() => { showToast(`✅ Mensagens de ${userName} apagadas!`); carregarMensagens(); });
                 });
             }
         };
@@ -964,48 +628,43 @@
         // ==================== MENSAGENS ====================
         function carregarMensagens() {
             if (!messagesRef) return;
-            messagesRef.orderByChild('timestamp').limitToLast(100).once('value', (snapshot) => {
-                const messages = [];
-                snapshot.forEach(child => messages.push({ id: child.key, ...child.val() }));
-                messages.reverse();
-                document.getElementById('totalMessages').textContent = messages.length;
-                document.getElementById('msgCount').textContent = messages.length;
-                renderMessages(messages);
+            messagesRef.orderByChild('timestamp').once('value', (snapshot) => {
+                messagesCache = [];
+                snapshot.forEach(child => messagesCache.push({ id: child.key, ...child.val() }));
+                messagesCache.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                document.getElementById('totalMessages').textContent = messagesCache.length;
+                document.getElementById('msgCount').textContent = messagesCache.length;
+                renderMessages();
             });
+            messagesRef.on('child_added', (snapshot) => { carregarMensagens(); });
+            messagesRef.on('child_removed', (snapshot) => { carregarMensagens(); });
         }
         
-        function renderMessages(messages) {
+        function renderMessages() {
             const container = document.getElementById('messagesList');
-            if (messages.length === 0) {
-                container.innerHTML = '<div class="loading">Nenhuma mensagem</div>';
-                return;
-            }
-            
-            container.innerHTML = messages.map(msg => `
-                <div class="message-item">
-                    <div class="message-info">
-                        <div class="message-author">
-                            <i class="fas fa-user"></i> ${escapeHtml(msg.autor || 'Anônimo')}
-                            ${msg.isAdmin ? '<span class="badge" style="background:#ff9800;">ADM</span>' : ''}
+            if (messagesCache.length === 0) { container.innerHTML = '<div class="loading">Nenhuma mensagem</div>'; return; }
+            container.innerHTML = messagesCache.map(msg => {
+                let replyHtml = '';
+                if (msg.replyTo) replyHtml = `<div class="reply-indicator"><i class="fas fa-reply"></i> Respondendo a ${escapeHtml(msg.replyTo.autor)}</div>`;
+                return `
+                    <div class="message-item">
+                        <div class="message-info">
+                            ${replyHtml}
+                            <div class="message-author"><i class="fas fa-user"></i> ${escapeHtml(msg.autor || 'Anônimo')}${msg.isAdmin ? ' <span class="badge" style="background:#ff9800;">ADM</span>' : ''}</div>
+                            <div class="message-text">${escapeHtml(msg.texto || '')}</div>
+                            ${msg.imagem ? `<div><img src="${msg.imagem}" style="max-width:100px; max-height:100px; border-radius:10px; margin-top:5px;"></div>` : ''}
+                            <div style="font-size:0.7rem;">${msg.timestamp ? new Date(msg.timestamp).toLocaleString() : 'Data desconhecida'}</div>
                         </div>
-                        <div class="message-text">${escapeHtml(msg.texto?.substring(0, 100))}${msg.texto?.length > 100 ? '...' : ''}</div>
-                        <div style="font-size:0.7rem;">${msg.timestamp ? new Date(msg.timestamp).toLocaleString() : 'Data desconhecida'}</div>
+                        <div class="user-actions">
+                            <button class="action-btn reply" onclick="openReplyModal('${escapeHtml(msg.autor).replace(/'/g, "\\'")}', '${escapeHtml(msg.texto).replace(/'/g, "\\'")}', '${msg.id}')"><i class="fas fa-reply"></i></button>
+                            <button class="action-btn delete" onclick="deleteMessage('${msg.id}')"><i class="fas fa-trash-alt"></i></button>
+                        </div>
                     </div>
-                    <div class="user-actions">
-                        <button class="action-btn reply" onclick="openReplyModal('${escapeHtml(msg.autor)}', '${escapeHtml(msg.texto).replace(/'/g, "\\'")}', '${msg.id}')" title="Responder"><i class="fas fa-reply"></i></button>
-                        <button class="action-btn delete" onclick="deleteMessage('${msg.id}')" title="Apagar"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
         
-        window.deleteMessage = function(msgId) {
-            if (confirm('Apagar esta mensagem?')) {
-                messagesRef.child(msgId).remove();
-                showToast('✅ Mensagem apagada!');
-                carregarMensagens();
-            }
-        };
+        window.deleteMessage = function(msgId) { if (confirm('Apagar esta mensagem?')) { messagesRef.child(msgId).remove(); showToast('✅ Mensagem apagada!'); } };
         
         window.openReplyModal = function(autor, texto, msgId) {
             currentReplyTo = { autor, texto, msgId };
@@ -1017,54 +676,37 @@
         function sendReply() {
             const replyText = document.getElementById('replyMessage').value.trim();
             if (!replyText) { showToast('Digite uma resposta!', true); return; }
-            
             const replyMsg = {
                 texto: `🔹 RESPOSTA DO ADMINISTRADOR 🔹\n\n${replyText}\n\n---\nRespondendo a: ${currentReplyTo.autor}`,
                 autor: "📢 ADMINISTRADOR",
                 autorId: "admin_system",
                 timestamp: firebase.database.ServerValue.TIMESTAMP,
                 isAdmin: true,
-                replyTo: { msgId: currentReplyTo.msgId, autor: currentReplyTo.autor }
+                replyTo: { msgId: currentReplyTo.msgId, autor: currentReplyTo.autor, texto: currentReplyTo.texto.substring(0, 50) }
             };
-            
             messagesRef.push(replyMsg);
-            showToast('✅ Resposta enviada como Administrador!');
+            showToast('✅ Resposta enviada!');
             document.getElementById('replyModal').style.display = 'none';
             document.getElementById('replyMessage').value = '';
-            carregarMensagens();
         }
         
-        function clearAllMessages() {
-            if (confirm('⚠️ ATENÇÃO! Isso apagará TODAS as mensagens. Continuar?')) {
-                messagesRef.remove();
-                showToast('✅ Todas mensagens apagadas!');
-                carregarMensagens();
-            }
-        }
+        function clearAllMessages() { if (confirm('⚠️ ATENÇÃO! Isso apagará TODAS as mensagens.')) { messagesRef.remove(); showToast('✅ Todas mensagens apagadas!'); } }
         
         // ==================== ESTRELAS ====================
         async function adicionarEstrelas(userIdentifier, quantidade) {
             try {
-                let userDoc;
+                let userDoc = null;
                 const emailQuery = await estrelasDb.collection('usuarios').where('email', '==', userIdentifier).limit(1).get();
-                if (!emailQuery.empty) {
-                    userDoc = emailQuery.docs[0];
-                } else {
-                    const idQuery = await estrelasDb.collection('usuarios').doc(userIdentifier).get();
-                    if (idQuery.exists) userDoc = idQuery;
-                    else { showToast('❌ Usuário não encontrado!', true); return; }
-                }
-                
-                if (isUserFrozen(userDoc.id)) { showToast('❌ Usuário com estrelas congeladas!', true); return; }
-                
-                const userData = userDoc.data();
-                const novasEstrelas = (userData.estrelas || 0) + quantidade;
+                if (!emailQuery.empty) userDoc = emailQuery.docs[0];
+                else { const idDoc = await estrelasDb.collection('usuarios').doc(userIdentifier).get(); if (idDoc.exists) userDoc = idDoc; }
+                if (!userDoc) { showToast('❌ Usuário não encontrado!', true); return; }
+                if (isUserFrozen(userDoc.id)) { showToast('❌ Usuário congelado!', true); return; }
+                const novasEstrelas = (userDoc.data().estrelas || 0) + quantidade;
                 await userDoc.ref.update({ estrelas: novasEstrelas });
-                showToast(`✅ +${quantidade} estrelas para ${userData.email}`);
+                showToast(`✅ +${quantidade} estrelas!`);
                 carregarUsuarios();
                 carregarRanking();
-                return true;
-            } catch(error) { showToast('❌ Erro!', true); return false; }
+            } catch(error) { showToast('❌ Erro!', true); }
         }
         
         async function removerEstrelas(userIdentifier, quantidade) {
@@ -1072,26 +714,20 @@
                 const emailQuery = await estrelasDb.collection('usuarios').where('email', '==', userIdentifier).limit(1).get();
                 if (emailQuery.empty) { showToast('❌ Usuário não encontrado!', true); return; }
                 const userDoc = emailQuery.docs[0];
-                const userData = userDoc.data();
-                const novasEstrelas = Math.max(0, (userData.estrelas || 0) - quantidade);
+                const novasEstrelas = Math.max(0, (userDoc.data().estrelas || 0) - quantidade);
                 await userDoc.ref.update({ estrelas: novasEstrelas });
-                showToast(`✅ -${quantidade} estrelas de ${userData.email}`);
+                showToast(`✅ -${quantidade} estrelas!`);
                 carregarUsuarios();
                 carregarRanking();
-                return true;
-            } catch(error) { showToast('❌ Erro!', true); return false; }
+            } catch(error) { showToast('❌ Erro!', true); }
         }
         
         window.openStarsModal = function(userId, userName, estrelasAtuais) {
-            const acao = prompt(`Gerenciar estrelas de ${userName}\nEstrelas atuais: ${estrelasAtuais}\n\nDigite: +[quantidade] para adicionar\n- [quantidade] para remover\nEx: +10 ou -5`);
+            const acao = prompt(`Gerenciar ${userName}\nEstrelas: ${estrelasAtuais}\n\nDigite: +10 ou -5`);
             if (acao) {
-                if (acao.startsWith('+')) {
-                    const qtd = parseInt(acao.substring(1));
-                    if (!isNaN(qtd)) adicionarEstrelas(userId, qtd);
-                } else if (acao.startsWith('-')) {
-                    const qtd = parseInt(acao.substring(1));
-                    if (!isNaN(qtd)) removerEstrelas(userId, qtd);
-                } else { showToast('Formato inválido! Use +10 ou -5', true); }
+                if (acao.startsWith('+')) { const qtd = parseInt(acao.substring(1)); if (!isNaN(qtd)) adicionarEstrelas(userId, qtd); }
+                else if (acao.startsWith('-')) { const qtd = parseInt(acao.substring(1)); if (!isNaN(qtd)) removerEstrelas(userId, qtd); }
+                else showToast('Use +10 ou -5', true);
             }
         };
         
@@ -1100,50 +736,31 @@
             try {
                 const snapshot = await estrelasDb.collection('usuarios').orderBy('estrelas', 'desc').limit(50).get();
                 const usuarios = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const userDownloads = downloadsData.filter(d => d.usuarioId === doc.id || d.usuarioId === data.email).length;
-                    usuarios.push({
-                        id: doc.id,
-                        email: data.email,
-                        estrelas: data.estrelas || 0,
-                        nome: data.nome || data.email?.split('@')[0] || 'Usuário',
-                        downloads: userDownloads
-                    });
-                });
-                
+                snapshot.forEach(doc => { const data = doc.data(); usuarios.push({ id: doc.id, email: data.email, estrelas: data.estrelas || 0, nome: data.nome || data.email?.split('@')[0] || 'Usuário' }); });
                 const container = document.getElementById('rankingList');
-                container.innerHTML = usuarios.map((user, index) => `
+                if (usuarios.length === 0) { container.innerHTML = '<div class="loading">Nenhum usuário encontrado</div>'; return; }
+                container.innerHTML = usuarios.map((user, idx) => `
                     <div class="user-item">
                         <div class="user-info">
-                            <div class="user-name">
-                                ${index === 0 ? '🏆 ' : index === 1 ? '🥈 ' : index === 2 ? '🥉 ' : ''}
-                                ${index + 1}. ${escapeHtml(user.nome)}
-                            </div>
+                            <div class="user-name">${idx === 0 ? '🏆 ' : idx === 1 ? '🥈 ' : idx === 2 ? '🥉 ' : ''}${idx + 1}. ${escapeHtml(user.nome)}</div>
                             <div class="user-email">${escapeHtml(user.email)}</div>
                             <div><i class="fas fa-star" style="color:#f39c12"></i> ${user.estrelas} estrelas</div>
-                            <div><i class="fas fa-download"></i> ${user.downloads} downloads</div>
                         </div>
-                        <div class="user-actions">
-                            <span style="background:#667eea; padding:5px 12px; border-radius:20px; color:white;">Score: ${user.estrelas + user.downloads}</span>
-                        </div>
+                        <div class="user-actions"><span style="background:#667eea; padding:5px 12px; border-radius:20px; color:white;">⭐ ${user.estrelas}</span></div>
                     </div>
                 `).join('');
-            } catch(e) { console.error(e); }
+            } catch(e) { console.error(e); document.getElementById('rankingList').innerHTML = '<div class="loading">Erro ao carregar ranking</div>'; }
         }
         
         // ==================== GRÁFICO ====================
         function atualizarGrafico() {
             const ctx = document.getElementById('activityChart').getContext('2d');
-            const dias = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-            const dados = [12, 19, 15, 17, 14, 10, 8];
-            
-            if (activityChart) activityChart.destroy();
-            activityChart = new Chart(ctx, {
-                type: 'line',
-                data: { labels: dias, datasets: [{ label: 'Atividade', data: dados, borderColor: '#667eea', backgroundColor: 'rgba(102,126,234,0.1)', tension: 0.4, fill: true }] },
-                options: { responsive: true, maintainAspectRatio: true }
-            });
+            new Chart(ctx, { type: 'bar', data: { labels: ['Usuários', 'Mensagens', 'Bloqueados', 'Estrelas'], datasets: [{ label: 'Quantidade', data: [0, 0, 0, 0], backgroundColor: '#667eea', borderRadius: 10 }] }, options: { responsive: true, maintainAspectRatio: true } });
+            setTimeout(() => {
+                const chart = Chart.getChart('activityChart');
+                if (chart) chart.data.datasets[0].data = [parseInt(document.getElementById('totalUsers').textContent) || 0, parseInt(document.getElementById('totalMessages').textContent) || 0, parseInt(document.getElementById('totalBlocked').textContent) || 0, parseInt(document.getElementById('totalStars').textContent) || 0];
+                if (chart) chart.update();
+            }, 2000);
         }
         
         // ==================== LOGIN ====================
@@ -1152,8 +769,7 @@
             if (password === ADMIN_PASSWORD) {
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('mainPanel').style.display = 'block';
-                showToast('✅ Login realizado! Sessão de 30 minutos');
-                
+                showToast('✅ Login realizado!');
                 initializeFirebases();
                 monitorActivity();
                 resetSessionTimer();
@@ -1163,20 +779,10 @@
                 carregarRanking();
                 atualizarGrafico();
                 setupTabs();
-            } else {
-                document.getElementById('loginError').style.display = 'block';
-                setTimeout(() => document.getElementById('loginError').style.display = 'none', 3000);
-            }
+            } else { document.getElementById('loginError').style.display = 'block'; setTimeout(() => document.getElementById('loginError').style.display = 'none', 3000); }
         }
         
-        function fazerLogout() {
-            if (sessionTimer) clearInterval(sessionTimer);
-            if (inactivityTimer) clearTimeout(inactivityTimer);
-            document.getElementById('loginOverlay').style.display = 'flex';
-            document.getElementById('mainPanel').style.display = 'none';
-            document.getElementById('adminPassword').value = '';
-            showToast('👋 Você saiu do painel');
-        }
+        function fazerLogout() { if (sessionTimer) clearInterval(sessionTimer); if (inactivityTimer) clearTimeout(inactivityTimer); document.getElementById('loginOverlay').style.display = 'flex'; document.getElementById('mainPanel').style.display = 'none'; document.getElementById('adminPassword').value = ''; showToast('👋 Você saiu'); }
         
         function setupTabs() {
             document.querySelectorAll('.tab-btn').forEach(tab => {
@@ -1195,47 +801,19 @@
         // Event Listeners
         document.getElementById('loginBtn').addEventListener('click', fazerLogin);
         document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
-        document.getElementById('searchUserBtn').addEventListener('click', () => {
-            currentSearchTerm = document.getElementById('searchUser').value.toLowerCase();
-            renderUsers();
-        });
-        document.getElementById('resetSearchBtn').addEventListener('click', () => {
-            currentSearchTerm = '';
-            document.getElementById('searchUser').value = '';
-            renderUsers();
-        });
+        document.getElementById('searchUserBtn').addEventListener('click', () => { currentSearchTerm = document.getElementById('searchUser').value.toLowerCase(); renderUsers(); });
+        document.getElementById('resetSearchBtn').addEventListener('click', () => { currentSearchTerm = ''; document.getElementById('searchUser').value = ''; renderUsers(); });
         document.getElementById('clearAllMessages').addEventListener('click', clearAllMessages);
         document.getElementById('refreshMessages').addEventListener('click', carregarMensagens);
-        document.getElementById('addStarsBtn').addEventListener('click', () => {
-            const user = document.getElementById('starsUser').value;
-            const amount = parseInt(document.getElementById('starsAmount').value);
-            if (user && amount > 0) {
-                adicionarEstrelas(user, amount);
-                document.getElementById('starsAmount').value = '';
-            } else showToast('Preencha usuário e quantidade!', true);
-        });
-        document.getElementById('removeStarsBtn').addEventListener('click', () => {
-            const user = document.getElementById('starsUser').value;
-            const amount = parseInt(document.getElementById('starsAmount').value);
-            if (user && amount > 0) {
-                removerEstrelas(user, amount);
-                document.getElementById('starsAmount').value = '';
-            } else showToast('Preencha usuário e quantidade!', true);
-        });
-        document.getElementById('freezeStarsBtn').addEventListener('click', () => {
-            const user = document.getElementById('starsUser').value;
-            if (user) freezeUserStars(user, user);
-            else showToast('Digite o email do usuário!', true);
-        });
+        document.getElementById('addStarsBtn').addEventListener('click', () => { const user = document.getElementById('starsUser').value; const amount = parseInt(document.getElementById('starsAmount').value); if (user && amount > 0) { adicionarEstrelas(user, amount); document.getElementById('starsAmount').value = ''; } else showToast('Preencha usuário e quantidade!', true); });
+        document.getElementById('removeStarsBtn').addEventListener('click', () => { const user = document.getElementById('starsUser').value; const amount = parseInt(document.getElementById('starsAmount').value); if (user && amount > 0) { removerEstrelas(user, amount); document.getElementById('starsAmount').value = ''; } else showToast('Preencha usuário e quantidade!', true); });
+        document.getElementById('freezeStarsBtn').addEventListener('click', () => { const user = document.getElementById('starsUser').value; if (user) freezeUserStars(user, user); else showToast('Digite o email!', true); });
         document.getElementById('sendReplyBtn').addEventListener('click', sendReply);
-        document.getElementById('cancelReplyBtn').addEventListener('click', () => {
-            document.getElementById('replyModal').style.display = 'none';
-            document.getElementById('replyMessage').value = '';
-        });
+        document.getElementById('cancelReplyBtn').addEventListener('click', () => { document.getElementById('replyModal').style.display = 'none'; document.getElementById('replyMessage').value = ''; });
         document.getElementById('adminPassword').addEventListener('keypress', (e) => { if (e.key === 'Enter') fazerLogin(); });
         
-        console.log('✅ Admin Panel Pro carregado!');
+        console.log('✅ Admin Panel carregado!');
         console.log('🔐 Senha:', ADMIN_PASSWORD);
     </script>
 </body>
-    </html>
+                </html>
