@@ -6,11 +6,10 @@
     <title>Admin Panel - Chat & Estrelas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (versões compatíveis) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -180,12 +179,14 @@
             padding: 15px;
             border-bottom: 1px solid #eee;
             transition: background 0.2s;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .user-item:hover, .message-item:hover { background: #f8f9fa; }
-        .user-info, .message-info { flex: 1; }
+        .user-info, .message-info { flex: 1; min-width: 200px; }
         .user-name { font-weight: bold; color: #2c3e50; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .user-email, .message-text { font-size: 0.8rem; color: #666; margin-top: 3px; }
+        .user-email, .message-text { font-size: 0.8rem; color: #666; margin-top: 3px; word-break: break-word; }
         .user-stars { font-size: 0.85rem; color: #f39c12; margin-top: 3px; }
         .message-author { font-weight: bold; font-size: 0.85rem; color: #075e54; }
         
@@ -289,8 +290,6 @@
         @media (max-width: 768px) {
             .container { padding: 10px; }
             .stats-grid { grid-template-columns: 1fr; }
-            .user-item, .message-item { flex-direction: column; gap: 10px; text-align: center; }
-            .user-actions, .message-actions { justify-content: center; }
         }
     </style>
 </head>
@@ -411,20 +410,21 @@
         let sessionTimer = null;
         let inactivityTimer = null;
         
-        // CONFIGURAÇÃO DO PROJETO CHAT (mensagens)
+        // CONFIGURAÇÃO DO PROJETO CHAT (Realtime Database)
         const CHAT_CONFIG = {
             apiKey: "AIzaSyD4W6l4vXKJEttbGxJ0cQ66SeqDXBvWg_s",
             authDomain: "chat-1ddb5.firebaseapp.com",
             databaseURL: "https://chat-1ddb5-default-rtdb.firebaseio.com/"
         };
         
-        // CONFIGURAÇÃO DO PROJETO LOGIN (estrelas)
+        // CONFIGURAÇÃO DO PROJETO LOGIN (Firestore - estrelas)
         const LOGIN_CONFIG = {
             apiKey: "AIzaSyDCBwanaFABmQNgT91vnhV3Xv1RJn9bYOI",
             authDomain: "login-actualizado.firebaseapp.com",
             projectId: "login-actualizado"
         };
         
+        let chatApp, loginApp;
         let chatDb, messagesRef, bloqueadosRef;
         let estrelasDb;
         let blockedUsers = [];
@@ -468,20 +468,28 @@
         function initializeFirebases() {
             try {
                 // Inicializar Chat (Realtime Database)
-                firebase.initializeApp(CHAT_CONFIG, "chat");
-                chatDb = firebase.app("chat").database();
+                if (!firebase.apps.find(app => app.name === "chat")) {
+                    chatApp = firebase.initializeApp(CHAT_CONFIG, "chat");
+                } else {
+                    chatApp = firebase.app("chat");
+                }
+                chatDb = chatApp.database();
                 messagesRef = chatDb.ref('mensagens');
                 bloqueadosRef = chatDb.ref('bloqueados');
                 
                 // Inicializar Login (Firestore)
-                firebase.initializeApp(LOGIN_CONFIG, "login");
-                estrelasDb = firebase.app("login").firestore();
+                if (!firebase.apps.find(app => app.name === "login")) {
+                    loginApp = firebase.initializeApp(LOGIN_CONFIG, "login");
+                } else {
+                    loginApp = firebase.app("login");
+                }
+                estrelasDb = loginApp.firestore();
                 
                 console.log('✅ Firebase inicializados!');
                 return true;
             } catch(e) { 
-                console.error("Erro:", e); 
-                return true; // Pode já estar inicializado
+                console.error("Erro ao inicializar:", e); 
+                return false;
             }
         }
         
@@ -491,9 +499,16 @@
             bloqueadosRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 blockedUsers = [];
-                if (data) Object.values(data).forEach(item => blockedUsers.push(item.userId));
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        const item = data[key];
+                        if (item.userId) blockedUsers.push(item.userId);
+                    });
+                }
                 document.getElementById('totalBlocked').textContent = blockedUsers.length;
                 renderBloqueados();
+            }, (error) => {
+                console.error('Erro ao carregar bloqueados:', error);
             });
         }
         
@@ -508,11 +523,11 @@
                     <div class="user-item">
                         <div class="user-info">
                             <div class="user-name">${escapeHtml(blocked.userName || 'Usuário')}</div>
-                            <div class="user-email">ID: ${blocked.userId}</div>
+                            <div class="user-email">ID: ${escapeHtml(blocked.userId)}</div>
                             <div>${blocked.data ? new Date(blocked.data).toLocaleString() : ''}</div>
                         </div>
                         <div class="user-actions">
-                            <button class="action-btn unblock" onclick="window.unblockUser('${blocked.userId}', '${escapeHtml(blocked.userName)}')"><i class="fas fa-check-circle"></i></button>
+                            <button class="action-btn unblock" onclick="window.unblockUser('${escapeHtml(blocked.userId)}', '${escapeHtml(blocked.userName || 'Usuário')}')"><i class="fas fa-check-circle"></i></button>
                         </div>
                     </div>
                 `).join('');
@@ -527,7 +542,7 @@
                 showToast(`✅ ${userName} bloqueado!`); 
                 carregarUsuarios();
                 carregarBloqueados();
-            });
+            }).catch(err => showToast('Erro ao bloquear: ' + err.message, true));
         };
         
         window.unblockUser = function(userId, userName) {
@@ -536,7 +551,7 @@
                 showToast(`✅ ${userName} desbloqueado!`); 
                 carregarUsuarios();
                 carregarBloqueados();
-            });
+            }).catch(err => showToast('Erro ao desbloquear: ' + err.message, true));
         };
         
         // ==================== USUÁRIOS (Firestore) ====================
@@ -559,7 +574,7 @@
                 renderUsers();
             } catch(e) {
                 console.error('Erro usuarios:', e);
-                document.getElementById('usersList').innerHTML = '<div class="loading">Erro ao carregar usuários</div>';
+                document.getElementById('usersList').innerHTML = '<div class="loading">Erro ao carregar usuários: ' + e.message + '</div>';
             }
         }
         
@@ -594,32 +609,52 @@
         
         // ==================== MENSAGENS (Realtime Database) ====================
         function carregarMensagens() {
-            if (!messagesRef) return;
+            if (!messagesRef) {
+                console.error('messagesRef não inicializado');
+                document.getElementById('messagesList').innerHTML = '<div class="loading">Erro: Database não conectado</div>';
+                return;
+            }
             messagesRef.orderByChild('timestamp').once('value', (snapshot) => {
                 messagesCache = [];
-                snapshot.forEach(child => messagesCache.push({ id: child.key, ...child.val() }));
+                snapshot.forEach(child => {
+                    const val = child.val();
+                    messagesCache.push({ 
+                        id: child.key, 
+                        texto: val.texto || '',
+                        autor: val.autor || 'Anônimo',
+                        autorId: val.autorId || '',
+                        timestamp: val.timestamp || 0,
+                        isAdmin: val.isAdmin || false,
+                        imagem: val.imagem || '',
+                        replyTo: val.replyTo || null
+                    });
+                });
                 messagesCache.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                 document.getElementById('totalMessages').textContent = messagesCache.length;
                 renderMessages();
+            }, (error) => {
+                console.error('Erro ao carregar mensagens:', error);
+                document.getElementById('messagesList').innerHTML = '<div class="loading">Erro ao carregar mensagens: ' + error.message + '</div>';
             });
         }
         
         function renderMessages() {
             const container = document.getElementById('messagesList');
-            if (messagesCache.length === 0) { container.innerHTML = '<div class="loading">Nenhuma mensagem</div>'; return; }
+            if (messagesCache.length === 0) { container.innerHTML = '<div class="loading">Nenhuma mensagem encontrada</div>'; return; }
             container.innerHTML = messagesCache.map(msg => {
                 let replyHtml = '';
-                if (msg.replyTo) replyHtml = `<div class="reply-indicator"><i class="fas fa-reply"></i> Respondendo a ${escapeHtml(msg.replyTo.autor)}</div>`;
+                if (msg.replyTo) replyHtml = `<div class="reply-indicator"><i class="fas fa-reply"></i> Respondendo a ${escapeHtml(msg.replyTo.autor || 'alguém')}</div>`;
+                const isAdminMsg = msg.isAdmin || msg.autor === '📢 ADMINISTRADOR';
                 return `
                     <div class="message-item">
                         <div class="message-info">
                             ${replyHtml}
-                            <div class="message-author"><i class="fas fa-user"></i> ${escapeHtml(msg.autor || 'Anônimo')}${msg.isAdmin ? ' <span class="badge" style="background:#ff9800;">ADM</span>' : ''}</div>
-                            <div class="message-text">${escapeHtml(msg.texto || '')}</div>
-                            ${msg.imagem ? `<div><img src="${msg.imagem}" style="max-width:100px; max-height:100px; border-radius:10px; margin-top:5px;"></div>` : ''}
-                            <div style="font-size:0.7rem;">${msg.timestamp ? new Date(msg.timestamp).toLocaleString() : ''}</div>
+                            <div class="message-author"><i class="fas fa-user"></i> ${escapeHtml(msg.autor)}${isAdminMsg ? ' <span class="badge" style="background:#ff9800;">ADM</span>' : ''}</div>
+                            <div class="message-text">${escapeHtml(msg.texto).replace(/\n/g, '<br>')}</div>
+                            ${msg.imagem ? `<div><img src="${escapeHtml(msg.imagem)}" style="max-width:100px; max-height:100px; border-radius:10px; margin-top:5px;"></div>` : ''}
+                            <div style="font-size:0.7rem; color:#888;">${msg.timestamp ? new Date(msg.timestamp).toLocaleString() : 'Data desconhecida'}</div>
                         </div>
-                        <div class="user-actions">
+                        <div class="message-actions">
                             <button class="action-btn reply" onclick="openReplyModal('${escapeHtml(msg.autor).replace(/'/g, "\\'")}', '${escapeHtml(msg.texto).replace(/'/g, "\\'")}', '${msg.id}')"><i class="fas fa-reply"></i></button>
                             <button class="action-btn delete" onclick="deleteMessage('${msg.id}')"><i class="fas fa-trash-alt"></i></button>
                         </div>
@@ -630,9 +665,12 @@
         
         window.deleteMessage = function(msgId) { 
             if (confirm('Apagar esta mensagem?')) { 
-                messagesRef.child(msgId).remove(); 
-                showToast('✅ Mensagem apagada!'); 
-                setTimeout(() => carregarMensagens(), 500);
+                messagesRef.child(msgId).remove()
+                    .then(() => { 
+                        showToast('✅ Mensagem apagada!'); 
+                        setTimeout(() => carregarMensagens(), 500);
+                    })
+                    .catch(err => showToast('Erro ao apagar: ' + err.message, true));
             } 
         };
         
@@ -646,6 +684,8 @@
         function sendReply() {
             const replyText = document.getElementById('replyMessage').value.trim();
             if (!replyText) { showToast('Digite uma resposta!', true); return; }
+            if (!currentReplyTo) { showToast('Erro: mensagem de referência perdida', true); return; }
+            
             const replyMsg = {
                 texto: `🔹 RESPOSTA DO ADMINISTRADOR 🔹\n\n${replyText}\n\n---\nRespondendo a: ${currentReplyTo.autor}`,
                 autor: "📢 ADMINISTRADOR",
@@ -654,18 +694,25 @@
                 isAdmin: true,
                 replyTo: { msgId: currentReplyTo.msgId, autor: currentReplyTo.autor, texto: currentReplyTo.texto.substring(0, 50) }
             };
-            messagesRef.push(replyMsg);
-            showToast('✅ Resposta enviada!');
-            document.getElementById('replyModal').style.display = 'none';
-            document.getElementById('replyMessage').value = '';
-            setTimeout(() => carregarMensagens(), 500);
+            
+            messagesRef.push(replyMsg)
+                .then(() => {
+                    showToast('✅ Resposta enviada!');
+                    document.getElementById('replyModal').style.display = 'none';
+                    document.getElementById('replyMessage').value = '';
+                    setTimeout(() => carregarMensagens(), 500);
+                })
+                .catch(err => showToast('Erro ao enviar: ' + err.message, true));
         }
         
         function clearAllMessages() { 
-            if (confirm('⚠️ ATENÇÃO! Apagar TODAS as mensagens?')) { 
-                messagesRef.remove(); 
-                showToast('✅ Todas mensagens apagadas!'); 
-                setTimeout(() => carregarMensagens(), 500);
+            if (confirm('⚠️ ATENÇÃO! Apagar TODAS as mensagens? Esta ação não pode ser desfeita!')) { 
+                messagesRef.remove() 
+                    .then(() => { 
+                        showToast('✅ Todas mensagens apagadas!'); 
+                        setTimeout(() => carregarMensagens(), 500);
+                    })
+                    .catch(err => showToast('Erro ao apagar: ' + err.message, true));
             } 
         }
         
@@ -673,14 +720,14 @@
         async function adicionarEstrelas(email, quantidade) {
             try {
                 const query = await estrelasDb.collection('usuarios').where('email', '==', email).limit(1).get();
-                if (query.empty) { showToast('❌ Usuário não encontrado!', true); return; }
+                if (query.empty) { showToast('❌ Usuário não encontrado! Verifique o email', true); return; }
                 const doc = query.docs[0];
                 const novasEstrelas = (doc.data().estrelas || 0) + quantidade;
                 await doc.ref.update({ estrelas: novasEstrelas });
                 showToast(`✅ +${quantidade} estrelas para ${email}`);
                 carregarUsuarios();
                 carregarRanking();
-            } catch(e) { showToast('❌ Erro!', true); }
+            } catch(e) { showToast('❌ Erro: ' + e.message, true); }
         }
         
         async function removerEstrelas(email, quantidade) {
@@ -693,15 +740,24 @@
                 showToast(`✅ -${quantidade} estrelas de ${email}`);
                 carregarUsuarios();
                 carregarRanking();
-            } catch(e) { showToast('❌ Erro!', true); }
+            } catch(e) { showToast('❌ Erro: ' + e.message, true); }
         }
         
+        // Função para abrir modal de estrelas (usando prompt simples)
         window.openStarsModal = function(userId, userName, estrelasAtuais) {
-            const acao = prompt(`Gerenciar ${userName}\nEstrelas: ${estrelasAtuais}\n\nDigite: +10 ou -5`);
+            const acao = prompt(`Gerenciar ${userName}\nEstrelas atuais: ${estrelasAtuais}\n\nDigite: +10 para adicionar ou -5 para remover\nExemplo: +10, -5`);
             if (acao) {
-                if (acao.startsWith('+')) { const qtd = parseInt(acao.substring(1)); if (!isNaN(qtd)) adicionarEstrelas(userId, qtd); }
-                else if (acao.startsWith('-')) { const qtd = parseInt(acao.substring(1)); if (!isNaN(qtd)) removerEstrelas(userId, qtd); }
-                else showToast('Use +10 ou -5', true);
+                if (acao.startsWith('+')) { 
+                    const qtd = parseInt(acao.substring(1)); 
+                    if (!isNaN(qtd) && qtd > 0) adicionarEstrelas(userId, qtd); 
+                    else showToast('Formato inválido! Use +10', true);
+                }
+                else if (acao.startsWith('-')) { 
+                    const qtd = parseInt(acao.substring(1)); 
+                    if (!isNaN(qtd) && qtd > 0) removerEstrelas(userId, qtd); 
+                    else showToast('Formato inválido! Use -5', true);
+                }
+                else showToast('Use +10 para adicionar ou -5 para remover', true);
             }
         };
         
@@ -710,9 +766,16 @@
             try {
                 const snapshot = await estrelasDb.collection('usuarios').orderBy('estrelas', 'desc').limit(50).get();
                 const usuarios = [];
-                snapshot.forEach(doc => { const data = doc.data(); usuarios.push({ nome: data.nome || data.email?.split('@')[0] || 'Usuário', email: data.email, estrelas: data.estrelas || 0 }); });
+                snapshot.forEach(doc => { 
+                    const data = doc.data(); 
+                    usuarios.push({ 
+                        nome: data.nome || data.email?.split('@')[0] || 'Usuário', 
+                        email: data.email, 
+                        estrelas: data.estrelas || 0 
+                    }); 
+                });
                 const container = document.getElementById('rankingList');
-                if (usuarios.length === 0) { container.innerHTML = '<div class="loading">Nenhum usuário</div>'; return; }
+                if (usuarios.length === 0) { container.innerHTML = '<div class="loading">Nenhum usuário encontrado</div>'; return; }
                 container.innerHTML = usuarios.map((user, idx) => `
                     <div class="user-item">
                         <div class="user-info">
@@ -723,7 +786,10 @@
                         <div class="user-actions"><span style="background:#667eea; padding:5px 12px; border-radius:20px; color:white;">⭐ ${user.estrelas}</span></div>
                     </div>
                 `).join('');
-            } catch(e) { console.error(e); document.getElementById('rankingList').innerHTML = '<div class="loading">Erro ao carregar ranking</div>'; }
+            } catch(e) { 
+                console.error('Erro ranking:', e); 
+                document.getElementById('rankingList').innerHTML = '<div class="loading">Erro ao carregar ranking: ' + e.message + '</div>';
+            }
         }
         
         // ==================== LOGIN ====================
@@ -733,15 +799,23 @@
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('mainPanel').style.display = 'block';
                 showToast('✅ Login realizado!');
-                initializeFirebases();
+                
+                const initSuccess = initializeFirebases();
+                if (!initSuccess) {
+                    showToast('⚠️ Erro ao conectar com Firebase', true);
+                }
+                
                 monitorActivity();
                 resetSessionTimer();
+                
+                // Carregar todos os dados
                 setTimeout(() => {
                     carregarBloqueados();
                     carregarUsuarios();
                     carregarMensagens();
                     carregarRanking();
                 }, 500);
+                
                 setupTabs();
             } else { 
                 document.getElementById('loginError').style.display = 'block'; 
@@ -755,7 +829,7 @@
             document.getElementById('loginOverlay').style.display = 'flex'; 
             document.getElementById('mainPanel').style.display = 'none'; 
             document.getElementById('adminPassword').value = ''; 
-            showToast('👋 Você saiu');
+            showToast('👋 Você saiu do painel admin');
         }
         
         function setupTabs() {
@@ -766,6 +840,8 @@
                     tab.classList.add('active');
                     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
                     document.getElementById(tabId).classList.add('active');
+                    
+                    // Recarregar dados ao mudar de aba
                     if (tabId === 'ranking') carregarRanking();
                     if (tabId === 'blocked') renderBloqueados();
                     if (tabId === 'messages') carregarMensagens();
@@ -774,21 +850,40 @@
             });
         }
         
-        // Event Listeners
+        // ==================== EVENT LISTENERS ====================
         document.getElementById('loginBtn').addEventListener('click', fazerLogin);
         document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
         document.getElementById('searchUserBtn').addEventListener('click', () => { currentSearchTerm = document.getElementById('searchUser').value.toLowerCase(); renderUsers(); });
         document.getElementById('resetSearchBtn').addEventListener('click', () => { currentSearchTerm = ''; document.getElementById('searchUser').value = ''; renderUsers(); });
         document.getElementById('clearAllMessages').addEventListener('click', clearAllMessages);
         document.getElementById('refreshMessages').addEventListener('click', () => carregarMensagens());
-        document.getElementById('addStarsBtn').addEventListener('click', () => { const user = document.getElementById('starsUser').value; const amount = parseInt(document.getElementById('starsAmount').value); if (user && amount > 0) { adicionarEstrelas(user, amount); document.getElementById('starsAmount').value = ''; } else showToast('Preencha email e quantidade!', true); });
-        document.getElementById('removeStarsBtn').addEventListener('click', () => { const user = document.getElementById('starsUser').value; const amount = parseInt(document.getElementById('starsAmount').value); if (user && amount > 0) { removerEstrelas(user, amount); document.getElementById('starsAmount').value = ''; } else showToast('Preencha email e quantidade!', true); });
+        document.getElementById('addStarsBtn').addEventListener('click', () => { 
+            const user = document.getElementById('starsUser').value.trim(); 
+            const amount = parseInt(document.getElementById('starsAmount').value); 
+            if (user && amount > 0) { 
+                adicionarEstrelas(user, amount); 
+                document.getElementById('starsAmount').value = ''; 
+            } else showToast('Preencha email e quantidade válida!', true); 
+        });
+        document.getElementById('removeStarsBtn').addEventListener('click', () => { 
+            const user = document.getElementById('starsUser').value.trim(); 
+            const amount = parseInt(document.getElementById('starsAmount').value); 
+            if (user && amount > 0) { 
+                removerEstrelas(user, amount); 
+                document.getElementById('starsAmount').value = ''; 
+            } else showToast('Preencha email e quantidade válida!', true); 
+        });
         document.getElementById('sendReplyBtn').addEventListener('click', sendReply);
-        document.getElementById('cancelReplyBtn').addEventListener('click', () => { document.getElementById('replyModal').style.display = 'none'; document.getElementById('replyMessage').value = ''; });
+        document.getElementById('cancelReplyBtn').addEventListener('click', () => { 
+            document.getElementById('replyModal').style.display = 'none'; 
+            document.getElementById('replyMessage').value = ''; 
+            currentReplyTo = null;
+        });
         document.getElementById('adminPassword').addEventListener('keypress', (e) => { if (e.key === 'Enter') fazerLogin(); });
         
         console.log('✅ Admin Panel carregado!');
         console.log('🔐 Senha:', ADMIN_PASSWORD);
+        console.log('📌 Para testar: digite a senha e clique em Acessar');
     </script>
 </body>
-                                                                       </html>
+    </html>
