@@ -1,45 +1,15 @@
 // ============================================
 // paysuite-manager.js - Sistema de Pagamento PaySuite
 // Token: 2078|BF9471P8wDmZ3Okg0dwTthC9CwF3Szj1uMkIgibU430dfd2f
+// Webhook Secret: whsec_10e409ea39545c761b8b6b9832ccf7879f983eb830641075
 // ============================================
 
 const PAYSUITE_CONFIG = {
     token: "2078|BF9471P8wDmZ3Okg0dwTthC9CwF3Szj1uMkIgibU430dfd2f",
     apiUrl: "https://paysuite.tech/api/v1/payments",
-    webhookUrl: "https://script.google.com/macros/s/AKfycbwQVxPUK5Y45l5fSpkKvokFIKF14HB4yDpBpB46BOJ3KjuBBVH69z3eiZ_C1PqN6LkH/exec",
-    statusUrl: "https://script.google.com/macros/s/AKfycbwQVxPUK5Y45l5fSpkKvokFIKF14HB4yDpBpB46BOJ3KjuBBVH69z3eiZ_C1PqN6LkH/exec"
-};
-
-// ============================================
-// CONFIGURAÇÃO DOS PRODUTOS
-// ============================================
-const PRODUCTS_CONFIG = {
-    // Pacotes de créditos (para Educação Física, Francês, etc)
-    CREDITOS: {
-        packages: [
-            { id: "cred_1", credits: 1, price: 3, name: "1 Acesso", desc: "1 Download" },
-            { id: "cred_4", credits: 4, price: 10, name: "4 Acessos", desc: "4 Downloads" },
-            { id: "cred_9", credits: 9, price: 20, name: "9 Acessos", desc: "9 Downloads" },
-            { id: "cred_14", credits: 14, price: 30, name: "14 Acessos", desc: "14 Downloads" },
-            { id: "cred_25", credits: 25, price: 50, name: "25 Acessos", desc: "25 Downloads" }
-        ]
-    },
-    // Planos quinzenais
-    QUINZENAL: {
-        packages: [
-            { id: "qz_1semana", name: "1 Semana", price: 10, desc: "Acesso por 1 semana", days: 7 },
-            { id: "qz_2semanas", name: "2 Semanas", price: 18, desc: "Acesso por 2 semanas", days: 14 },
-            { id: "qz_3semanas", name: "3 Semanas", price: 25, desc: "Acesso por 3 semanas", days: 21 }
-        ]
-    },
-    // Planos mensais/trimestrais
-    PLANOS: {
-        packages: [
-            { id: "plan_mensal", name: "Plano Mensal", price: 25, desc: "Acesso por 1 mês", days: 30 },
-            { id: "plan_trimestral", name: "Plano Trimestral", price: 60, desc: "Acesso por 3 meses", days: 90 },
-            { id: "plan_anual", name: "Plano Anual", price: 200, desc: "Acesso por 1 ano", days: 365 }
-        ]
-    }
+    webhookUrl: "https://script.google.com/macros/s/AKfycbzfc4emCKMNZDW18_ikssbIuT14qHXKiUPcfU0geF0zdwMNeXWpQt3c1RtfVVqbt9lkyg/exec",
+    statusUrl: "https://script.google.com/macros/s/AKfycbzfc4emCKMNZDW18_ikssbIuT14qHXKiUPcfU0geF0zdwMNeXWpQt3c1RtfVVqbt9lkyg/exec",
+    webhookSecret: "whsec_10e409ea39545c761b8b6b9832ccf7879f983eb830641075"
 };
 
 // ============================================
@@ -47,28 +17,63 @@ const PRODUCTS_CONFIG = {
 // ============================================
 function getTelefoneUsuario() {
     try {
+        // Tentar pegar do localStorage (salvo pelo index.html)
+        const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}');
+        if (perfil.telefone) {
+            return perfil.telefone;
+        }
+        
+        // Tentar pegar do usuario
         const usuarioLocal = JSON.parse(localStorage.getItem('usuario') || '{}');
-        return usuarioLocal.telefone || usuarioLocal.phone || '000000000';
+        if (usuarioLocal.telefone) {
+            return usuarioLocal.telefone;
+        }
+        
+        // Tentar pegar do usuario_cadastrado
+        const usuarioCadastrado = JSON.parse(localStorage.getItem('usuario_cadastrado') || '{}');
+        if (usuarioCadastrado.telefone) {
+            return usuarioCadastrado.telefone;
+        }
+        
+        return '000000000';
     } catch(e) {
+        console.error('Erro ao buscar telefone:', e);
         return '000000000';
     }
 }
 
 function salvarTelefoneUsuario(telefone) {
     try {
+        // Salvar no perfil_professor
+        const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}');
+        perfil.telefone = telefone;
+        localStorage.setItem('perfil_professor', JSON.stringify(perfil));
+        
+        // Salvar no usuario
         const usuarioLocal = JSON.parse(localStorage.getItem('usuario') || '{}');
         usuarioLocal.telefone = telefone;
         localStorage.setItem('usuario', JSON.stringify(usuarioLocal));
+        
         return true;
     } catch(e) {
+        console.error('Erro ao salvar telefone:', e);
         return false;
     }
 }
 
 function getUsuarioUID() {
     try {
-        const usuarioLocal = JSON.parse(localStorage.getItem('usuario') || '{}');
-        return usuarioLocal.uid || null;
+        const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}');
+        return perfil.uid || null;
+    } catch(e) {
+        return null;
+    }
+}
+
+function getUsuarioEmail() {
+    try {
+        const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}');
+        return perfil.email || null;
     } catch(e) {
         return null;
     }
@@ -114,6 +119,7 @@ async function criarPagamentoPaySuite(tipo, dados, valor, metodo = 'MPESA') {
     const referencia = gerarReferencia(tipo);
     const telefone = getTelefoneUsuario();
     const uid = getUsuarioUID();
+    const email = getUsuarioEmail();
     
     // Descrição do pagamento
     let descricao = '';
@@ -140,6 +146,7 @@ async function criarPagamentoPaySuite(tipo, dados, valor, metodo = 'MPESA') {
         metodo: metodo,
         telefone: telefone,
         uid: uid,
+        email: email,
         data_criacao: new Date().toISOString(),
         timestamp: Date.now()
     };
@@ -148,6 +155,24 @@ async function criarPagamentoPaySuite(tipo, dados, valor, metodo = 'MPESA') {
     
     // Salvar também no localStorage para persistência
     localStorage.setItem(`pagamento_${referencia}`, JSON.stringify(payloadSessao));
+    
+    // Salvar compra pendente para créditos
+    if (tipo === 'CREDITOS') {
+        const compraPendente = {
+            tipo: 'CREDITOS',
+            packageId: dados.packageId,
+            credits: dados.credits,
+            valor: valor,
+            metodo: metodo,
+            referencia: referencia,
+            telefone: telefone,
+            uid: uid,
+            email: email,
+            timestamp: Date.now()
+        };
+        sessionStorage.setItem('compra_pendente', JSON.stringify(compraPendente));
+        sessionStorage.setItem('referencia_compra', referencia);
+    }
     
     try {
         mostrarLoadingPagamento();
@@ -169,6 +194,7 @@ async function criarPagamentoPaySuite(tipo, dados, valor, metodo = 'MPESA') {
                 callback_url: PAYSUITE_CONFIG.webhookUrl,
                 metadata: {
                     user_id: uid,
+                    user_email: email,
                     user_phone: telefone,
                     product_type: tipo,
                     product_data: produtoInfo
@@ -220,7 +246,7 @@ async function verificarStatusPagamento(referencia) {
 // ============================================
 // AGUARDAR CONFIRMAÇÃO DO PAGAMENTO
 // ============================================
-async function aguardarConfirmacaoPagamento(referencia, intervalo = 3000, maxTentativas = 20) {
+async function aguardarConfirmacaoPagamento(referencia, intervalo = 3000, maxTentativas = 30) {
     let tentativas = 0;
     
     while (tentativas < maxTentativas) {
@@ -361,8 +387,10 @@ function esconderLoadingPagamento() {
 function mostrarToast(mensagem, tipo = 'success') {
     const toast = document.createElement('div');
     toast.className = 'paysuite-toast';
+    const bgColor = tipo === 'error' ? '#e74c3c' : tipo === 'warning' ? '#f39c12' : '#27ae60';
+    const textColor = tipo === 'warning' ? '#333' : 'white';
     toast.innerHTML = `
-        <div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${tipo === 'error' ? '#e74c3c' : '#27ae60'};color:white;padding:12px 24px;border-radius:30px;z-index:10001;box-shadow:0 4px 12px rgba(0,0,0,0.15);animation:paysuite-fadeInOut 3s ease forwards;">
+        <div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${bgColor};color:${textColor};padding:12px 24px;border-radius:30px;z-index:10001;box-shadow:0 4px 12px rgba(0,0,0,0.15);animation:paysuite-fadeInOut 3s ease forwards;max-width:90%;font-family:'Segoe UI',sans-serif;">
             ${mensagem}
         </div>
     `;
@@ -394,7 +422,38 @@ function limparDadosPagamento() {
     sessionStorage.removeItem('pagamento_pendente');
     sessionStorage.removeItem('pagamento_confirmado');
     sessionStorage.removeItem('referencia_pagamento');
+    sessionStorage.removeItem('compra_pendente');
+    sessionStorage.removeItem('referencia_compra');
 }
+
+// ============================================
+// CONFIGURAÇÃO DOS PRODUTOS
+// ============================================
+const PRODUCTS_CONFIG = {
+    CREDITOS: {
+        packages: [
+            { id: "cred_1", credits: 1, price: 3, name: "1 Estrela", desc: "1 Download" },
+            { id: "cred_4", credits: 4, price: 10, name: "4 Estrelas", desc: "4 Downloads" },
+            { id: "cred_9", credits: 9, price: 20, name: "9 Estrelas", desc: "9 Downloads" },
+            { id: "cred_14", credits: 14, price: 30, name: "14 Estrelas", desc: "14 Downloads" },
+            { id: "cred_25", credits: 25, price: 50, name: "25 Estrelas", desc: "25 Downloads" }
+        ]
+    },
+    QUINZENAL: {
+        packages: [
+            { id: "qz_1semana", name: "1 Semana", price: 10, desc: "Acesso por 1 semana", days: 7 },
+            { id: "qz_2semanas", name: "2 Semanas", price: 18, desc: "Acesso por 2 semanas", days: 14 },
+            { id: "qz_3semanas", name: "3 Semanas", price: 25, desc: "Acesso por 3 semanas", days: 21 }
+        ]
+    },
+    PLANOS: {
+        packages: [
+            { id: "plan_mensal", name: "Plano Mensal", price: 25, desc: "Acesso por 1 mês", days: 30 },
+            { id: "plan_trimestral", name: "Plano Trimestral", price: 60, desc: "Acesso por 3 meses", days: 90 },
+            { id: "plan_anual", name: "Plano Anual", price: 200, desc: "Acesso por 1 ano", days: 365 }
+        ]
+    }
+};
 
 // ============================================
 // EXPORTAR
@@ -421,6 +480,7 @@ window.PaySuiteManager = {
     getTelefoneUsuario: getTelefoneUsuario,
     salvarTelefoneUsuario: salvarTelefoneUsuario,
     getUsuarioUID: getUsuarioUID,
+    getUsuarioEmail: getUsuarioEmail,
     
     // UI
     mostrarToast: mostrarToast,
@@ -429,4 +489,7 @@ window.PaySuiteManager = {
 };
 
 console.log('✅ PaySuite Manager carregado com sucesso!');
+console.log('📞 Telefone do usuário:', getTelefoneUsuario());
+console.log('🔑 UID:', getUsuarioUID());
+console.log('📧 Email:', getUsuarioEmail());
 console.log('📦 Pacotes disponíveis:', PRODUCTS_CONFIG);
