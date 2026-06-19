@@ -15,6 +15,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     
+    <!-- ===== PAYSUITE MANAGER ===== -->
+    <script src="paysuite-manager.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -346,7 +349,6 @@
             background-color: #f9f9f9;
         }
         
-        /* Modo de Edição */
         .modo-edicao td {
             background-color: #fff9e6;
         }
@@ -441,7 +443,6 @@
         .btn-comprar { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; }
         .btn-comprar:hover { box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4); }
         
-        /* ===== MODAL DE COMPRA ===== */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -634,7 +635,6 @@
             margin-top: 15px;
         }
         
-        /* ===== TOAST ===== */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -766,7 +766,6 @@
             to { transform: rotate(360deg); }
         }
         
-        /* Loading do PaySuite */
         .paysuite-loader {
             position: fixed;
             top: 0;
@@ -857,7 +856,6 @@
             </div>
         </div>
         
-        <!-- ===== FILTROS ===== -->
         <div class="filtros-card" id="filtrosCard">
             <div class="filtros-header">
                 <h3><i class="fas fa-chalkboard-teacher"></i> Dados para gerar Plano Quinzenal</h3>
@@ -975,7 +973,6 @@
             </button>
         </div>
         
-        <!-- ===== RESULTADOS ===== -->
         <div id="resultadoContainer"></div>
         
         <div class="support-banner">
@@ -1037,7 +1034,6 @@
         </div>
     </div>
     
-    <!-- ===== LOADING OVERLAY ===== -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
         <p style="color: white;">Processando...</p>
@@ -1080,16 +1076,6 @@
         const auth = firebase.auth();
         const dbPlanos = firebase.firestore(dataApp);
         const dbUsuarios = firebase.firestore();
-        
-        // ============================================
-        // CONFIGURAÇÃO DO PAYSUITE
-        // ============================================
-        const PAYSUITE_CONFIG = {
-            token: "2078|BF9471P8wDmZ3Okg0dwTthC9CwF3Szj1uMkIgibU430dfd2f",
-            apiUrl: "https://paysuite.tech/api/v1/payments",
-            webhookUrl: "https://script.google.com/macros/s/AKfycbwQVxPUK5Y45l5fSpkKvokFIKF14HB4yDpBpB46BOJ3KjuBBVH69z3eiZ_C1PqN6LkH/exec",
-            statusUrl: "https://script.google.com/macros/s/AKfycbwQVxPUK5Y45l5fSpkKvokFIKF14HB4yDpBpB46BOJ3KjuBBVH69z3eiZ_C1PqN6LkH/exec"
-        };
         
         // ============================================
         // VARIÁVEIS GLOBAIS
@@ -1171,6 +1157,11 @@
                     document.getElementById('delegado').value = userData.nome;
                 }
                 
+                // Salvar telefone no PaySuite Manager
+                if (window.PaySuiteManager && userData?.telefone) {
+                    window.PaySuiteManager.salvarTelefoneUsuario(userData.telefone);
+                }
+                
             } catch (error) {
                 console.error('Erro ao carregar dados:', error);
                 const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}');
@@ -1222,19 +1213,6 @@
             } catch (error) {
                 console.error('Erro ao adicionar estrelas:', error);
                 return false;
-            }
-        }
-        
-        function getTelefoneUsuario() {
-            return userData?.telefone || '000000000';
-        }
-        
-        function salvarTelefoneUsuario(telefone) {
-            if (userData && currentUser) {
-                userData.telefone = telefone;
-                dbUsuarios.collection('usuarios').doc(currentUser.uid).update({
-                    telefone: telefone
-                }).catch(err => console.error('Erro ao salvar telefone:', err));
             }
         }
         
@@ -1499,138 +1477,6 @@
         
         function hidePaysuiteLoader() {
             document.getElementById('paysuiteLoader').classList.remove('active');
-        }
-        
-        // ============================================
-        // FUNÇÕES DO PAYSUITE
-        // ============================================
-        function gerarReferencia(tipo) {
-            const prefixos = { 'CREDITOS': 'CR', 'PLANO': 'PL' };
-            const prefixo = prefixos[tipo] || 'PG';
-            const timestamp = Date.now();
-            const random = Math.floor(Math.random() * 9000) + 1000;
-            let telefone = getTelefoneUsuario();
-            
-            if (telefone.length > 9) telefone = telefone.substring(0, 9);
-            if (telefone.length < 9) telefone = telefone.padStart(9, '0');
-            
-            return `${telefone}${prefixo}${timestamp}${random}`;
-        }
-        
-        async function criarPagamentoPaySuite(tipo, dados, valor, metodo = 'MPESA') {
-            const referencia = gerarReferencia(tipo);
-            const telefone = getTelefoneUsuario();
-            const uid = currentUser?.uid;
-            
-            let descricao = '';
-            let produtoInfo = {};
-            
-            if (tipo === 'CREDITOS') {
-                descricao = `Compra de ${dados.credits} estrelas - ${dados.name || ''}`;
-                produtoInfo = { tipo: 'creditos', quantidade: dados.credits, packageId: dados.packageId };
-            }
-            
-            // Salvar dados da sessão
-            const payloadSessao = {
-                tipo: tipo,
-                dados: dados,
-                produtoInfo: produtoInfo,
-                valor: valor,
-                referencia: referencia,
-                metodo: metodo,
-                telefone: telefone,
-                uid: uid,
-                data_criacao: new Date().toISOString(),
-                timestamp: Date.now()
-            };
-            sessionStorage.setItem('pagamento_pendente', JSON.stringify(payloadSessao));
-            sessionStorage.setItem('referencia_pagamento', referencia);
-            localStorage.setItem(`pagamento_${referencia}`, JSON.stringify(payloadSessao));
-            
-            try {
-                showPaysuiteLoader();
-                
-                const response = await fetch(PAYSUITE_CONFIG.apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${PAYSUITE_CONFIG.token}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        amount: valor,
-                        method: metodo,
-                        reference: referencia,
-                        description: descricao.substring(0, 125),
-                        phone: telefone,
-                        return_url: window.location.href,
-                        callback_url: PAYSUITE_CONFIG.webhookUrl,
-                        metadata: {
-                            user_id: uid,
-                            user_phone: telefone,
-                            product_type: tipo,
-                            product_data: produtoInfo
-                        }
-                    })
-                });
-                
-                const result = await response.json();
-                hidePaysuiteLoader();
-                
-                if (result.status === 'success' && result.data && result.data.checkout_url) {
-                    window.location.href = result.data.checkout_url;
-                    return { success: true, url: result.data.checkout_url, reference: referencia };
-                } else {
-                    throw new Error(result.message || 'Erro ao criar pagamento');
-                }
-            } catch (error) {
-                hidePaysuiteLoader();
-                console.error('Erro PaySuite:', error);
-                mostrarToast('❌ Erro ao iniciar pagamento: ' + error.message, 'error');
-                return { success: false, error: error.message };
-            }
-        }
-        
-        async function verificarStatusPagamento(referencia) {
-            try {
-                const response = await fetch(`${PAYSUITE_CONFIG.statusUrl}?ref=${referencia}&action=verificar`);
-                const data = await response.json();
-                return { 
-                    status: data.status, 
-                    pago: data.status === 'paid' || data.status === 'confirmed',
-                    telefone: data.telefone,
-                    credits: data.credits || null
-                };
-            } catch (error) {
-                console.error('Erro verificar status:', error);
-                return { status: 'error', pago: false };
-            }
-        }
-        
-        async function verificarPagamentoPendenteAoCarregar() {
-            const referencia = sessionStorage.getItem('referencia_pagamento');
-            if (!referencia) return null;
-            
-            const resultado = await verificarStatusPagamento(referencia);
-            
-            if (resultado.pago) {
-                const pagamentoPendente = sessionStorage.getItem('pagamento_pendente');
-                if (pagamentoPendente) {
-                    const dados = JSON.parse(pagamentoPendente);
-                    const creditsAdicionados = dados.dados?.credits || 0;
-                    
-                    if (creditsAdicionados > 0) {
-                        await adicionarEstrelas(creditsAdicionados);
-                        mostrarToast(`✅ Pagamento confirmado! +${creditsAdicionados} estrelas adicionadas.`, 'success');
-                    }
-                    
-                    sessionStorage.removeItem('pagamento_pendente');
-                    sessionStorage.removeItem('referencia_pagamento');
-                    return dados;
-                }
-            }
-            
-            return null;
         }
         
         // ============================================
@@ -2200,7 +2046,7 @@
         }
         
         // ============================================
-        // MODAL DE COMPRA DE ESTRELAS
+        // MODAL DE COMPRA DE ESTRELAS COM PAYSUITE
         // ============================================
         function abrirModalComprar() {
             const modal = document.getElementById('modalComprar');
@@ -2266,24 +2112,61 @@
             
             if (!confirmar) return;
             
-            // Iniciar pagamento com PaySuite
-            criarPagamentoPaySuite(
-                'CREDITOS',
-                {
-                    packageId: pacoteSelecionado.id,
-                    credits: pacoteSelecionado.credits,
-                    name: pacoteSelecionado.name,
-                    price: pacoteSelecionado.price
-                },
-                pacoteSelecionado.price,
-                metodoSelecionado
-            );
+            // Usar o PaySuite Manager
+            if (window.PaySuiteManager) {
+                // Salvar telefone do usuário
+                const telefone = prompt('Digite o número de telefone para o pagamento (ex: 84XXXXXXX):');
+                if (telefone && telefone.length >= 9) {
+                    window.PaySuiteManager.salvarTelefoneUsuario(telefone);
+                    if (userData) {
+                        userData.telefone = telefone;
+                        dbUsuarios.collection('usuarios').doc(currentUser.uid).update({
+                            telefone: telefone
+                        }).catch(err => console.error('Erro ao salvar telefone:', err));
+                    }
+                } else {
+                    mostrarToast('⚠️ Telefone inválido. Tente novamente.', 'warning');
+                    return;
+                }
+                
+                // Iniciar pagamento
+                window.PaySuiteManager.comprarCreditos(
+                    pacoteSelecionado.id,
+                    pacoteSelecionado.credits,
+                    pacoteSelecionado.price,
+                    pacoteSelecionado.name
+                ).then(result => {
+                    if (!result.success) {
+                        mostrarToast('❌ Erro ao iniciar pagamento: ' + (result.error || 'Tente novamente'), 'error');
+                    }
+                }).catch(err => {
+                    console.error('Erro PaySuite:', err);
+                    mostrarToast('❌ Erro ao processar pagamento: ' + err.message, 'error');
+                });
+            } else {
+                mostrarToast('❌ Sistema de pagamento não disponível. Tente novamente.', 'error');
+            }
         }
         
-        // Fechar modal ao clicar fora
-        document.getElementById('modalComprar').addEventListener('click', function(e) {
-            if (e.target === this) fecharModalComprar();
-        });
+        // ============================================
+        // VERIFICAR PAGAMENTO PENDENTE
+        // ============================================
+        async function verificarPagamentoPendente() {
+            if (!window.PaySuiteManager) return;
+            
+            try {
+                const pagamento = await window.PaySuiteManager.verificarPagamentoPendenteAoCarregar();
+                if (pagamento) {
+                    const credits = pagamento.dados?.credits || 0;
+                    if (credits > 0) {
+                        await adicionarEstrelas(credits);
+                        mostrarToast(`✅ Pagamento confirmado! +${credits} estrelas adicionadas.`, 'success');
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao verificar pagamento pendente:', error);
+            }
+        }
         
         // ============================================
         // INICIALIZAÇÃO
@@ -2291,13 +2174,7 @@
         carregarSemanas();
         
         // Verificar pagamento pendente ao carregar
-        verificarPagamentoPendenteAoCarregar().then(dados => {
-            if (dados) {
-                console.log('Pagamento confirmado:', dados);
-            }
-        }).catch(err => {
-            console.error('Erro ao verificar pagamento pendente:', err);
-        });
+        verificarPagamentoPendente();
         
         auth.onAuthStateChanged(async (user) => {
             if (!user) {
@@ -2348,7 +2225,6 @@
         window.selecionarPacote = selecionarPacote;
         window.selecionarMetodo = selecionarMetodo;
         window.confirmarCompra = confirmarCompra;
-        window.criarPagamentoPaySuite = criarPagamentoPaySuite;
     </script>
 </body>
 </html>
