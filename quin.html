@@ -1007,7 +1007,7 @@
     
     <script>
         // ============================================
-        // CONFIGURAÇÃO DO FIREBASE - LOGIN
+        // CONFIGURAÇÃO DO FIREBASE
         // ============================================
         const firebaseConfigAuth = {
             apiKey: "AIzaSyDCBwanaFABmQNgT91vnhV3Xv1RJn9bYOI",
@@ -1019,9 +1019,6 @@
             appId: "1:666275920026:web:f7fe76327968619c2c4723"
         };
         
-        // ============================================
-        // CONFIGURAÇÃO DO FIREBASE - PLANOS
-        // ============================================
         const firebaseConfigData = {
             apiKey: "AIzaSyClUaP2QpNFnCNwh449i0ztzzSnBj8CWG4",
             authDomain: "plano-de-aula-moz.firebaseapp.com",
@@ -1031,12 +1028,10 @@
             appId: "1:710741933182:web:f3599eb809e31fe3eeec2f"
         };
         
-        // Inicializar Firebase Auth (login)
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfigAuth);
         }
         
-        // Inicializar Firebase Data (planos)
         let dataApp;
         if (!firebase.apps.some(app => app.name === 'dataApp')) {
             dataApp = firebase.initializeApp(firebaseConfigData, 'dataApp');
@@ -1045,8 +1040,8 @@
         }
         
         const auth = firebase.auth();
-        const dbLogin = firebase.firestore(); // ← USUÁRIOS (estrelas)
-        const dbPlanos = firebase.firestore(dataApp); // ← PLANOS
+        const dbLogin = firebase.firestore();
+        const dbPlanos = firebase.firestore(dataApp);
         
         // ============================================
         // VARIÁVEIS GLOBAIS
@@ -1129,8 +1124,8 @@
                     document.getElementById('delegado').value = userData.nome;
                 }
                 
-                // Salvar telefone no PaySuite Manager
-                if (window.PaySuiteManager && userData?.telefone) {
+                // Salvar telefone no localStorage para o PaySuite
+                if (userData?.telefone && window.PaySuiteManager) {
                     window.PaySuiteManager.salvarTelefoneUsuario(userData.telefone);
                 }
                 
@@ -1853,9 +1848,7 @@
             
             const saldoAtual = userData?.estrelas || 0;
             
-            // Verificar se tem estrelas suficientes
             if (saldoAtual < CUSTO_POR_DISCIPLINA) {
-                // Abrir modal de compra com mensagem específica
                 abrirModalComprar();
                 mostrarToast(`⚠️ Saldo insuficiente! Precisa de ${CUSTO_POR_DISCIPLINA} estrela. Compre agora!`, 'warning');
                 return;
@@ -1865,7 +1858,6 @@
             showLoading();
             
             try {
-                // Consumir a estrela
                 const consumido = await consumirEstrelas(CUSTO_POR_DISCIPLINA);
                 if (!consumido) {
                     hideLoading();
@@ -1874,7 +1866,6 @@
                     return;
                 }
                 
-                // Gerar PDF
                 await gerarPDF(disciplina, planos, delegado, dap);
                 mostrarToast(`✅ PDF de ${disciplina} baixado! Saldo: ${userData?.estrelas || 0} ⭐`, 'success');
                 
@@ -1904,7 +1895,6 @@
             const saldoAtual = userData?.estrelas || 0;
             
             if (saldoAtual < totalEstrelas) {
-                // Abrir modal de compra com mensagem específica
                 abrirModalComprar();
                 mostrarToast(`⚠️ Saldo insuficiente! Precisa de ${totalEstrelas} estrelas. Compre agora!`, 'warning');
                 return;
@@ -1914,7 +1904,6 @@
             showLoading();
             
             try {
-                // Consumir todas as estrelas necessárias
                 const consumido = await consumirEstrelas(totalEstrelas);
                 if (!consumido) {
                     hideLoading();
@@ -1923,7 +1912,6 @@
                     return;
                 }
                 
-                // Gerar todos os PDFs
                 for (const disciplina of disciplinasComPlanos) {
                     await gerarPDF(disciplina, planosEncontrados[disciplina], delegado, dap);
                     await new Promise(r => setTimeout(r, 500));
@@ -2120,30 +2108,24 @@
             
             if (!confirmar) return;
             
-            // Usar o PaySuite Manager
-            if (window.PaySuiteManager) {
-                // Salvar telefone do usuário
-                const telefone = prompt('Digite o número de telefone para o pagamento (ex: 84XXXXXXX):');
-                if (telefone && telefone.length >= 9) {
-                    window.PaySuiteManager.salvarTelefoneUsuario(telefone);
-                    if (userData) {
-                        userData.telefone = telefone;
-                        dbLogin.collection('usuarios').doc(currentUser.uid).update({
-                            telefone: telefone
-                        }).catch(err => console.error('Erro ao salvar telefone:', err));
-                    }
-                } else {
-                    mostrarToast('⚠️ Telefone inválido. Tente novamente.', 'warning');
-                    return;
+            // Fechar modal
+            fecharModalComprar();
+            
+            // Mostrar loader
+            showPaysuiteLoader();
+            
+            try {
+                // Verificar se o PaySuite Manager está disponível
+                if (!window.PaySuiteManager) {
+                    throw new Error('Sistema de pagamento não disponível. Recarregue a página.');
                 }
                 
-                // Fechar modal
-                fecharModalComprar();
+                // Salvar telefone do usuário no localStorage para o PaySuite
+                if (userData?.telefone) {
+                    window.PaySuiteManager.salvarTelefoneUsuario(userData.telefone);
+                }
                 
-                // Mostrar loader
-                showPaysuiteLoader();
-                
-                // Iniciar pagamento
+                // Iniciar pagamento - Usando comprarCreditos
                 const result = await window.PaySuiteManager.comprarCreditos(
                     pacoteSelecionado.id,
                     pacoteSelecionado.credits,
@@ -2156,9 +2138,12 @@
                 if (!result.success) {
                     mostrarToast('❌ Erro ao iniciar pagamento: ' + (result.error || 'Tente novamente'), 'error');
                 }
-                // Se sucesso, a página será redirecionada
-            } else {
-                mostrarToast('❌ Sistema de pagamento não disponível. Tente novamente.', 'error');
+                // Se sucesso, a página será redirecionada para o checkout do PaySuite
+                
+            } catch (error) {
+                hidePaysuiteLoader();
+                console.error('Erro PaySuite:', error);
+                mostrarToast('❌ Erro ao processar pagamento: ' + error.message, 'error');
             }
         }
         
@@ -2166,16 +2151,45 @@
         // VERIFICAR PAGAMENTO PENDENTE
         // ============================================
         async function verificarPagamentoPendente() {
-            if (!window.PaySuiteManager) return;
+            if (!window.PaySuiteManager) {
+                console.warn('PaySuite Manager não disponível');
+                return;
+            }
             
             try {
-                const pagamento = await window.PaySuiteManager.verificarPagamentoPendenteAoCarregar();
-                if (pagamento) {
-                    const credits = pagamento.dados?.credits || 0;
+                // Verificar se há pagamento confirmado
+                const pagamentoConfirmado = window.PaySuiteManager.getPagamentoConfirmado();
+                if (pagamentoConfirmado) {
+                    const credits = pagamentoConfirmado.dados?.credits || 0;
                     if (credits > 0) {
                         await adicionarEstrelas(credits);
                         mostrarToast(`✅ Pagamento confirmado! +${credits} estrelas adicionadas. Saldo: ${userData?.estrelas || 0} ⭐`, 'success');
+                        window.PaySuiteManager.limparDados();
                     }
+                    return;
+                }
+                
+                // Verificar se há referência pendente
+                const referencia = sessionStorage.getItem('referencia_pagamento');
+                if (!referencia) return;
+                
+                const resultado = await window.PaySuiteManager.verificarStatus(referencia);
+                
+                if (resultado.pago) {
+                    // Buscar os dados da compra pendente
+                    const compraPendente = sessionStorage.getItem('compra_pendente');
+                    if (compraPendente) {
+                        const dados = JSON.parse(compraPendente);
+                        const credits = dados.credits || 0;
+                        if (credits > 0) {
+                            await adicionarEstrelas(credits);
+                            mostrarToast(`✅ Pagamento confirmado! +${credits} estrelas adicionadas. Saldo: ${userData?.estrelas || 0} ⭐`, 'success');
+                        }
+                        sessionStorage.removeItem('compra_pendente');
+                        sessionStorage.removeItem('referencia_compra');
+                    }
+                    sessionStorage.removeItem('referencia_pagamento');
+                    sessionStorage.removeItem('pagamento_pendente');
                 }
             } catch (error) {
                 console.error('Erro ao verificar pagamento pendente:', error);
@@ -2187,10 +2201,10 @@
         // ============================================
         carregarSemanas();
         
-        // Verificar pagamento pendente ao carregar
-        setTimeout(() => {
-            verificarPagamentoPendente();
-        }, 1000);
+        // Verificar pagamento pendente ao carregar (com delay)
+        setTimeout(async () => {
+            await verificarPagamentoPendente();
+        }, 1500);
         
         auth.onAuthStateChanged(async (user) => {
             if (!user) {
@@ -2246,6 +2260,7 @@
         window.selecionarPacote = selecionarPacote;
         window.selecionarMetodo = selecionarMetodo;
         window.confirmarCompra = confirmarCompra;
+        window.verificarPagamentoPendente = verificarPagamentoPendente;
     </script>
 </body>
 </html>
