@@ -734,31 +734,9 @@
     
     <script>
         // ============================================
-        // FIREBASE CONFIG - PROJETO plano-de-aula-moz
-        // ONDE OS PLANOS ESTÃO ARMAZENADOS
+        // PROJETO 1: AUTENTICAÇÃO (login-actualizado)
         // ============================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyClUaP2QpNFnCNwh449i0ztzzSnBj8CWG4",
-            authDomain: "plano-de-aula-moz.firebaseapp.com",
-            projectId: "plano-de-aula-moz",
-            storageBucket: "plano-de-aula-moz.firebasestorage.app",
-            messagingSenderId: "710741933182",
-            appId: "1:710741933182:web:f3599eb809e31fe3eeec2f"
-        };
-
-        // Inicializar Firebase (apenas 1 vez)
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        
-        // IMPORTANTE: Usar o Firestore do projeto plano-de-aula-moz
-        const db = firebase.firestore();
-        
-        // ============================================
-        // AUTENTICAÇÃO - USAR O PROJETO login-actualizado
-        // ============================================
-        // Inicializar segundo app para autenticação
-        const authConfig = {
+        const firebaseConfigAuth = {
             apiKey: "AIzaSyDCBwanaFABmQNgT91vnhV3Xv1RJn9bYOI",
             authDomain: "login-actualizado.firebaseapp.com",
             projectId: "login-actualizado",
@@ -767,16 +745,42 @@
             appId: "1:666275920026:web:f7fe76327968619c2c4723"
         };
         
+        // ============================================
+        // PROJETO 2: DADOS (plano-de-aula-moz)
+        // ============================================
+        const firebaseConfigData = {
+            apiKey: "AIzaSyClUaP2QpNFnCNwh449i0ztzzSnBj8CWG4",
+            authDomain: "plano-de-aula-moz.firebaseapp.com",
+            projectId: "plano-de-aula-moz",
+            storageBucket: "plano-de-aula-moz.firebasestorage.app",
+            messagingSenderId: "710741933182",
+            appId: "1:710741933182:web:f3599eb809e31fe3eeec2f"
+        };
+        
+        // ============================================
+        // INICIALIZAR AMBOS OS PROJETOS
+        // ============================================
+        // App 1: Autenticação (login-actualizado)
         let authApp;
         if (!firebase.apps.some(app => app.name === 'authApp')) {
-            authApp = firebase.initializeApp(authConfig, 'authApp');
+            authApp = firebase.initializeApp(firebaseConfigAuth, 'authApp');
         } else {
             authApp = firebase.app('authApp');
         }
-        
         const auth = firebase.auth(authApp);
-        // Usar o Firestore do primeiro app (plano-de-aula-moz) para usuários também
-        // ou criar uma coleção separada - vamos usar o mesmo db
+        
+        // App 2: Dados (plano-de-aula-moz)
+        let dataApp;
+        if (!firebase.apps.some(app => app.name === 'dataApp')) {
+            dataApp = firebase.initializeApp(firebaseConfigData, 'dataApp');
+        } else {
+            dataApp = firebase.app('dataApp');
+        }
+        const db = firebase.firestore(dataApp);
+        
+        console.log('✅ Projetos Firebase inicializados:');
+        console.log('🔐 Autenticação: login-actualizado');
+        console.log('📁 Dados: plano-de-aula-moz');
         
         // ============================================
         // VARIÁVEIS
@@ -812,12 +816,12 @@
         };
         
         // ============================================
-        // FUNÇÕES DE USUÁRIO
+        // FUNÇÕES DE USUÁRIO (Firestore do plano-de-aula-moz)
         // ============================================
         async function carregarDadosUsuario() {
             if (!currentUser) return;
             try {
-                // Usar o mesmo db (plano-de-aula-moz) para usuários
+                // Usar o Firestore do projeto plano-de-aula-moz para usuários
                 const docRef = db.collection('usuarios').doc(currentUser.uid);
                 const doc = await docRef.get();
                 if (doc.exists) {
@@ -1515,7 +1519,7 @@
         // ============================================
         carregarSemanas();
         
-        // Autenticação usando o app separado
+        // Autenticação usando o app authApp (login-actualizado)
         auth.onAuthStateChanged(async (user) => {
             if (!user) {
                 mostrarToast('Faça login para continuar!', 'error');
@@ -1526,6 +1530,7 @@
             await carregarDadosUsuario();
             
             console.log('✅ Usuário autenticado:', user.uid);
+            console.log('🔐 Projeto: login-actualizado');
             console.log('📁 Buscando dados do projeto: plano-de-aula-moz');
         });
         
@@ -1546,8 +1551,8 @@
         window.irParaLojaEstrelas = irParaLojaEstrelas;
         
         console.log('✅ quin.html carregado!');
-        console.log('📁 Projeto Firebase: plano-de-aula-moz');
-        console.log('📚 Coleção: planos');
+        console.log('🔐 Autenticação: login-actualizado');
+        console.log('📁 Dados: plano-de-aula-moz');
     </script>
 </body>
 </html>
