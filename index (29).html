@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="pt-MZ">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Aula MZ - Acesso</title>
+    <meta name="description" content="Plataforma de gestão de planos de aula para professores de Moçambique">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 480px;
+            overflow: hidden;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 35px 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 26px; margin-bottom: 8px; }
+        .header p { opacity: 0.95; font-size: 14px; }
+        
+        .form-container { padding: 30px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px; }
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
+        
+        .password-container {
+            position: relative;
+        }
+        .password-container input {
+            padding-right: 45px;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #999;
+            padding: 8px;
+        }
+        .toggle-password:hover { color: #667eea; }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+        .btn:active { transform: translateY(0); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+        .btn-google {
+            background: white;
+            color: #333;
+            border: 2px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn-google:hover { border-color: #ccc; background: #fafafa; }
+        
+        .message { margin-top: 15px; padding: 12px 15px; border-radius: 10px; text-align: center; display: none; font-size: 14px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        .loading {
+            text-align: center;
+            padding: 50px 20px;
+            color: white;
+            font-size: 16px;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 45px;
+            height: 45px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }        
+        .error-border { border-color: #e74c3c !important; animation: shake 0.3s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .error-text { color: #e74c3c; font-size: 12px; margin-top: 5px; display: none; }
+        
+        .link {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            font-size: 14px;
+        }
+        .link a { color: #667eea; text-decoration: none; font-weight: 600; cursor: pointer; }
+        .link a:hover { text-decoration: underline; }
+        
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            color: #999;
+            font-size: 13px;
+            position: relative;
+        }
+        .divider::before, .divider::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: #eee;
+        }
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+        
+        .footer-note {
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            color: #888;
+            background: #f8f9fa;
+            border-top: 1px solid #eee;
+        }
+        
+        .support-section {
+            background: #f0f7ff;
+            border-radius: 12px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+        .support-header {
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            background: #f0f7ff;
+            transition: background 0.2s;
+        }
+        .support-header:hover {
+            background: #e8f0fe;
+        }
+        .support-header h4 {
+            font-size: 14px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+        .support-header i.fa-chevron-down {
+            transition: transform 0.3s;
+            color: #667eea;
+        }
+        .support-header.open i.fa-chevron-down {
+            transform: rotate(180deg);
+        }
+        .support-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 15px;
+        }
+        .support-content.open {
+            max-height: 300px;
+            padding: 0 15px 15px 15px;
+        }
+        .support-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .support-btn-sm {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .support-btn-sm.whatsapp {
+            background: #25D366;
+            color: white;
+        }
+        .support-btn-sm.call {
+            background: #3498db;
+            color: white;
+        }
+        .support-btn-sm.sms {
+            background: #95a5a6;
+            color: white;
+        }
+        .support-btn-sm:hover { opacity: 0.9; transform: translateY(-2px); }
+        
+        @media (max-width: 480px) {
+            .container { border-radius: 16px; }
+            .header { padding: 25px 20px; }
+            .header h1 { font-size: 22px; }
+            .form-container { padding: 25px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loadingScreen">
+        <div class="spinner"></div>
+        <p>Verificando sessão...</p>
+    </div>
+
+    <div class="container" id="loginContainer">
+        <div class="header">
+            <h1>🔐 Plano de Aula MZ</h1>
+            <p>Escolha como deseja acessar a plataforma</p>
+        </div>
+        <div class="form-container">
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">📧 Email</label>
+                    <input type="email" id="loginEmail" required placeholder="exemplo@email.com" autocomplete="email">
+                    <span class="error-text" id="loginEmailError"></span>
+                </div>
+                <div class="form-group">
+                    <label for="loginSenha">🔒 Senha</label>
+                    <div class="password-container">
+                        <input type="password" id="loginSenha" required placeholder="••••••••" autocomplete="current-password">
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('loginSenha', this)">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                    <span class="error-text" id="loginSenhaError"></span>
+                </div>
+                <button type="submit" class="btn" id="loginBtn">Entrar com Email</button>
+                <div class="divider">ou</div>
+                <button type="button" class="btn btn-google" id="btnLoginGoogle">
+                    <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Entrar com Google
+                </button>
+                <div class="message" id="loginMessage"></div>
+            </form>
+            <div class="link">
+                <a id="irParaCadastro">📝 Não tem conta? Cadastre-se aqui</a>
+            </div>
+            <div class="support-section" id="supportSection">
+                <div class="support-header" id="supportHeader">
+                    <h4><i class="fas fa-headset"></i> Precisa de ajuda?</h4>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="support-content" id="supportContent">
+                    <div class="support-buttons">
+                        <a href="https://chat.whatsapp.com/JXb16aohQKSFVgxHzfRC5L" target="_blank" class="support-btn-sm whatsapp">
+                            <i class="fab fa-whatsapp"></i> Grupo de Suporte WhatsApp
+                        </a>
+                        <a href="tel:+258876393961" class="support-btn-sm call">
+                            <i class="fas fa-phone-alt"></i> Ligar: 87 639 3961
+                        </a>
+                        <a href="tel:+258834890828" class="support-btn-sm call">
+                            <i class="fas fa-phone-alt"></i> Ligar: 83 489 0828
+                        </a>
+                        <a href="sms:+258876393961" class="support-btn-sm sms">
+                            <i class="fas fa-sms"></i> SMS: 87 639 3961
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-note">
+            Plataforma desenvolvida para professores de Moçambique 🇲🇿
+        </div>
+    </div>
+
+    <div class="container" id="cadastroContainer">
+        <div class="header">
+            <h1>📝 Criar Conta</h1>
+            <p>Preencha seus dados para começar</p>
+        </div>
+        <div class="form-container">
+            <form id="cadastroForm">
+                <div class="form-group">
+                    <label for="nome">👤 Nome Completo *</label>
+                    <input type="text" id="nome" required placeholder="Ex: Maria João Sitoe" autocomplete="name">
+                    <span class="error-text" id="nomeError"></span>
+                </div>
+                <div class="form-group">
+                    <label for="email">📧 Email *</label>
+                    <input type="email" id="email" required placeholder="exemplo@email.com" autocomplete="email">
+                    <span class="error-text" id="emailError"></span>
+                </div>
+                <div class="form-group">
+                    <label for="numero">📱 Telefone *</label>
+                    <input type="tel" id="numero" required placeholder="Ex: 841234567" pattern="[0-9]{9}" maxlength="9" autocomplete="tel">
+                    <span class="error-text" id="numeroError"></span>
+                </div>
+                <div class="form-group">
+                    <label for="escola">🏫 Escola *</label>
+                    <input type="text" id="escola" required placeholder="Nome da sua escola" autocomplete="organization">
+                    <span class="error-text" id="escolaError"></span>
+                </div>
+                <div class="form-group">
+                    <label for="provincia">📍 Província *</label>
+                    <select id="provincia" required>
+                        <option value="">Selecione a província</option>
+                        <option value="Maputo Cidade">Maputo Cidade</option>
+                        <option value="Maputo">Maputo Província</option>
+                        <option value="Gaza">Gaza</option>
+                        <option value="Inhambane">Inhambane</option>
+                        <option value="Sofala">Sofala</option>
+                        <option value="Manica">Manica</option>
+                        <option value="Tete">Tete</option>
+                        <option value="Zambézia">Zambézia</option>
+                        <option value="Nampula">Nampula</option>
+                        <option value="Cabo Delgado">Cabo Delgado</option>
+                        <option value="Niassa">Niassa</option>
+                    </select>
+                    <span class="error-text" id="provinciaError"></span>
+                </div>
+                <div class="form-group">
+                    <label for="senha">🔒 Senha *</label>
+                    <div class="password-container">
+                        <input type="password" id="senha" required placeholder="Mínimo 6 caracteres" minlength="6" autocomplete="new-password">
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('senha', this)">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                    <span class="error-text" id="senhaError"></span>
+                </div>
+                <div class="form-group">
+                    <label for="confirmarSenha">🔒 Confirmar Senha *</label>
+                    <div class="password-container">
+                        <input type="password" id="confirmarSenha" required placeholder="Digite a senha novamente" autocomplete="new-password">
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('confirmarSenha', this)">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                    <div id="senhaAlerta" class="senha-alerta" style="display: none;">
+                        <i class="fas fa-check-circle"></i> <span id="senhaAlertaMsg"></span>
+                    </div>
+                    <span class="error-text" id="confirmarSenhaError"></span>
+                </div>
+                <button type="button" class="btn" id="btnCadastroEmail">📧 Criar conta com Email</button>
+                <div class="divider">ou</div>
+                <button type="button" class="btn btn-google" id="btnCadastroGoogle">
+                    <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Criar conta com Google
+                </button>
+                <div class="message" id="cadastroMessage"></div>
+            </form>            
+            <div class="link">
+                <a id="voltarLogin">🔐 Já tenho conta? Faça login</a>
+            </div>
+            <div class="support-section" id="supportSectionCad">
+                <div class="support-header" id="supportHeaderCad">
+                    <h4><i class="fas fa-headset"></i> Precisa de ajuda?</h4>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="support-content" id="supportContentCad">
+                    <div class="support-buttons">
+                        <a href="https://chat.whatsapp.com/JXb16aohQKSFVgxHzfRC5L" target="_blank" class="support-btn-sm whatsapp">
+                            <i class="fab fa-whatsapp"></i> Grupo de Suporte WhatsApp
+                        </a>
+                        <a href="tel:+258876393961" class="support-btn-sm call">
+                            <i class="fas fa-phone-alt"></i> Ligar: 87 639 3961
+                        </a>
+                        <a href="tel:+258834890828" class="support-btn-sm call">
+                            <i class="fas fa-phone-alt"></i> Ligar: 83 489 0828
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-note">
+            Ao criar conta, você concorda com nossos termos de uso.
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <script>
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = '<i class="far fa-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                btn.innerHTML = '<i class="far fa-eye"></i>';
+            }
+        }
+        
+        function initSupportToggle() {
+            const supportHeader = document.getElementById('supportHeader');
+            const supportContent = document.getElementById('supportContent');
+            if (supportHeader && supportContent) {
+                supportHeader.addEventListener('click', () => {
+                    supportHeader.classList.toggle('open');
+                    supportContent.classList.toggle('open');
+                });
+            }
+            const supportHeaderCad = document.getElementById('supportHeaderCad');
+            const supportContentCad = document.getElementById('supportContentCad');
+            if (supportHeaderCad && supportContentCad) {
+                supportHeaderCad.addEventListener('click', () => {
+                    supportHeaderCad.classList.toggle('open');
+                    supportContentCad.classList.toggle('open');
+                });
+            }
+        }
+        
+        function initSenhaConfirmacao() {
+            const senhaInput = document.getElementById('senha');
+            const confirmarInput = document.getElementById('confirmarSenha');
+            const alertaDiv = document.getElementById('senhaAlerta');
+            const alertaMsg = document.getElementById('senhaAlertaMsg');
+            
+            function verificarSenha() {
+                const senha = senhaInput.value;
+                const confirmar = confirmarInput.value;
+                if (confirmar.length === 0) {
+                    alertaDiv.style.display = 'none';
+                    return;
+                }
+                alertaDiv.style.display = 'flex';
+                if (senha === confirmar && senha.length >= 6) {
+                    alertaDiv.className = 'senha-alerta valid';
+                    alertaMsg.innerHTML = '✓ As senhas coincidem';
+                } else if (senha === confirmar && senha.length < 6) {
+                    alertaDiv.className = 'senha-alerta invalid';
+                    alertaMsg.innerHTML = '⚠ A senha precisa ter pelo menos 6 caracteres';
+                } else {
+                    alertaDiv.className = 'senha-alerta invalid';
+                    alertaMsg.innerHTML = '✗ As senhas não coincidem';
+                }
+            }
+            senhaInput.addEventListener('input', verificarSenha);
+            confirmarInput.addEventListener('input', verificarSenha);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initSupportToggle();
+            initSenhaConfirmacao();
+        });
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            signInWithPopup, 
+            GoogleAuthProvider, 
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            getDoc, 
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDCBwanaFABmQNgT91vnhV3Xv1RJn9bYOI",
+            authDomain: "login-actualizado.firebaseapp.com",
+            databaseURL: "https://login-actualizado-default-rtdb.firebaseio.com",
+            projectId: "login-actualizado",
+            storageBucket: "login-actualizado.firebasestorage.app",
+            messagingSenderId: "666275920026",
+            appId: "1:666275920026:web:f7fe76327968619c2c4723"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        const loadingScreen = document.getElementById('loadingScreen');
+        const loginContainer = document.getElementById('loginContainer');
+        const cadastroContainer = document.getElementById('cadastroContainer');
+        
+        const loginEmail = document.getElementById('loginEmail');
+        const loginSenha = document.getElementById('loginSenha');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginMessage = document.getElementById('loginMessage');
+        
+        const nomeInput = document.getElementById('nome');
+        const emailInput = document.getElementById('email');
+        const numeroInput = document.getElementById('numero');
+        const escolaInput = document.getElementById('escola');
+        const provinciaSelect = document.getElementById('provincia');
+        const senhaInput = document.getElementById('senha');
+        const confirmarSenhaInput = document.getElementById('confirmarSenha');
+        const cadastroMessage = document.getElementById('cadastroMessage');
+
+        let isRedirecting = false;
+
+        function showMessage(element, text, type) {
+            element.textContent = text;
+            element.className = `message ${type}`;
+            element.style.display = 'block';
+            setTimeout(() => { element.style.display = 'none'; }, 5000);
+        }
+        
+        function showError(fieldId, message) {
+            const errorSpan = document.getElementById(`${fieldId}Error`);
+            const inputField = document.getElementById(fieldId);
+            if (errorSpan) {
+                errorSpan.textContent = message;
+                errorSpan.style.display = 'block';
+            }
+            if (inputField) {
+                inputField.classList.add('error-border');
+                inputField.focus();
+            }
+        }      
+        
+        function clearError(fieldId) {
+            const errorSpan = document.getElementById(`${fieldId}Error`);
+            const inputField = document.getElementById(fieldId);
+            if (errorSpan) {
+                errorSpan.textContent = '';
+                errorSpan.style.display = 'none';
+            }
+            if (inputField) inputField.classList.remove('error-border');
+        }
+        
+        function clearAllErrors() {
+            ['nome','email','numero','escola','provincia','senha','confirmarSenha','loginEmail','loginSenha'].forEach(clearError);
+        }
+        
+        function toggleLoading(button, isLoading, text = 'Processando...') {
+            button.disabled = isLoading;
+            button.dataset.originalText = button.dataset.originalText || button.textContent;
+            button.textContent = isLoading ? text : button.dataset.originalText;
+        }
+
+        async function salvarUsuarioNoFirestore(uid, dados, email) {
+            try {
+                await setDoc(doc(db, 'usuarios', uid), {
+                    nome: dados.nome || '',
+                    email: email,
+                    telefone: dados.numero || '',
+                    escola: dados.escola || '',
+                    provincia: dados.provincia || '',
+                    dataCadastro: new Date().toLocaleString('pt-MZ'),
+                    timestamp: serverTimestamp()
+                }, { merge: true });
+                console.log('✅ Dados salvos no Firestore');
+                return true;
+            } catch (error) {
+                console.error('❌ Erro Firestore:', error);
+                return false;
+            }
+        }
+        
+        function salvarSessaoLocalStorage(uid, email, nome) {
+            localStorage.setItem('user_uid', uid);
+            localStorage.setItem('user_email', email);
+            localStorage.setItem('user_nome', nome || '');
+            localStorage.setItem('perfil_professor', JSON.stringify({
+                nome: nome || '',
+                email: email,
+                uid: uid
+            }));
+            localStorage.setItem('usuario_cadastrado', JSON.stringify({
+                nome: nome || '',
+                email: email,
+                uid: uid,
+                cadastroCompleto: true
+            }));
+        }
+
+        async function criarContaEmailSenha(dados, senha) {
+            try {
+                const email = dados.email.trim().toLowerCase();
+                const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+                const user = userCredential.user;
+                await salvarUsuarioNoFirestore(user.uid, dados, email);
+                salvarSessaoLocalStorage(user.uid, email, dados.nome);
+                return { success: true };
+            } catch (error) {
+                console.error('❌ Erro email/senha:', error);
+                return tratarErroFirebase(error);
+            }
+        }
+        
+        async function fazerLoginEmailSenha(email, senha) {
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), senha);
+                const user = userCredential.user;
+                const docSnap = await getDoc(doc(db, 'usuarios', user.uid));
+                const dados = docSnap.exists() ? docSnap.data() : {};
+                const nome = dados.nome || '';
+                salvarSessaoLocalStorage(user.uid, user.email, nome);
+                return { success: true };
+            } catch (error) {
+                console.error('❌ Erro login:', error);
+                return tratarErroFirebase(error);
+            }
+        }
+
+        async function autenticarComGoogle() {
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                const user = result.user;
+                const isNewUser = result.additionalUserInfo?.isNewUser;
+                
+                if (isNewUser) {
+                    await setDoc(doc(db, 'usuarios', user.uid), {
+                        nome: user.displayName || '',
+                        email: user.email,
+                        telefone: '',
+                        escola: '',
+                        provincia: '',
+                        dataCadastro: new Date().toLocaleString('pt-MZ'),
+                        timestamp: serverTimestamp(),
+                        provedor: 'google'
+                    });
+                }
+                salvarSessaoLocalStorage(user.uid, user.email, user.displayName || '');
+                return { success: true, isNewUser };
+            } catch (error) {
+                console.error('❌ Erro Google:', error);
+                return tratarErroFirebase(error);
+            }
+        }
+        
+        function tratarErroFirebase(error) {
+            const erros = {
+                'auth/email-already-in-use': 'Este email já está cadastrado. Tente fazer login.',
+                'auth/weak-password': 'Senha muito fraca. Use pelo menos 6 caracteres.',
+                'auth/invalid-email': 'Formato de email inválido.',
+                'auth/user-not-found': 'Email não cadastrado. Crie uma conta primeiro.',
+                'auth/wrong-password': 'Senha incorreta. Tente novamente.',
+                'auth/popup-closed-by-user': 'Janela de login fechada. Tente novamente.',
+                'auth/unauthorized-domain': 'Domínio não autorizado.',
+                'auth/operation-not-allowed': 'Método de login não ativado.',
+                'auth/account-exists-with-different-credential': 'Este email já usa outro método de login.'
+            };
+            return { success: false, error: erros[error.code] || `Erro: ${error.message}` };
+        }
+
+        function validarCadastro() {
+            clearAllErrors();
+            let valido = true;
+            const nome = nomeInput.value.trim();
+            const email = emailInput.value.trim().toLowerCase();
+            const numero = numeroInput.value.replace(/\D/g, '');
+            const escola = escolaInput.value.trim();
+            const provincia = provinciaSelect.value;
+            const senha = senhaInput.value;
+            const confirmar = confirmarSenhaInput.value;
+            
+            if (nome.split(/\s+/).filter(Boolean).length < 2) {
+                showError('nome', 'Digite nome e sobrenome');
+                valido = false;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showError('email', 'Digite um email válido');
+                valido = false;
+            }
+            if (numero.length !== 9) {
+                showError('numero', 'Telefone deve ter 9 dígitos');
+                valido = false;
+            }
+            if (!escola) {
+                showError('escola', 'Digite o nome da escola');
+                valido = false;
+            }
+            if (!provincia) {
+                showError('provincia', 'Selecione a província');
+                valido = false;
+            }
+            if (senha.length < 6) {
+                showError('senha', 'Mínimo de 6 caracteres');
+                valido = false;
+            }
+            if (senha !== confirmar) {
+                showError('confirmarSenha', 'As senhas não coincidem');
+                valido = false;
+            }
+            return valido;
+        }
+        
+        function validarLogin() {
+            clearError('loginEmail');
+            clearError('loginSenha');
+            let valido = true;
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginEmail.value.trim())) {
+                showError('loginEmail', 'Email inválido');
+                valido = false;
+            }
+            if (!loginSenha.value) {
+                showError('loginSenha', 'Digite sua senha');
+                valido = false;
+            }
+            return valido;
+        }
+
+        function redirectToTela() {
+            if (!isRedirecting) {
+                isRedirecting = true;
+                setTimeout(() => {
+                    window.location.replace('tela.html');
+                }, 500);
+            }
+        }
+        
+        document.getElementById('btnCadastroEmail').onclick = async () => {
+            if (!validarCadastro()) return;
+            const dados = {
+                nome: nomeInput.value.trim(),
+                email: emailInput.value.trim().toLowerCase(),
+                numero: numeroInput.value.trim(),
+                escola: escolaInput.value.trim(),
+                provincia: provinciaSelect.value
+            };
+            const btn = document.getElementById('btnCadastroEmail');
+            toggleLoading(btn, true, 'Processando...');
+            const result = await criarContaEmailSenha(dados, senhaInput.value);
+            if (result.success) {
+                showMessage(cadastroMessage, `✅ Conta criada com sucesso! Redirecionando...`, 'success');
+                redirectToTela();
+            } else {
+                showMessage(cadastroMessage, `❌ ${result.error}`, 'error');
+                toggleLoading(btn, false);
+            }
+        };
+        
+        document.getElementById('btnCadastroGoogle').onclick = async () => {
+            const btn = document.getElementById('btnCadastroGoogle');
+            toggleLoading(btn, true, 'Abrindo Google...');
+            const result = await autenticarComGoogle();
+            if (result.success) {
+                showMessage(cadastroMessage, `✅ Conta criada com sucesso! Redirecionando...`, 'success');
+                redirectToTela();
+            } else {
+                showMessage(cadastroMessage, `❌ ${result.error}`, 'error');
+                toggleLoading(btn, false);
+            }
+        };
+        
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            if (!validarLogin()) return;
+            toggleLoading(loginBtn, true, 'Entrando...');
+            const result = await fazerLoginEmailSenha(loginEmail.value, loginSenha.value);
+            if (result.success) {
+                showMessage(loginMessage, '✅ Login realizado! Redirecionando...', 'success');
+                redirectToTela();
+            } else {
+                showMessage(loginMessage, `❌ ${result.error}`, 'error');
+                toggleLoading(loginBtn, false);
+            }
+        };
+        
+        document.getElementById('btnLoginGoogle').onclick = async () => {
+            toggleLoading(loginBtn, true, 'Abrindo Google...');
+            const result = await autenticarComGoogle();
+            if (result.success) {
+                showMessage(loginMessage, '✅ Login realizado! Redirecionando...', 'success');
+                redirectToTela();
+            } else {
+                showMessage(loginMessage, `❌ ${result.error}`, 'error');
+                toggleLoading(loginBtn, false);
+            }
+        };
+        
+        document.getElementById('irParaCadastro').onclick = () => {
+            loginContainer.style.display = 'none';
+            cadastroContainer.style.display = 'block';
+            clearAllErrors();
+        };
+        
+        document.getElementById('voltarLogin').onclick = () => {
+            cadastroContainer.style.display = 'none';
+            loginContainer.style.display = 'block';
+            clearAllErrors();
+        };
+        
+        numeroInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 9);
+        });
+        
+        ['loginEmail','loginSenha','nome','email','numero','escola','senha','confirmarSenha'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', () => clearError(id));
+        });
+        provinciaSelect?.addEventListener('change', () => clearError('provincia'));
+
+        // VERIFICAÇÃO DE SESSÃO CORRIGIDA
+        onAuthStateChanged(auth, async (user) => {
+            loadingScreen.style.display = 'none';
+            
+            if (user && !isRedirecting) {
+                // Verificar se o usuário já está na tela.html
+                const currentPath = window.location.pathname;
+                if (!currentPath.includes('tela.html')) {
+                    redirectToTela();
+                }
+            } else if (!user) {
+                // Usuário não está logado, mostrar tela de login
+                loginContainer.style.display = 'block';
+                cadastroContainer.style.display = 'none';
+                isRedirecting = false;
+            }
+        });
+        
+        window.togglePasswordVisibility = togglePasswordVisibility;
+    </script>
+</body>
+</html>

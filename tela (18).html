@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta name="theme-color" content="#2b5dab">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Plano de Aula">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <meta charset="UTF-8" />
+  <title>Plano de Aula Moçambicano</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --primary: #2c3e50;
+      --secondary: #3498db;
+      --accent: #e67e22;
+      --success: #27ae60;
+      --danger: #e74c3c;
+      --bg: #f8f9fa;
+      --text: #2c3e50;
+      --card: #ffffff;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    body.theme-default { --primary: #2c3e50; --secondary: #3498db; }
+    body.theme-blue { --primary: #1e3c72; --secondary: #2a5298; }
+    body.theme-red { --primary: #8b0000; --secondary: #b22222; }
+    body.theme-pink { --primary: #c2185b; --secondary: #e91e63; }
+    body.theme-purple { --primary: #4a148c; --secondary: #7b1fa2; }
+    body.theme-indigo { --primary: #1a237e; --secondary: #283593; }
+    body.theme-teal { --primary: #00695c; --secondary: #009688; }
+    body.theme-green { --primary: #1b5e20; --secondary: #4caf50; }
+    body.theme-yellow { --primary: #f57f17; --secondary: #ffc107; }
+    body.theme-orange { --primary: #e65100; --secondary: #ff9800; }
+    body.theme-brown { --primary: #4e2e2a; --secondary: #8d6e63; }
+    body.theme-grey { --primary: #424242; --secondary: #757575; }
+    body.theme-black { --primary: #000000; --secondary: #212121; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 70px;
+      transition: all 0.3s;
+    }
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 15px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 { font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+    .menu-btn, .support-btn {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -300px;
+      width: 300px;
+      height: 100%;
+      background: var(--card);
+      z-index: 1000;
+      transition: left 0.3s;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      overflow-y: auto;
+    }
+    .sidebar.open { left: 0; }
+    .sidebar-header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 25px 20px;
+      text-align: center;
+    }
+    .sidebar-header i { font-size: 2.5rem; margin-bottom: 10px; }
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px 20px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .sidebar-item i { width: 28px; color: var(--secondary); }
+    .sidebar-footer {
+      padding: 15px;
+      text-align: center;
+      font-size: 0.7rem;
+      color: #888;
+      border-top: 1px solid #eee;
+      margin-top: 10px;
+    }
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      display: none;
+    }
+    .overlay.open { display: block; }
+    .toast-info {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 12px 20px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      z-index: 1000;
+      animation: fadeInOut 5s ease forwards;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    }
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .theme-option {
+      padding: 8px;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+    }
+    .theme-option.active { border-color: var(--secondary); background: rgba(52,152,219,0.1); }
+    .theme-color { width: 30px; height: 30px; border-radius: 50%; margin: 0 auto 5px; }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .welcome-card {
+      background: linear-gradient(135deg, var(--secondary), var(--primary));
+      color: white;
+      padding: 20px;
+      border-radius: 20px;
+      margin-bottom: 25px;
+      text-align: center;
+      position: relative;
+    }
+    .welcome-card h2 { font-size: 1.3rem; margin-bottom: 5px; }
+    .welcome-card p { font-size: 0.85rem; opacity: 0.9; }
+    
+    .btn-gerar-novo {
+      background: linear-gradient(135deg, var(--accent), #d35400);
+      border: none;
+      width: 100%;
+      padding: 18px;
+      border-radius: 20px;
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      cursor: pointer;
+      margin-bottom: 25px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: pulseColor 3s infinite;
+    }
+    @keyframes pulseColor {
+      0% { background: linear-gradient(135deg, #e67e22, #d35400); }
+      33% { background: linear-gradient(135deg, #3498db, #2980b9); }
+      66% { background: linear-gradient(135deg, #27ae60, #229954); }
+      100% { background: linear-gradient(135deg, #e67e22, #d35400); }
+    }
+    .btn-gerar-novo:active { transform: scale(0.98); animation: none; }
+    
+    .category { margin-bottom: 25px; }
+    .category-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--primary);
+      border-left: 3px solid var(--accent);
+      padding-left: 12px;
+    }
+    .grid-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .action-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.05);
+      text-decoration: none;
+      display: block;
+      color: var(--text);
+    }
+    .action-card:active { transform: scale(0.97); }
+    .action-card i { 
+      font-size: 1.8rem; 
+      margin-bottom: 8px; 
+      display: block;
+      color: var(--secondary);
+      transition: color 0.3s;
+    }
+    .action-card .title { font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; }
+    .action-card .desc { font-size: 0.7rem; color: #888; }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .modal-content {
+      background: var(--card);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      padding: 18px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 { margin: 0; color: var(--primary); }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #888;
+    }
+    .modal-body { padding: 20px; }
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      border: 1px solid #eee;
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .option-item:hover { background: rgba(0,0,0,0.03); }
+    .option-item:active { transform: scale(0.98); }
+    .option-item i { font-size: 1.5rem; width: 40px; text-align: center; color: var(--secondary); }
+    .contact-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    .contact-item button {
+      background: var(--secondary);
+      border: none;
+      padding: 8px 20px;
+      border-radius: 25px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .profile-save-btn {
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 12px;
+      width: 100%;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .confirm-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .confirm-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+    .confirm-btn.yes { background: var(--danger); color: white; }
+    .confirm-btn.no { background: #95a5a6; color: white; }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 15px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      border-top: 1px solid #eee;
+      z-index: 90;
+    }
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 12px;
+      color: #888;
+      text-decoration: none;
+    }
+    .nav-btn.active { color: var(--secondary); background: rgba(52,152,219,0.1); }
+    .nav-btn i { font-size: 1.3rem; }
+    .nav-btn span { font-size: 0.65rem; font-weight: 500; }
+    
+    .chat-button {
+      position: fixed;
+      bottom: 85px;
+      right: 20px;
+      left: auto;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #25d366, #128C7E);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(37,211,102,0.4);
+      z-index: 1000;
+      border: 3px solid white;
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: chatPulse 1.8s ease-in-out infinite;
+      text-decoration: none;
+    }
+    @keyframes chatPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(37,211,102,0.4); }
+      50% { transform: scale(1.08); box-shadow: 0 8px 25px rgba(37,211,102,0.7); }
+    }
+    .chat-button:active { transform: scale(0.95); animation: none; }
+    .chat-button i { font-size: 1.8rem; color: white; }
+    .chat-notification {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--danger);
+      color: white;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border: 2px solid white;
+      pointer-events: none;
+    }
+    
+    .facebook-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .facebook-card {
+      background: white;
+      border-radius: 30px;
+      padding: 30px 25px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      animation: pulseFacebook 2s infinite;
+      border: 3px solid #1877f2;
+    }
+    @keyframes pulseFacebook {
+      0% { transform: scale(1); box-shadow: 0 20px 40px rgba(24, 119, 242, 0.3); }
+      50% { transform: scale(1.02); box-shadow: 0 30px 50px rgba(24, 119, 242, 0.5); }
+      100% { transform: scale(1); box-shadow: 0 20px 40px rgba(24, 119, 242, 0.3); }
+    }
+    .facebook-card .fb-logo {
+      background: #1877f2;
+      color: white;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 45px;
+      margin: 0 auto 20px;
+      box-shadow: 0 10px 20px rgba(24, 119, 242, 0.4);
+    }
+    .facebook-card h2 { color: #1877f2; font-size: 1.8rem; margin-bottom: 15px; font-weight: bold; }
+    .facebook-card p { color: #555; font-size: 1rem; margin-bottom: 25px; line-height: 1.5; }
+    .facebook-card .btn-follow-big {
+      background: #1877f2;
+      color: white;
+      border: none;
+      padding: 18px 30px;
+      border-radius: 60px;
+      font-weight: bold;
+      font-size: 1.3rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      box-shadow: 0 8px 20px rgba(24, 119, 242, 0.4);
+      transition: all 0.3s;
+      border: 2px solid white;
+    }
+    .facebook-card .btn-follow-big:active { transform: scale(0.98); }
+    .facebook-card .aviso { margin-top: 20px; font-size: 0.9rem; color: #888; font-style: italic; }
+    body.dark .facebook-card { background: #1e1e1e; border-color: #1877f2; }
+    body.dark .facebook-card h2 { color: #1877f2; }
+    body.dark .facebook-card p { color: #ccc; }
+    body.dark .facebook-card .aviso { color: #aaa; }
+    body.dark { --bg: #1a1a2e; --text: #eee; --card: #16213e; }
+    body.dark .action-card { background: #0f3460; }
+    
+    .quinzenal-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .quinzenal-btn {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      border-radius: 12px;
+      background: var(--card);
+      border: 1px solid #eee;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .quinzenal-btn:active { transform: scale(0.98); }
+    .quinzenal-btn i { font-size: 1.8rem; color: var(--secondary); }
+    .quinzenal-btn .info { flex: 1; }
+    .quinzenal-btn .title { font-weight: 600; font-size: 1rem; }
+    .quinzenal-btn .desc { font-size: 0.75rem; color: #888; margin-top: 4px; }
+    
+    .silent-loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      z-index: 10000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    .silent-loading .spinner {
+      border: 4px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top: 4px solid white;
+      width: 45px;
+      height: 45px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="theme-brown" oncontextmenu="return false" onkeydown="return disableKeys(event)">
+
+  <div class="silent-loading" id="silentLoading">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="header">
+    <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+    <h1><i class="fas fa-chalkboard-user"></i> Plano de Aula MZ</h1>
+    <button class="support-btn" id="supportBtn"><i class="fas fa-headset"></i></button>
+  </div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <i class="fas fa-user-graduate"></i>
+      <h3 id="sidebarNome">Prof. Visitante</h3>
+      <p style="font-size: 0.8rem;" id="sidebarEmail">carregando...</p>
+    </div>
+    <a href="biografia.html" class="sidebar-item"><i class="fas fa-user-circle"></i> Biografia do Criador</a>
+    <div class="sidebar-item" id="definicoesBtn"><i class="fas fa-sliders-h"></i> Definições</div>
+    <div class="sidebar-item" id="temasBtn"><i class="fas fa-palette"></i> Temas</div>
+    <div class="sidebar-item" id="atualizacaoBtn"><i class="fas fa-sync-alt"></i> Verificar Actualizações</div>
+    <a href="termos.html" class="sidebar-item"><i class="fas fa-file-contract"></i> Termos e Políticas</a>
+    <div class="sidebar-item" id="sobreBtn"><i class="fas fa-info-circle"></i> Sobre</div>
+    <div class="sidebar-item" id="partilhaBtn"><i class="fas fa-share-alt"></i> Partilhar App</div>
+    <div class="sidebar-item" id="estatisticasBtn"><i class="fas fa-chart-line"></i> Estatísticas</div>
+    <div class="sidebar-item" id="sairBtn"><i class="fas fa-sign-out-alt"></i> Sair do Aplicativo</div>
+    <div class="sidebar-footer">© 2025 | EB 4 de Outubro<br>Versão 2.1</div>
+  </div>
+  <div class="overlay" id="overlay"></div>
+
+  <div class="container" id="mainContent">
+    <div class="welcome-card" id="welcomeCard">
+      <h2 id="welcomeTitle">📚 Bem-vindo, Professor!</h2>
+      <p id="welcomeMessage">Simplifique a criação dos seus planos de aula</p>
+    </div>
+
+    <button class="btn-gerar-novo" id="gerarPlanoNovoBtn">
+      <i class="fas fa-plus-circle"></i> Gerar Plano Novo
+      <i class="fas fa-arrow-right"></i>
+    </button>
+
+    <div class="category">
+      <div class="category-title"><i class="fas fa-file-alt"></i><span>Gerar Planos</span></div>
+      <div class="grid-buttons">
+        <div class="action-card" id="disciplinasGeraisBtn">
+          <i class="fas fa-book-open"></i>
+          <div class="title">Gerar Planos de Disciplinas Gerais</div>
+          <div class="desc">Português | Matemática | etc</div>
+        </div>
+        <a href="fisica.html" class="action-card">
+          <i class="fas fa-futbol"></i>
+          <div class="title">Gerar Plano de Educação Física</div>
+          <div class="desc">Planos para EF</div>
+        </a>
+        <div class="action-card" id="linguagensBtn">
+          <i class="fas fa-language"></i>
+          <div class="title">Gerar Plano de Línguas</div>
+          <div class="desc">Inglês | Francês</div>
+        </div>
+        <a href="quin.html" class="action-card">
+          <i class="fas fa-calendar-week"></i>
+          <div class="title">Gerar Plano Quinzenal</div>
+          <div class="desc">15 dias de aula</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="category">
+      <div class="category-title"><i class="fas fa-tools"></i><span>Ferramentas do Professor</span></div>
+      <div class="grid-buttons">
+        <div class="action-card" id="cadernoBtn"><i class="fas fa-book"></i><div class="title">Caderno de Planificação</div><div class="desc">Registo organizado</div></div>
+        <a href="biblioteca.html" class="action-card"><i class="fas fa-layer-group"></i><div class="title">Biblioteca Escolar</div><div class="desc">Recursos educativos</div></a>
+        <a href="permuta.html" class="action-card"><i class="fas fa-exchange-alt"></i><div class="title">Permuta</div><div class="desc">Troca de escolas</div></a>
+        <a href="abano.html" class="action-card"><i class="fas fa-dice-d6"></i><div class="title">Abano da Sorte</div><div class="desc">Sorteio aleatório</div></a>
+      </div>
+    </div>
+
+    <div class="category">
+      <div class="category-title"><i class="fas fa-heart"></i><span>Apoio</span></div>
+      <div class="grid-buttons">
+        <div class="action-card" id="doacoesBtn"><i class="fas fa-hand-holding-heart"></i><div class="title">Doações</div><div class="desc">Apoie o projeto</div></div>
+        <a href="instrucoes-apk.html" class="action-card"><i class="fas fa-circle-info"></i><div class="title">Instruções APK</div><div class="desc">Como instalar</div></a>
+        <a href="historico.html" class="action-card"><i class="fas fa-clock-rotate-left"></i><div class="title">Histórico</div><div class="desc">Últimos planos</div></a>
+      </div>
+    </div>
+  </div>
+
+  <div id="facebookOverlay" class="facebook-overlay">
+    <div class="facebook-card">
+      <div class="fb-logo"><i class="fab fa-facebook-f"></i></div>
+      <h2>Siga nossa página!</h2>
+      <p>📱 Fique por dentro de todas as novidades, atualizações e conteúdos exclusivos para professores moçambicanos.</p>
+      <button class="btn-follow-big" onclick="seguirFacebook()"><i class="fab fa-facebook"></i> Seguir Agora</button>
+      <p class="aviso">⚠️ É necessário seguir a página para continuar usando o aplicativo</p>
+    </div>
+  </div>
+
+  <div class="modal" id="modalGerarPlanoNovo">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-plus-circle"></i> Escolha o tipo de plano</h3>
+        <button class="modal-close" onclick="fecharModal('modalGerarPlanoNovo')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="option-item" id="disciplinasGeraisModalBtn">
+          <i class="fas fa-book-open"></i>
+          <div>
+            <h4>Disciplinas Gerais</h4>
+            <p>Estático ou com I.A</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </div>
+        <a href="fisica.html" class="option-item">
+          <i class="fas fa-futbol"></i>
+          <div>
+            <h4>Educação Física</h4>
+            <p>Planos para EF</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <div class="option-item" id="linguagensModalBtn">
+          <i class="fas fa-language"></i>
+          <div>
+            <h4>Línguas</h4>
+            <p>Inglês | Francês</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </div>
+        <a href="quin.html" class="option-item">
+          <i class="fas fa-calendar-week"></i>
+          <div>
+            <h4>Plano Quinzenal</h4>
+            <p>15 dias de aula</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalDisciplinasGerais">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-book-open"></i> Disciplinas Gerais</h3>
+        <button class="modal-close" onclick="fecharModal('modalDisciplinasGerais')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <a href="planovip.html" class="option-item">
+          <i class="fas fa-file-alt"></i>
+          <div>
+            <h4>Gerar Plano Estático</h4>
+            <p>Plano de aula padrão</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="inteligente.html" class="option-item">
+          <i class="fas fa-robot"></i>
+          <div>
+            <h4>Gerar Plano Inteligente (I.A)</h4>
+            <p>Com inteligência artificial</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalLinguas">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-language"></i> Escolha o idioma</h3>
+        <button class="modal-close" onclick="fecharModal('modalLinguas')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <a href="ingles.html" class="option-item">
+          <i class="fas fa-flag-usa"></i>
+          <div>
+            <h4>Inglês</h4>
+            <p>Plano de aula de Inglês</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <div class="option-item" id="francesEmDesenvolvimento">
+          <i class="fas fa-flag-france"></i>
+          <div>
+            <h4>Francês</h4>
+            <p>Em desenvolvimento</p>
+          </div>
+          <i class="fas fa-clock"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalCaderno">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-book"></i> Caderno de Planificação</h3>
+        <button class="modal-close" onclick="fecharModal('modalCaderno')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <a href="blocoingles.html" class="option-item">
+          <i class="fas fa-flag-usa"></i>
+          <div>
+            <h4>Caderno de Inglês</h4>
+            <p>Planificação para aulas de Inglês</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="bloco.html" class="option-item">
+          <i class="fas fa-book-open"></i>
+          <div>
+            <h4>Caderno de Disciplinas Gerais</h4>
+            <p>Planificação para todas as disciplinas</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <a href="educacaofisica.html" class="option-item">
+          <i class="fas fa-futbol"></i>
+          <div>
+            <h4>Caderno de Educação Física</h4>
+            <p>Planificação para Educação Física</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        <div class="option-item" id="cadernoQuinzenalBtn">
+          <i class="fas fa-calendar-week"></i>
+          <div>
+            <h4>Caderno de Planificação Quinzenal</h4>
+            <p>Planificação quinzenal organizada</p>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalCadernoQuinzenal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-calendar-week"></i> Caderno Quinzenal</h3>
+        <button class="modal-close" onclick="fecharModal('modalCadernoQuinzenal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="quinzenal-options">
+          <a href="competencias.html" class="quinzenal-btn">
+            <i class="fas fa-trophy"></i>
+            <div class="info">
+              <div class="title">Caderno com Competências</div>
+              <div class="desc">Planificação focada em competências específicas</div>
+            </div>
+            <i class="fas fa-chevron-right"></i>
+          </a>
+          <a href="semcompetencias.html" class="quinzenal-btn">
+            <i class="fas fa-book"></i>
+            <div class="info">
+              <div class="title">Caderno sem Competências</div>
+              <div class="desc">Planificação padrão sem competências</div>
+            </div>
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalTemas">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-palette"></i> Escolha o Tema</h3>
+        <button class="modal-close" onclick="fecharModal('modalTemas')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="theme-grid" id="themeGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalEstatisticas">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-chart-line"></i> Estatísticas</h3>
+        <button class="modal-close" onclick="fecharModal('modalEstatisticas')">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <p style="font-size:2rem;font-weight:bold;">2.847</p>
+        <p>Acessos Totais</p>
+        <p style="font-size:2rem;font-weight:bold;margin-top:15px;">1.219</p>
+        <p>Planos Gerados</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalConfirmSair">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-question-circle"></i> Confirmar Saída</h3>
+        <button class="modal-close" onclick="fecharModal('modalConfirmSair')">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <p style="margin-bottom:15px;">Tem certeza que pretende sair do aplicativo?</p>
+        <div class="confirm-buttons">
+          <button class="confirm-btn yes" id="confirmSairSim">Sim</button>
+          <button class="confirm-btn no" id="confirmSairNao">Não</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalSobre">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-info-circle"></i> Sobre o App</h3>
+        <button class="modal-close" onclick="fecharModal('modalSobre')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Plano de Aula Moçambicano</strong></p>
+        <p>Versão: 2.1.0</p>
+        <p>Desenvolvido por: Prof. Edmilson Nhanombe</p>
+        <p>© 2025 - Todos os direitos reservados</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalPartilha">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-share-alt"></i> Partilhar App</h3>
+        <button class="modal-close" onclick="fecharModal('modalPartilha')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="option-item" onclick="partilharWhatsApp()">
+          <i class="fab fa-whatsapp"></i>
+          <div>
+            <h4>WhatsApp</h4>
+            <p>Partilhar via WhatsApp</p>
+          </div>
+        </div>
+        <div class="option-item" onclick="partilharFacebook()">
+          <i class="fab fa-facebook"></i>
+          <div>
+            <h4>Facebook</h4>
+            <p>Partilhar no Facebook</p>
+          </div>
+        </div>
+        <div class="option-item" onclick="copiarLinkApp()">
+          <i class="fas fa-copy"></i>
+          <div>
+            <h4>Copiar Link</h4>
+            <p>Copiar link do aplicativo</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalDoacoes">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-hand-holding-heart"></i> Doações</h3>
+        <button class="modal-close" onclick="fecharModal('modalDoacoes')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="option-item">
+          <i class="fas fa-mobile-alt"></i>
+          <div>
+            <h4>Emola: 876393961</h4>
+          </div>
+          <button onclick="copiarNumero('876393961')">Copiar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalAtualizarPerfil">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-edit"></i> Actualizar Perfil</h3>
+        <button class="modal-close" onclick="fecharModal('modalAtualizarPerfil')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom:15px;text-align:center;"><i class="fas fa-info-circle"></i> Complete seu cadastro com seus dados profissionais</p>
+        <button class="profile-save-btn" id="irAtualizarBtn" style="background:var(--secondary);"><i class="fas fa-arrow-right"></i> Completar Cadastro</button>
+        <button class="profile-save-btn" id="verPerfilAtualBtn" style="background:var(--accent);margin-top:10px;"><i class="fas fa-eye"></i> Ver Dados Atuais</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalContato">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-headset"></i> Equipa Técnica</h3>
+        <button class="modal-close" onclick="fecharModal('modalContato')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="contact-item">
+          <span><i class="fas fa-phone"></i> 87 639 3961</span>
+          <button onclick="ligarTelefone('876393961')">Ligar</button>
+        </div>
+        <div class="contact-item">
+          <span><i class="fas fa-phone"></i> 83 489 0828</span>
+          <button onclick="ligarTelefone('834890828')">Ligar</button>
+        </div>
+        <div class="contact-item">
+          <span><i class="fas fa-phone"></i> 84 639 3962</span>
+          <button onclick="ligarTelefone('846393962')">Ligar</button>
+        </div>
+        <div class="contact-item">
+          <span><i class="fas fa-envelope"></i> Email</span>
+          <button onclick="enviarEmail()">edmilsonnhanombe62@gmail.com</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <a href="chat.html" class="chat-button" id="chatButton">
+    <i class="fas fa-comment-dots"></i>
+    <span class="chat-notification" id="chatNotification" style="display:none;">0</span>
+  </a>
+
+  <div class="bottom-nav">
+    <button class="nav-btn active" id="navHome"><i class="fas fa-home"></i><span>Início</span></button>
+    <a href="permuta.html" class="nav-btn"><i class="fas fa-exchange-alt"></i><span>Permuta</span></a>
+    <button class="nav-btn" id="navAtualizarPerfil"><i class="fas fa-user-edit"></i><span>Actualizar Perfil</span></button>
+    <button class="nav-btn" id="navRecarregarConta">
+      <i class="fas fa-shopping-cart"></i>
+      <span>Recarregar Conta</span>
+    </button>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDCBwanaFABmQNgT91vnhV3Xv1RJn9bYOI",
+      authDomain: "login-actualizado.firebaseapp.com",
+      databaseURL: "https://login-actualizado-default-rtdb.firebaseio.com",
+      projectId: "login-actualizado",
+      storageBucket: "login-actualizado.firebasestorage.app",
+      messagingSenderId: "666275920026",
+      appId: "1:666275920026:web:f7fe76327968619c2c4723"
+    };
+    
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    const database = firebase.database();
+    
+    const silentLoading = document.getElementById('silentLoading');
+    
+    function showSilentLoading() {
+      silentLoading.style.display = 'flex';
+    }
+    
+    function hideSilentLoading() {
+      silentLoading.style.display = 'none';
+    }
+    
+    // VERSÃO CORRIGIDA - Sem obrigação de cadastro completo
+    function verificarCadastroCompleto(uid) {
+      // Sempre retorna true para não bloquear o acesso
+      return true;
+    }
+    
+    async function fazerLogout() {
+      showSilentLoading();
+      try {
+        await auth.signOut();
+        localStorage.removeItem('user_uid');
+        localStorage.removeItem('user_email');
+        localStorage.removeItem('usuario_cadastrado');
+        localStorage.removeItem('perfil_professor');
+        window.location.href = 'index.html';
+      } catch(e) {
+        window.location.href = 'index.html';
+      }
+    }
+    
+    // VERIFICAÇÃO DE AUTENTICAÇÃO CORRIGIDA - SEM REDIRECIONAMENTO PARA CADASTRO
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+      
+      // REMOVIDA a verificação de cadastro completo que causava o loop
+      // O usuário pode acessar a tela mesmo sem dados completos
+      
+      localStorage.setItem('user_uid', user.uid);
+      localStorage.setItem('user_email', user.email);
+      
+      carregarPerfilSilencioso();
+      hideSilentLoading();
+      
+      setTimeout(() => {
+        carregarPerfil();
+        mostrarBoasVindas();
+        verificarMostrarFacebook();
+        initChatNotifications();
+      }, 100);
+    });
+    
+    function carregarPerfilSilencioso() {
+      const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}');
+      const email = localStorage.getItem('user_email') || '';
+      document.getElementById('sidebarNome').innerHTML = perfil.nome ? `Prof. ${perfil.nome.split(' ')[0]}` : 'Professor';
+      document.getElementById('sidebarEmail').innerHTML = email;
+    }
+    
+    function disableKeys(e) {
+      if (e.key === 'F12' || 
+          (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c')) ||
+          (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S'))) {
+        e.preventDefault();
+        return false;
+      }
+      return true;
+    }
+    document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+    
+    let lastReadTimestamp = localStorage.getItem('last_read_chat') || 0;
+    
+    function getCurrentUserForNotify() {
+      const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}');
+      const cadastro = JSON.parse(localStorage.getItem('usuario_cadastrado') || '{}');
+      const nome = perfil.nome || cadastro.nome || 'Visitante';
+      const id = nome.replace(/\s/g, '_') + '_' + Date.now().toString().slice(-6);
+      return { id: id, nome: nome };
+    }
+    
+    function updateNotificationCount() {
+      if (!database) return;
+      const user = getCurrentUserForNotify();
+      database.ref('mensagens').orderByChild('timestamp').once('value', (snapshot) => {
+        let unreadCount = 0;
+        snapshot.forEach(child => {
+          const msg = child.val();
+          if (msg.autorId !== user.id && (msg.timestamp || 0) > Number(lastReadTimestamp)) unreadCount++;
+        });
+        const notification = document.getElementById('chatNotification');
+        if (unreadCount > 0) {
+          notification.style.display = 'flex';
+          notification.textContent = unreadCount > 99 ? '99+' : unreadCount;
+        } else notification.style.display = 'none';
+      }).catch(() => {});
+    }
+    
+    function initChatNotifications() {
+      if (!database) return;
+      database.ref('mensagens').on('child_added', () => updateNotificationCount());
+      setTimeout(() => updateNotificationCount(), 1000);
+    }
+    
+    function verificarMostrarFacebook() {
+      if (localStorage.getItem('facebook_seguido') === 'true') return;
+      let contadorVisitas = parseInt(localStorage.getItem('facebook_visitas') || '0');
+      contadorVisitas++;
+      localStorage.setItem('facebook_visitas', contadorVisitas);
+      if (contadorVisitas >= 2) setTimeout(() => mostrarFacebookOverlay(), 1000);
+    }
+    
+    function mostrarFacebookOverlay() {
+      const fbOverlay = document.getElementById('facebookOverlay');
+      if (fbOverlay) {
+        fbOverlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        document.body.style.pointerEvents = 'none';
+        fbOverlay.style.pointerEvents = 'auto';
+      }
+    }
+    
+    function fecharFacebookOverlay() {
+      const fbOverlay = document.getElementById('facebookOverlay');
+      if (fbOverlay) {
+        fbOverlay.style.display = 'none';
+        document.body.style.overflow = '';
+        document.body.style.pointerEvents = 'auto';
+      }
+    }
+    
+    function seguirFacebook() {
+      window.open('https://www.facebook.com/profile.php?id=61584540906521', '_blank');
+      localStorage.setItem('facebook_seguido', 'true');
+      fecharFacebookOverlay();
+      mostrarToast('✅ Obrigado por seguir nossa página!', 3000);
+    }
+    
+    function mostrarToast(mensagem, duracao = 5000) {
+      const toast = document.createElement('div');
+      toast.className = 'toast-info';
+      toast.innerHTML = `<i class="fas fa-info-circle"></i> ${mensagem}`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), duracao);
+    }
+    
+    function abrirModal(id) { 
+      const modal = document.getElementById(id); 
+      if (modal) modal.style.display = 'flex'; 
+    }
+    
+    function fecharModal(id) { 
+      const modal = document.getElementById(id); 
+      if (modal) modal.style.display = 'none'; 
+    }
+    
+    function ligarTelefone(numero) { 
+      window.location.href = `tel:+258${numero}`; 
+    }
+    
+    function enviarEmail() { 
+      window.location.href = 'mailto:edmilsonnhanombe62@gmail.com'; 
+    }
+    
+    function copiarNumero(num) { 
+      navigator.clipboard.writeText(num); 
+      mostrarToast(`✅ Número ${num} copiado!`, 3000); 
+    }
+    
+    function partilharWhatsApp() { 
+      const linkApp = 'https://nhanomb3.github.io/Planodeaula-/';
+      window.open(`https://wa.me/?text=${encodeURIComponent('📚 Baixe o app Plano de Aula MZ - Facilite a criação dos seus planos de aula! Acesse: ' + linkApp)}`, '_blank'); 
+    }
+    
+    function partilharFacebook() { 
+      const linkApp = 'https://nhanomb3.github.io/Planodeaula-/';
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(linkApp)}`, '_blank'); 
+    }
+    
+    function copiarLinkApp() { 
+      const linkApp = 'https://nhanomb3.github.io/Planodeaula-/';
+      navigator.clipboard.writeText(linkApp); 
+      mostrarToast('✅ Link do app copiado!', 3000); 
+    }
+    
+    function irParaAtualizarPerfil() { 
+      window.location.href = 'index.html?update=true';
+    }
+    
+    function verDadosAtuais() { 
+      const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}'); 
+      const cadastro = JSON.parse(localStorage.getItem('usuario_cadastrado') || '{}');
+      const nome = perfil.nome || cadastro.nome || 'Não cadastrado';
+      const escola = perfil.escola || cadastro.escola || 'Não informada';
+      const provincia = perfil.provincia || cadastro.provincia || 'Não informada';
+      alert(`📋 DADOS DO PERFIL:\n👤 Nome: ${nome}\n🏫 Escola: ${escola}\n📍 Província: ${provincia}`);
+    }
+    
+    function irParaRecarregarConta() {
+      window.location.href = 'estrela.html';
+    }
+    
+    function mostrarBoasVindas() {
+      const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}');
+      const nome = perfil.nome || '';
+      if (!localStorage.getItem('ja_cumprimentou')) {
+        setTimeout(() => {
+          if (nome) mostrarToast(`🎉 Bem-vindo de volta, Professor ${nome.split(' ')[0]}!`, 4000);
+          else mostrarToast(`🎉 Bem-vindo ao Plano de Aula MZ!`, 4000);
+          localStorage.setItem('ja_cumprimentou', 'true');
+        }, 500);
+      }
+    }
+    
+    function carregarPerfil() {
+      const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}');
+      const nome = perfil.nome || '';
+      const welcomeTitle = document.getElementById('welcomeTitle');
+      const welcomeMessage = document.getElementById('welcomeMessage');
+      if (nome) {
+        welcomeTitle.innerHTML = `📚 Olá, Professor ${nome.split(' ')[0]}!`;
+        welcomeMessage.innerHTML = perfil.escola ? `Escola ${perfil.escola} - Vamos planificar hoje?` : 'Prepare-se para mais uma aula incrível!';
+      } else {
+        welcomeTitle.innerHTML = `📚 Bem-vindo, Professor!`;
+        welcomeMessage.innerHTML = 'Complete seu cadastro no menu "Actualizar Perfil"';
+      }
+    }
+    
+    function sairAplicativo() {
+      fecharModal('modalConfirmSair');
+      mostrarToast('👋 Encerrando sessão...', 2000);
+      setTimeout(() => fazerLogout(), 500);
+    }
+    
+    const temas = ['default','blue','red','pink','purple','indigo','teal','green','yellow','orange','brown','grey','black'];
+    const temaNomes = ['Padrão','Azul','Vermelho','Rosa','Roxo','Índigo','Verde Azulado','Verde','Amarelo','Laranja','Marrom','Cinza','Preto'];
+    const temaCores = ['#2c3e50','#1e3c72','#8b0000','#c2185b','#4a148c','#1a237e','#00695c','#1b5e20','#f57f17','#e65100','#4e2e2a','#424242','#000000'];
+    
+    function aplicarTema(tema) { 
+      document.body.className = `theme-${tema}`; 
+      localStorage.setItem('tema_atual', tema); 
+      atualizarTemaAtivo(tema); 
+      mostrarToast(`🎨 Tema ${temaNomes[temas.indexOf(tema)]} aplicado!`, 2000); 
+    }
+    
+    function carregarTema() { 
+      const tema = localStorage.getItem('tema_atual') || 'brown'; 
+      document.body.className = `theme-${tema}`; 
+      atualizarTemaAtivo(tema); 
+    }
+    
+    function atualizarTemaAtivo(tema) { 
+      document.querySelectorAll('.theme-option').forEach(opt => { 
+        if(opt.dataset.tema === tema) opt.classList.add('active'); 
+        else opt.classList.remove('active'); 
+      }); 
+    }
+    
+    function carregarTemasModal() { 
+      const grid = document.getElementById('themeGrid'); 
+      if(!grid) return; 
+      grid.innerHTML = temas.map((t,i) => `<div class="theme-option" data-tema="${t}" onclick="aplicarTema('${t}')"><div class="theme-color" style="background:${temaCores[i]}"></div><span>${temaNomes[i]}</span></div>`).join(''); 
+      atualizarTemaAtivo(localStorage.getItem('tema_atual') || 'brown'); 
+    }
+    
+    let sidebarOpen = false;
+    function toggleSidebar() { 
+      sidebarOpen = !sidebarOpen; 
+      document.getElementById('sidebar').classList.toggle('open', sidebarOpen); 
+      document.getElementById('overlay').classList.toggle('open', sidebarOpen); 
+    }
+    
+    function closeSidebar() { 
+      sidebarOpen = false; 
+      document.getElementById('sidebar').classList.remove('open'); 
+      document.getElementById('overlay').classList.remove('open'); 
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarTema();
+      carregarTemasModal();
+      
+      document.getElementById('menuBtn').addEventListener('click', toggleSidebar);
+      document.getElementById('overlay').addEventListener('click', closeSidebar);
+      document.getElementById('supportBtn').addEventListener('click', () => abrirModal('modalContato'));
+      
+      document.getElementById('cadernoBtn').addEventListener('click', () => abrirModal('modalCaderno'));
+      document.getElementById('gerarPlanoNovoBtn').addEventListener('click', () => abrirModal('modalGerarPlanoNovo'));
+      document.getElementById('disciplinasGeraisBtn').addEventListener('click', () => abrirModal('modalDisciplinasGerais'));
+      document.getElementById('linguagensBtn').addEventListener('click', () => abrirModal('modalLinguas'));
+      document.getElementById('francesEmDesenvolvimento').addEventListener('click', () => mostrarToast('📚 Plano de Francês em desenvolvimento!', 3000));
+      document.getElementById('doacoesBtn').addEventListener('click', () => abrirModal('modalDoacoes'));
+      
+      document.getElementById('definicoesBtn').addEventListener('click', () => { closeSidebar(); abrirModal('modalEstatisticas'); });
+      document.getElementById('temasBtn').addEventListener('click', () => { closeSidebar(); abrirModal('modalTemas'); });
+      document.getElementById('atualizacaoBtn').addEventListener('click', () => { closeSidebar(); mostrarToast('✅ App actualizado! Versão 2.1', 3000); });
+      document.getElementById('partilhaBtn').addEventListener('click', () => { closeSidebar(); abrirModal('modalPartilha'); });
+      document.getElementById('estatisticasBtn').addEventListener('click', () => { closeSidebar(); abrirModal('modalEstatisticas'); });
+      document.getElementById('sobreBtn').addEventListener('click', () => { closeSidebar(); abrirModal('modalSobre'); });
+      document.getElementById('sairBtn').addEventListener('click', () => { closeSidebar(); abrirModal('modalConfirmSair'); });
+      
+      document.getElementById('navAtualizarPerfil').addEventListener('click', () => abrirModal('modalAtualizarPerfil'));
+      document.getElementById('navRecarregarConta').addEventListener('click', irParaRecarregarConta);
+      document.getElementById('navHome').addEventListener('click', () => {
+        document.getElementById('mainContent').style.display = 'block';
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('navHome').classList.add('active');
+        closeSidebar();
+      });
+      
+      document.getElementById('cadernoQuinzenalBtn').addEventListener('click', () => { fecharModal('modalCaderno'); abrirModal('modalCadernoQuinzenal'); });
+      document.getElementById('disciplinasGeraisModalBtn').addEventListener('click', () => { fecharModal('modalGerarPlanoNovo'); abrirModal('modalDisciplinasGerais'); });
+      document.getElementById('linguagensModalBtn').addEventListener('click', () => { fecharModal('modalGerarPlanoNovo'); abrirModal('modalLinguas'); });
+      document.getElementById('irAtualizarBtn').addEventListener('click', irParaAtualizarPerfil);
+      document.getElementById('verPerfilAtualBtn').addEventListener('click', verDadosAtuais);
+      document.getElementById('confirmSairSim').addEventListener('click', sairAplicativo);
+      document.getElementById('confirmSairNao').addEventListener('click', () => fecharModal('modalConfirmSair'));
+      
+      document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if(e.target === m) m.style.display = 'none'; }));
+      
+      window.addEventListener('focus', () => {
+        lastReadTimestamp = Date.now();
+        localStorage.setItem('last_read_chat', lastReadTimestamp);
+        setTimeout(() => updateNotificationCount(), 500);
+      });
+      setTimeout(() => {
+        lastReadTimestamp = Date.now();
+        localStorage.setItem('last_read_chat', lastReadTimestamp);
+        updateNotificationCount();
+      }, 2000);
+    });
+    
+    window.fecharModal = fecharModal;
+    window.abrirModal = abrirModal;
+    window.ligarTelefone = ligarTelefone;
+    window.enviarEmail = enviarEmail;
+    window.copiarNumero = copiarNumero;
+    window.partilharWhatsApp = partilharWhatsApp;
+    window.partilharFacebook = partilharFacebook;
+    window.copiarLinkApp = copiarLinkApp;
+    window.aplicarTema = aplicarTema;
+    window.disableKeys = disableKeys;
+    window.seguirFacebook = seguirFacebook;
+    window.irParaRecarregarConta = irParaRecarregarConta;
+  </script>
+</body>
+</html>
