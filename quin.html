@@ -19,11 +19,7 @@
     <script src="paysuite-manager.js"></script>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: 'Inter', 'Segoe UI', sans-serif;
@@ -32,10 +28,7 @@
             padding: 20px;
         }
         
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1200px; margin: 0 auto; }
         
         .stars-header {
             background: white;
@@ -50,15 +43,8 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
         
-        .logo-area h2 {
-            font-size: 1.3rem;
-            color: #2c3e50;
-        }
-        
-        .logo-area p {
-            font-size: 0.7rem;
-            color: #888;
-        }
+        .logo-area h2 { font-size: 1.3rem; color: #2c3e50; }
+        .logo-area p { font-size: 0.7rem; color: #888; }
         
         .stars-balance {
             background: linear-gradient(135deg, #f39c12, #e67e22);
@@ -71,25 +57,10 @@
             transition: transform 0.2s;
         }
         
-        .stars-balance:hover {
-            transform: scale(1.02);
-        }
-        
-        .stars-balance i {
-            font-size: 1.5rem;
-            color: #ffd700;
-        }
-        
-        .stars-balance .value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: white;
-        }
-        
-        .stars-balance .label {
-            color: rgba(255,255,255,0.9);
-            font-size: 0.8rem;
-        }
+        .stars-balance:hover { transform: scale(1.02); }
+        .stars-balance i { font-size: 1.5rem; color: #ffd700; }
+        .stars-balance .value { font-size: 1.8rem; font-weight: bold; color: white; }
+        .stars-balance .label { color: rgba(255,255,255,0.9); font-size: 0.8rem; }
         
         .user-info {
             display: flex;
@@ -102,9 +73,7 @@
             color: #555;
         }
         
-        .user-info i {
-            color: #667eea;
-        }
+        .user-info i { color: #667eea; }
         
         .back-btn {
             background: rgba(255,255,255,0.2);
@@ -121,9 +90,7 @@
             transition: all 0.2s;
         }
         
-        .back-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
+        .back-btn:hover { background: rgba(255,255,255,0.3); }
         
         .btn-comprar {
             background: white;
@@ -137,9 +104,7 @@
             margin-left: 5px;
         }
         
-        .btn-comprar:hover {
-            background: #f0f0f0;
-        }
+        .btn-comprar:hover { background: #f0f0f0; }
         
         .filtros-card {
             background: white;
@@ -443,6 +408,7 @@
         .btn-comprar { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; }
         .btn-comprar:hover { box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4); }
         
+        /* ===== MODAL DE COMPRA ===== */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -1041,7 +1007,7 @@
     
     <script>
         // ============================================
-        // CONFIGURAÇÃO DO FIREBASE
+        // CONFIGURAÇÃO DO FIREBASE - LOGIN
         // ============================================
         const firebaseConfigAuth = {
             apiKey: "AIzaSyDCBwanaFABmQNgT91vnhV3Xv1RJn9bYOI",
@@ -1053,6 +1019,9 @@
             appId: "1:666275920026:web:f7fe76327968619c2c4723"
         };
         
+        // ============================================
+        // CONFIGURAÇÃO DO FIREBASE - PLANOS
+        // ============================================
         const firebaseConfigData = {
             apiKey: "AIzaSyClUaP2QpNFnCNwh449i0ztzzSnBj8CWG4",
             authDomain: "plano-de-aula-moz.firebaseapp.com",
@@ -1062,10 +1031,12 @@
             appId: "1:710741933182:web:f3599eb809e31fe3eeec2f"
         };
         
+        // Inicializar Firebase Auth (login)
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfigAuth);
         }
         
+        // Inicializar Firebase Data (planos)
         let dataApp;
         if (!firebase.apps.some(app => app.name === 'dataApp')) {
             dataApp = firebase.initializeApp(firebaseConfigData, 'dataApp');
@@ -1074,8 +1045,8 @@
         }
         
         const auth = firebase.auth();
-        const dbPlanos = firebase.firestore(dataApp);
-        const dbUsuarios = firebase.firestore();
+        const dbLogin = firebase.firestore(); // ← USUÁRIOS (estrelas)
+        const dbPlanos = firebase.firestore(dataApp); // ← PLANOS
         
         // ============================================
         // VARIÁVEIS GLOBAIS
@@ -1087,6 +1058,7 @@
         let CUSTO_POR_DISCIPLINA = 1;
         let pacoteSelecionado = null;
         let metodoSelecionado = null;
+        let downloadEmAndamento = false;
         
         const PACOTES = [
             { id: 'cred_1', credits: 1, price: 3, name: '1 Estrela' },
@@ -1126,7 +1098,7 @@
             if (!currentUser) return;
             
             try {
-                const docRef = dbUsuarios.collection('usuarios').doc(currentUser.uid);
+                const docRef = dbLogin.collection('usuarios').doc(currentUser.uid);
                 const doc = await docRef.get();
                 
                 if (doc.exists) {
@@ -1187,7 +1159,7 @@
             
             try {
                 const novasEstrelas = (userData?.estrelas || 0) - quantidade;
-                await dbUsuarios.collection('usuarios').doc(currentUser.uid).update({
+                await dbLogin.collection('usuarios').doc(currentUser.uid).update({
                     estrelas: novasEstrelas
                 });
                 userData.estrelas = novasEstrelas;
@@ -1204,7 +1176,7 @@
             
             try {
                 const novasEstrelas = (userData?.estrelas || 0) + quantidade;
-                await dbUsuarios.collection('usuarios').doc(currentUser.uid).update({
+                await dbLogin.collection('usuarios').doc(currentUser.uid).update({
                     estrelas: novasEstrelas
                 });
                 userData.estrelas = novasEstrelas;
@@ -1331,14 +1303,15 @@
                 
                 const disciplinasSet = new Set();
                 snapshot.forEach(doc => {
-                    const disciplina = doc.data().Disciplina;
+                    const data = doc.data();
+                    const disciplina = data.Disciplina;
                     if (disciplina) disciplinasSet.add(disciplina);
                 });
                 
                 const disciplinas = Array.from(disciplinasSet).sort();
                 
                 if (disciplinas.length === 0) {
-                    container.innerHTML = '<p style="color: #e74c3c;">Nenhuma disciplina encontrada para esta classe/trimestre.</p>';
+                    container.innerHTML = '<p style="color: #e74c3c;">Nenhuma disciplina encontrada para esta classe/trimestre.</p><p style="color:#666;font-size:12px;">Verifique se os planos já foram carregados no sistema.</p>';
                     return;
                 }
                 
@@ -1517,14 +1490,20 @@
                 const numInicio = extrairNumeroSemana(semanaInicio);
                 const numFim = extrairNumeroSemana(semanaFim);
                 
+                console.log(`Buscando planos para: Classe=${classeFormatada}, Trimestre=${trimestreNum}, Semanas=${numInicio}-${numFim}`);
+                
                 for (const disciplina of disciplinas) {
                     try {
+                        console.log(`Buscando disciplina: ${disciplina}`);
+                        
                         const snapshot = await dbPlanos.collection('planos')
                             .where('Classe', '==', classeFormatada)
                             .where('Disciplina', '==', disciplina)
                             .where('Trimestre', '==', trimestreNum)
                             .where('Ano', '==', 2026)
                             .get();
+                        
+                        console.log(`Encontrados ${snapshot.size} documentos para ${disciplina}`);
                         
                         const planos = [];
                         snapshot.forEach(doc => {
@@ -1539,6 +1518,8 @@
                         planos.sort((a, b) => extrairNumeroSemana(a.semana) - extrairNumeroSemana(b.semana));
                         if (planos.length > 0) {
                             planosEncontrados[disciplina] = planos;
+                        } else {
+                            console.log(`Nenhum plano no período para ${disciplina}`);
                         }
                     } catch (err) {
                         console.error(`Erro ao buscar ${disciplina}:`, err);
@@ -1554,6 +1535,7 @@
                             <i class="fas fa-search" style="font-size: 50px; color: #f59e0b;"></i>
                             <h3>Nenhum plano encontrado</h3>
                             <p>Não existem registos para ${classeOriginal} no período selecionado.</p>
+                            <p>Verifique se os planos já foram carregados para esta disciplina no sistema.</p>
                             <br>
                             <button class="btn" onclick="mostrarFiltros()" style="margin: 0 auto; background: #0066cc; color: white;">VOLTAR</button>
                         </div>`;
@@ -1574,6 +1556,7 @@
                         <i class="fas fa-exclamation-triangle" style="font-size: 50px; color: #e74c3c;"></i>
                         <h3>Erro ao buscar planos</h3>
                         <p>${error.message}</p>
+                        <p>Verifique sua conexão com a internet e tente novamente.</p>
                         <br>
                         <button class="btn" onclick="location.reload()" style="margin: 0 auto; background: #0066cc; color: white;">TENTAR NOVAMENTE</button>
                     </div>`;
@@ -1854,9 +1837,14 @@
         }
         
         // ============================================
-        // FUNÇÕES DE DOWNLOAD
+        // FUNÇÕES DE DOWNLOAD COM ESTRELAS
         // ============================================
         async function baixarPDFUnico(disciplina, delegado, dap) {
+            if (downloadEmAndamento) {
+                mostrarToast('⏳ Aguarde, já está a processar um download...', 'warning');
+                return;
+            }
+            
             const planos = planosEncontrados[disciplina];
             if (!planos || planos.length === 0) {
                 mostrarToast('Nenhum plano disponível para esta disciplina', 'error');
@@ -1864,34 +1852,47 @@
             }
             
             const saldoAtual = userData?.estrelas || 0;
+            
+            // Verificar se tem estrelas suficientes
             if (saldoAtual < CUSTO_POR_DISCIPLINA) {
-                mostrarToast(`❌ Saldo insuficiente! Precisa de ${CUSTO_POR_DISCIPLINA} estrela.`, 'error');
-                mostrarToast('💡 Clique em "COMPRAR ESTRELAS" para adquirir.', 'warning');
+                // Abrir modal de compra com mensagem específica
+                abrirModalComprar();
+                mostrarToast(`⚠️ Saldo insuficiente! Precisa de ${CUSTO_POR_DISCIPLINA} estrela. Compre agora!`, 'warning');
                 return;
             }
             
+            downloadEmAndamento = true;
             showLoading();
             
             try {
+                // Consumir a estrela
                 const consumido = await consumirEstrelas(CUSTO_POR_DISCIPLINA);
                 if (!consumido) {
                     hideLoading();
-                    mostrarToast('Erro ao consumir estrela. Tente novamente.', 'error');
+                    downloadEmAndamento = false;
+                    mostrarToast('❌ Erro ao consumir estrela. Tente novamente.', 'error');
                     return;
                 }
                 
+                // Gerar PDF
                 await gerarPDF(disciplina, planos, delegado, dap);
                 mostrarToast(`✅ PDF de ${disciplina} baixado! Saldo: ${userData?.estrelas || 0} ⭐`, 'success');
                 
             } catch (error) {
                 console.error(error);
-                mostrarToast('Erro ao gerar PDF: ' + error.message, 'error');
+                mostrarToast('❌ Erro ao gerar PDF: ' + error.message, 'error');
             } finally {
                 hideLoading();
+                downloadEmAndamento = false;
             }
         }
         
         async function baixarTodosPDFs(delegado, dap) {
+            if (downloadEmAndamento) {
+                mostrarToast('⏳ Aguarde, já está a processar um download...', 'warning');
+                return;
+            }
+            
             const disciplinasComPlanos = Object.keys(planosEncontrados);
             const totalEstrelas = disciplinasComPlanos.length;
             
@@ -1901,22 +1902,28 @@
             }
             
             const saldoAtual = userData?.estrelas || 0;
+            
             if (saldoAtual < totalEstrelas) {
-                mostrarToast(`❌ Saldo insuficiente! Precisa de ${totalEstrelas} estrelas. Saldo: ${saldoAtual}`, 'error');
-                mostrarToast('💡 Clique em "COMPRAR ESTRELAS" para adquirir mais.', 'warning');
+                // Abrir modal de compra com mensagem específica
+                abrirModalComprar();
+                mostrarToast(`⚠️ Saldo insuficiente! Precisa de ${totalEstrelas} estrelas. Compre agora!`, 'warning');
                 return;
             }
             
+            downloadEmAndamento = true;
             showLoading();
             
             try {
+                // Consumir todas as estrelas necessárias
                 const consumido = await consumirEstrelas(totalEstrelas);
                 if (!consumido) {
                     hideLoading();
-                    mostrarToast('Erro ao consumir estrelas. Tente novamente.', 'error');
+                    downloadEmAndamento = false;
+                    mostrarToast('❌ Erro ao consumir estrelas. Tente novamente.', 'error');
                     return;
                 }
                 
+                // Gerar todos os PDFs
                 for (const disciplina of disciplinasComPlanos) {
                     await gerarPDF(disciplina, planosEncontrados[disciplina], delegado, dap);
                     await new Promise(r => setTimeout(r, 500));
@@ -1926,9 +1933,10 @@
                 
             } catch (error) {
                 console.error(error);
-                mostrarToast('Erro ao gerar PDFs: ' + error.message, 'error');
+                mostrarToast('❌ Erro ao gerar PDFs: ' + error.message, 'error');
             } finally {
                 hideLoading();
+                downloadEmAndamento = false;
             }
         }
         
@@ -2093,7 +2101,7 @@
             document.getElementById('btnPagar').disabled = !(pacoteSelecionado && metodoSelecionado);
         }
         
-        function confirmarCompra() {
+        async function confirmarCompra() {
             if (!pacoteSelecionado) {
                 mostrarToast('Selecione um pacote de estrelas.', 'warning');
                 return;
@@ -2120,7 +2128,7 @@
                     window.PaySuiteManager.salvarTelefoneUsuario(telefone);
                     if (userData) {
                         userData.telefone = telefone;
-                        dbUsuarios.collection('usuarios').doc(currentUser.uid).update({
+                        dbLogin.collection('usuarios').doc(currentUser.uid).update({
                             telefone: telefone
                         }).catch(err => console.error('Erro ao salvar telefone:', err));
                     }
@@ -2129,20 +2137,26 @@
                     return;
                 }
                 
+                // Fechar modal
+                fecharModalComprar();
+                
+                // Mostrar loader
+                showPaysuiteLoader();
+                
                 // Iniciar pagamento
-                window.PaySuiteManager.comprarCreditos(
+                const result = await window.PaySuiteManager.comprarCreditos(
                     pacoteSelecionado.id,
                     pacoteSelecionado.credits,
                     pacoteSelecionado.price,
                     pacoteSelecionado.name
-                ).then(result => {
-                    if (!result.success) {
-                        mostrarToast('❌ Erro ao iniciar pagamento: ' + (result.error || 'Tente novamente'), 'error');
-                    }
-                }).catch(err => {
-                    console.error('Erro PaySuite:', err);
-                    mostrarToast('❌ Erro ao processar pagamento: ' + err.message, 'error');
-                });
+                );
+                
+                hidePaysuiteLoader();
+                
+                if (!result.success) {
+                    mostrarToast('❌ Erro ao iniciar pagamento: ' + (result.error || 'Tente novamente'), 'error');
+                }
+                // Se sucesso, a página será redirecionada
             } else {
                 mostrarToast('❌ Sistema de pagamento não disponível. Tente novamente.', 'error');
             }
@@ -2160,7 +2174,7 @@
                     const credits = pagamento.dados?.credits || 0;
                     if (credits > 0) {
                         await adicionarEstrelas(credits);
-                        mostrarToast(`✅ Pagamento confirmado! +${credits} estrelas adicionadas.`, 'success');
+                        mostrarToast(`✅ Pagamento confirmado! +${credits} estrelas adicionadas. Saldo: ${userData?.estrelas || 0} ⭐`, 'success');
                     }
                 }
             } catch (error) {
@@ -2174,7 +2188,9 @@
         carregarSemanas();
         
         // Verificar pagamento pendente ao carregar
-        verificarPagamentoPendente();
+        setTimeout(() => {
+            verificarPagamentoPendente();
+        }, 1000);
         
         auth.onAuthStateChanged(async (user) => {
             if (!user) {
@@ -2201,6 +2217,11 @@
             if (e.key === 'Escape') {
                 fecharModalComprar();
             }
+        });
+        
+        // Fechar modal ao clicar fora
+        document.getElementById('modalComprar').addEventListener('click', function(e) {
+            if (e.target === this) fecharModalComprar();
         });
         
         // ============================================
