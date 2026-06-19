@@ -15,9 +15,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     
-    <!-- PaySuite Manager -->
-    <script src="paysuite-manager.js"></script>
-    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -737,9 +734,31 @@
     
     <script>
         // ============================================
-        // FIREBASE CONFIG
+        // FIREBASE CONFIG - PROJETO plano-de-aula-moz
+        // ONDE OS PLANOS ESTÃO ARMAZENADOS
         // ============================================
-        const firebaseConfigAuth = {
+        const firebaseConfig = {
+            apiKey: "AIzaSyClUaP2QpNFnCNwh449i0ztzzSnBj8CWG4",
+            authDomain: "plano-de-aula-moz.firebaseapp.com",
+            projectId: "plano-de-aula-moz",
+            storageBucket: "plano-de-aula-moz.firebasestorage.app",
+            messagingSenderId: "710741933182",
+            appId: "1:710741933182:web:f3599eb809e31fe3eeec2f"
+        };
+
+        // Inicializar Firebase (apenas 1 vez)
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        // IMPORTANTE: Usar o Firestore do projeto plano-de-aula-moz
+        const db = firebase.firestore();
+        
+        // ============================================
+        // AUTENTICAÇÃO - USAR O PROJETO login-actualizado
+        // ============================================
+        // Inicializar segundo app para autenticação
+        const authConfig = {
             apiKey: "AIzaSyDCBwanaFABmQNgT91vnhV3Xv1RJn9bYOI",
             authDomain: "login-actualizado.firebaseapp.com",
             projectId: "login-actualizado",
@@ -748,29 +767,16 @@
             appId: "1:666275920026:web:f7fe76327968619c2c4723"
         };
         
-        const firebaseConfigData = {
-            apiKey: "AIzaSyClUaP2QpNFnCNwh449i0ztzzSnBj8CWG4",
-            authDomain: "plano-de-aula-moz.firebaseapp.com",
-            projectId: "plano-de-aula-moz",
-            storageBucket: "plano-de-aula-moz.firebasestorage.app",
-            messagingSenderId: "710741933182",
-            appId: "1:710741933182:web:f3599eb809e31fe3eeec2f"
-        };
-        
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfigAuth);
-        }
-        
-        let dataApp;
-        if (!firebase.apps.some(app => app.name === 'dataApp')) {
-            dataApp = firebase.initializeApp(firebaseConfigData, 'dataApp');
+        let authApp;
+        if (!firebase.apps.some(app => app.name === 'authApp')) {
+            authApp = firebase.initializeApp(authConfig, 'authApp');
         } else {
-            dataApp = firebase.app('dataApp');
+            authApp = firebase.app('authApp');
         }
         
-        const auth = firebase.auth();
-        const dbPlanos = firebase.firestore(dataApp);
-        const dbUsuarios = firebase.firestore();
+        const auth = firebase.auth(authApp);
+        // Usar o Firestore do primeiro app (plano-de-aula-moz) para usuários também
+        // ou criar uma coleção separada - vamos usar o mesmo db
         
         // ============================================
         // VARIÁVEIS
@@ -811,7 +817,8 @@
         async function carregarDadosUsuario() {
             if (!currentUser) return;
             try {
-                const docRef = dbUsuarios.collection('usuarios').doc(currentUser.uid);
+                // Usar o mesmo db (plano-de-aula-moz) para usuários
+                const docRef = db.collection('usuarios').doc(currentUser.uid);
                 const doc = await docRef.get();
                 if (doc.exists) {
                     userData = doc.data();
@@ -847,7 +854,7 @@
             if ((userData?.estrelas || 0) < CUSTO_ESTRELA) return false;
             try {
                 const novas = (userData?.estrelas || 0) - CUSTO_ESTRELA;
-                await dbUsuarios.collection('usuarios').doc(currentUser.uid).update({ estrelas: novas });
+                await db.collection('usuarios').doc(currentUser.uid).update({ estrelas: novas });
                 userData.estrelas = novas;
                 atualizarDisplayEstrelas();
                 return true;
@@ -886,7 +893,7 @@
         }
         
         // ============================================
-        // FUNÇÕES DE DISCIPLINAS
+        // FUNÇÕES DE DISCIPLINAS - BUSCA DO FIREBASE (plano-de-aula-moz)
         // ============================================
         async function carregarDisciplinas() {
             const classe = document.getElementById('classe').value;
@@ -920,11 +927,16 @@
             const trimestreNum = formatarTrimestre(trimestre);
             
             try {
-                const snapshot = await dbPlanos.collection('planos')
+                console.log(`🔍 Buscando disciplinas: Classe=${classeFormatada}, Trimestre=${trimestreNum}, Ano=2026`);
+                console.log(`📁 Projeto: plano-de-aula-moz - Coleção: planos`);
+                
+                const snapshot = await db.collection('planos')
                     .where('Classe', '==', classeFormatada)
                     .where('Trimestre', '==', trimestreNum)
                     .where('Ano', '==', 2026)
                     .get();
+                
+                console.log(`📊 Encontrados ${snapshot.size} documentos`);
                 
                 const disciplinasSet = new Set();
                 snapshot.forEach(doc => {
@@ -936,7 +948,13 @@
                 const disciplinas = Array.from(disciplinasSet).sort();
                 
                 if (disciplinas.length === 0) {
-                    container.innerHTML = '<p style="color:#e74c3c;">Nenhuma disciplina encontrada para esta classe/trimestre.</p>';
+                    container.innerHTML = `
+                        <p style="color:#e74c3c;">❌ Nenhuma disciplina encontrada para ${classe} - ${trimestre}º Trimestre</p>
+                        <p style="color:#888; font-size:12px; margin-top:5px;">
+                            Verifique se os planos já foram carregados no sistema.
+                            <br>Execute o script de popular planos se necessário.
+                        </p>
+                    `;
                     return;
                 }
                 
@@ -948,8 +966,11 @@
                 container.innerHTML = html;
                 
             } catch (error) {
-                console.error('Erro ao carregar disciplinas:', error);
-                container.innerHTML = '<p style="color:#e74c3c;">Erro ao carregar disciplinas. Verifique sua conexão.</p>';
+                console.error('❌ Erro ao carregar disciplinas:', error);
+                container.innerHTML = `
+                    <p style="color:#e74c3c;">❌ Erro ao carregar disciplinas</p>
+                    <p style="color:#888; font-size:12px;">${error.message}</p>
+                `;
             }
         }
         
@@ -1064,7 +1085,7 @@
         }
         
         // ============================================
-        // BUSCAR PLANOS DO FIREBASE
+        // BUSCAR PLANOS DO FIREBASE (plano-de-aula-moz)
         // ============================================
         async function buscarPlanos() {
             if (!currentUser) {
@@ -1101,20 +1122,23 @@
                 const numInicio = extrairNumeroSemana(semanaInicio);
                 const numFim = extrairNumeroSemana(semanaFim);
                 
-                console.log(`Buscando planos: Classe=${classeFormatada}, Trimestre=${trimestreNum}, Semanas=${numInicio}-${numFim}`);
+                console.log(`🔍 Buscando planos: Classe=${classeFormatada}, Trimestre=${trimestreNum}, Semanas=${numInicio}-${numFim}`);
+                console.log(`📁 Projeto: plano-de-aula-moz - Coleção: planos`);
+                
+                let totalEncontrados = 0;
                 
                 for (const disciplina of disciplinas) {
                     try {
-                        console.log(`Buscando disciplina: ${disciplina}`);
+                        console.log(`🔍 Buscando disciplina: ${disciplina}`);
                         
-                        const snapshot = await dbPlanos.collection('planos')
+                        const snapshot = await db.collection('planos')
                             .where('Classe', '==', classeFormatada)
                             .where('Disciplina', '==', disciplina)
                             .where('Trimestre', '==', trimestreNum)
                             .where('Ano', '==', 2026)
                             .get();
                         
-                        console.log(`Encontrados ${snapshot.size} documentos para ${disciplina}`);
+                        console.log(`📊 Encontrados ${snapshot.size} documentos para ${disciplina}`);
                         
                         const planos = [];
                         snapshot.forEach(doc => {
@@ -1129,9 +1153,11 @@
                         planos.sort((a, b) => extrairNumeroSemana(a.semana) - extrairNumeroSemana(b.semana));
                         if (planos.length > 0) {
                             planosEncontrados[disciplina] = planos;
+                            totalEncontrados += planos.length;
                         }
                     } catch (err) {
-                        console.error(`Erro ao buscar ${disciplina}:`, err);
+                        console.error(`❌ Erro ao buscar ${disciplina}:`, err);
+                        mostrarToast(`Erro ao buscar ${disciplina}: ${err.message}`, 'error');
                     }
                 }
                 
@@ -1143,8 +1169,11 @@
                         <div class="error-card">
                             <i class="fas fa-search" style="font-size: 40px; color: #f59e0b;"></i>
                             <h3>Nenhum plano encontrado</h3>
-                            <p>Não existem registos para ${classeOriginal} no período selecionado.</p>
-                            <p>Verifique se os planos já foram carregados para esta disciplina.</p>
+                            <p>Não existem registos para <strong>${classeOriginal}</strong> no período selecionado.</p>
+                            <p>Verifique se os planos já foram carregados para esta disciplina no sistema.</p>
+                            <p style="color:#888; font-size:12px; margin-top:10px;">
+                                💡 Dica: Execute o script de popular planos para adicionar dados de exemplo.
+                            </p>
                             <br>
                             <button class="btn" onclick="mostrarFiltros()" style="margin:0 auto; background:#667eea; color:white;">VOLTAR</button>
                         </div>`;
@@ -1154,10 +1183,10 @@
                 }
                 
                 mostrarResultadosPlanos(provincia, distrito, zip, numero, classeOriginal, trimestreOriginal, semanaInicio, semanaFim, delegado, dap);
-                mostrarToast(`✅ ${Object.keys(planosEncontrados).length} disciplina(s) encontrada(s)!`);
+                mostrarToast(`✅ ${Object.keys(planosEncontrados).length} disciplina(s) encontrada(s) (${totalEncontrados} planos no total)!`);
                 
             } catch (error) {
-                console.error('Erro ao buscar planos:', error);
+                console.error('❌ Erro ao buscar planos:', error);
                 hideLoading();
                 document.getElementById('resultadoContainer').innerHTML = `
                     <div class="error-card">
@@ -1486,6 +1515,7 @@
         // ============================================
         carregarSemanas();
         
+        // Autenticação usando o app separado
         auth.onAuthStateChanged(async (user) => {
             if (!user) {
                 mostrarToast('Faça login para continuar!', 'error');
@@ -1494,6 +1524,9 @@
             }
             currentUser = user;
             await carregarDadosUsuario();
+            
+            console.log('✅ Usuário autenticado:', user.uid);
+            console.log('📁 Buscando dados do projeto: plano-de-aula-moz');
         });
         
         // Exportar funções globais
@@ -1511,6 +1544,10 @@
         window.pagamentoManual = pagamentoManual;
         window.copiarNumeroModal = copiarNumeroModal;
         window.irParaLojaEstrelas = irParaLojaEstrelas;
+        
+        console.log('✅ quin.html carregado!');
+        console.log('📁 Projeto Firebase: plano-de-aula-moz');
+        console.log('📚 Coleção: planos');
     </script>
 </body>
 </html>
