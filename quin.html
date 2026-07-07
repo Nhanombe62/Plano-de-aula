@@ -2,241 +2,136 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Plano Quinzenal - Plano de Aula MZ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Plano Quinzenal</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            --primary-color: #0066cc;
+            --primary-dark: #004c99;
+            --bg-color: #f4f6f9;
+            --text-color: #333;
+            --border-color: #ddd;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        body {
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            padding-bottom: 95px;
+        body, .planos-tabela, .planos-tabela td, .planos-tabela th {
+            font-family: 'Times New Roman', Times, serif;
         }
         
-        .container { max-width: 750px; margin: 0 auto; }
-        
-        .back-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-            transition: all 0.2s;
-        }
-        .back-btn:hover { background: rgba(255,255,255,0.3); }
-        
-        .stars-header {
-            background: white;
-            border-radius: 25px;
-            padding: 15px 25px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        .filtros-card, .btn, .filtro-grupo label, .info-item {
+            font-family: 'Roboto', sans-serif;
         }
         
-        .logo-area h2 {
-            font-size: 1.3rem;
-            color: #2c3e50;
-        }
-        .logo-area p {
-            font-size: 0.7rem;
-            color: #888;
-        }
-        
-        .stars-balance {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            border-radius: 50px;
-            padding: 10px 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .stars-balance:hover { transform: scale(1.02); }
-        .stars-balance i { font-size: 1.5rem; color: #ffd700; }
-        .stars-balance .value { font-size: 1.8rem; font-weight: bold; color: white; }
-        .stars-balance .label { color: rgba(255,255,255,0.9); font-size: 0.8rem; }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #f0f2f5;
-            padding: 8px 18px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            color: #555;
-        }
-        .user-info i { color: #667eea; }
-        
-        .btn-comprar {
-            background: white;
-            color: #e67e22;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: 11px;
-            cursor: pointer;
-            margin-left: 5px;
-        }
-        .btn-comprar:hover { background: #f0f0f0; }
-        
+        body { background: var(--bg-color); padding: 20px 10px; color: var(--text-color); }
+        .container { max-width: 1200px; margin: 0 auto; }
+
         .filtros-card {
             background: white;
-            border-radius: 20px;
-            padding: 25px;
+            border-radius: var(--radius);
+            padding: 30px;
             margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
+            border-top: 5px solid var(--primary-color);
         }
-        
-        .filtros-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .filtros-header h3 { color: #667eea; font-size: 20px; font-weight: 700; }
-        .filtros-header p { color: #888; font-size: 13px; }
+
+        .filtros-header { text-align: center; margin-bottom: 25px; }
+        .filtros-header h3 { color: var(--primary-color); font-size: 22px; font-weight: 700; margin-bottom: 5px; }
+        .filtros-header p { color: #666; font-size: 14px; }
         
         .linha-localizacao {
             display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+            width: 100%;
         }
-        .linha-localizacao .filtro-grupo { flex: 1; min-width: 180px; }
+        
+        .linha-localizacao .filtro-grupo {
+            flex: 1;
+        }
         
         .filtros-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            gap: 20px;
         }
+        
         .filtro-grupo { display: flex; flex-direction: column; }
         .filtro-grupo.full-width { grid-column: 1 / -1; }
         
         .filtro-grupo label {
-            font-weight: 600;
-            margin-bottom: 6px;
-            font-size: 13px;
-            color: #555;
+            font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #555;
             display: flex;
             align-items: center;
             gap: 6px;
         }
         
         input, select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 14px;
-            background-color: #fafafa;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-        input:focus, select:focus {
-            border-color: #667eea;
-            background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+            width: 100%; padding: 12px 15px; border: 1px solid var(--border-color);
+            border-radius: 8px; font-size: 15px; background-color: #fafafa;
+            transition: all 0.3s ease; outline: none;
         }
         
-        .semana-range {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 12px;
-            border: 1px dashed #ddd;
+        input:focus, select:focus {
+            border-color: var(--primary-color); background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
         }
-        .semana-range span { color: #888; font-size: 12px; }
+
+        .semana-range {
+            display: flex; gap: 10px; align-items: center;
+            background: #f8f9fa; padding: 10px; border-radius: 8px;
+            border: 1px dashed var(--border-color);
+        }
+        .semana-range span { font-weight: bold; color: #888; font-size: 12px; }
         
         .btn-pesquisar {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            font-weight: 700;
-            border: none;
-            padding: 15px;
-            width: 100%;
-            border-radius: 12px;
-            margin-top: 20px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white; font-weight: 700; border: none; padding: 15px;
+            width: 100%; border-radius: 8px; margin-top: 25px;
+            font-size: 16px; cursor: pointer; transition: transform 0.2s;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            align-items: center; justify-content: center; gap: 10px;
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .btn-pesquisar:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102,126,234,0.4);
-        }
-        .btn-pesquisar:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-pesquisar:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 102, 204, 0.3); }
         
         .temas-transversais {
-            background: linear-gradient(135deg, #fef3c7, #fffbeb);
-            border-left: 5px solid #f59e0b;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
+            background: #e3f2fd; border-left: 5px solid var(--primary-color);
+            border-radius: 8px; padding: 20px; margin-bottom: 20px;
         }
-        .temas-transversais h4 { font-size: 14px; font-weight: 700; color: #d97706; margin-bottom: 10px; }
+        .temas-transversais h4 { font-size: 16px; font-weight: 700; color: var(--primary-dark); margin-bottom: 10px; }
         .temas-tags { display: flex; flex-wrap: wrap; gap: 8px; }
         .tema-tag {
-            background: white;
-            border: 1px solid #f59e0b;
-            color: #d97706;
-            border-radius: 20px;
-            padding: 4px 12px;
-            font-size: 12px;
-            font-weight: 600;
+            background: white; border: 1px solid var(--primary-color);
+            color: var(--primary-color); border-radius: 20px;
+            padding: 6px 14px; font-size: 13px; font-weight: 600;
         }
         
         .info-plano {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            background: white;
-            border: 1px solid #e0e0e0;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 12px;
+            display: flex; flex-wrap: wrap; gap: 15px; background: white;
+            border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 20px;
+            border-radius: 8px;
         }
         .info-item {
-            flex: 1 1 auto;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 500;
-            color: #555;
-            background: #f8f9fa;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 12px;
+            flex: 1 1 auto; display: flex; align-items: center; gap: 6px;
+            font-weight: 500; color: #555; background: #f8f9fa;
+            padding: 8px 12px; border-radius: 6px; font-size: 14px;
+        }
+        .info-item .valor {
+            font-weight: normal;
+        }
+        .info-item .linha-branco {
+            display: inline-block;
+            min-width: 120px;
+            border-bottom: 1px solid #999;
+            margin-left: 4px;
+            padding: 0 10px;
         }
         
         .planos-tabela {
@@ -244,348 +139,342 @@
             border-collapse: collapse;
             background: white;
             margin-bottom: 20px;
-            font-size: 12px;
-            border-radius: 12px;
+            font-size: 14px;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: var(--shadow);
         }
+        
         .planos-tabela th {
-            background: #667eea;
-            color: white;
-            padding: 10px 6px;
-            border: none;
+            background: #9e9e9e;
+            color: black;
+            padding: 10px 8px;
+            border: 1px solid #757575;
             text-align: center;
             font-weight: 600;
-            font-size: 12px;
+            text-transform: uppercase;
+            font-size: 14px;
         }
+        
         .planos-tabela td {
-            border: 1px solid #eee;
-            padding: 8px 6px;
+            border: 1px solid #ddd;
+            padding: 10px 10px;
             vertical-align: top;
-            color: #333;
+            color: black;
             background: #fff;
-            font-size: 12px;
+            font-size: 14px;
             line-height: 1.4;
         }
-        .planos-tabela tr:nth-child(even) td { background-color: #f9f9f9; }
+        
+        .planos-tabela tr:nth-child(even) td {
+            background-color: #f9f9f9;
+        }
+        
+        .modo-edicao td {
+            background-color: #fff9e6;
+        }
+        
+        .modo-edicao td[contenteditable="true"] {
+            cursor: text;
+            outline: none;
+        }
+        
+        .modo-edicao td[contenteditable="true"]:hover {
+            background-color: #fff3cd;
+        }
+        
+        .modo-edicao td[contenteditable="true"]:focus {
+            background-color: #fff3cd;
+            outline: 2px solid var(--primary-color);
+            outline-offset: -2px;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-aviso {
+            background: white;
+            border-radius: var(--radius);
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: var(--shadow);
+            border-top: 8px solid #ffc107;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-aviso h2 {
+            color: #856404;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        
+        .modal-aviso p {
+            color: #333;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .modal-aviso .destaque {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 5px solid var(--primary-color);
+        }
+        
+        .modal-aviso .destaque strong {
+            color: var(--primary-dark);
+            font-size: 18px;
+        }
+        
+        .modal-aviso .btn-ok {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.2s;
+        }
+        
+        .modal-aviso .btn-ok:hover {
+            background: #218838;
+            transform: scale(1.02);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0066cc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .loading-centralizado {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(244, 246, 249, 0.9);
+            z-index: 999;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .disciplinas-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        
+        .disciplina-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 150px;
+        }
+        
+        .disciplina-checkbox input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .disciplina-checkbox label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: normal;
+        }
+        
+        .btn-selecionar-todas {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
         
         .disciplina-card {
-            margin-bottom: 20px;
-            border: 1px solid #e0e0e0;
-            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
             overflow: hidden;
-            background: white;
         }
+        
         .disciplina-card h3 {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: #0066cc;
             color: white;
-            padding: 12px 20px;
+            padding: 10px 15px;
             margin: 0;
-            font-size: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .disciplina-card h3 span {
-            font-size: 11px;
-            background: rgba(255,255,255,0.2);
-            padding: 4px 10px;
-            border-radius: 20px;
+            font-size: 16px;
         }
         
         .disciplina-actions {
             display: flex;
             gap: 10px;
-            padding: 12px 15px;
+            padding: 10px 15px;
             background: #f8f9fa;
-            border-top: 1px solid #eee;
+            border-top: 1px solid #ddd;
+        }
+        
+        .disciplina-actions .btn {
+            flex: 0 1 auto;
+            padding: 8px 16px;
+            min-width: auto;
+            font-size: 13px;
         }
         
         .global-actions {
             display: flex;
-            gap: 12px;
+            gap: 15px;
             margin: 20px 0;
             flex-wrap: wrap;
         }
         
         .btn {
-            padding: 12px 18px;
+            padding: 15px 25px;
             border: none;
-            border-radius: 12px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             flex: 1;
-            min-width: 130px;
-            font-size: 13px;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .btn:hover { transform: translateY(-2px); }
-        .btn-editar { background: #f59e0b; color: #1a1a2e; }
-        .btn-pdf { background: #dc3545; color: white; }
-        .btn-nova-consulta { background: #8b5cf6; color: white; }
-        
-        .disciplinas-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 12px;
-            border: 1px solid #ddd;
-            max-height: 250px;
-            overflow-y: auto;
-        }
-        .disciplina-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 8px;
             min-width: 140px;
-        }
-        .disciplina-checkbox input { width: 18px; height: 18px; cursor: pointer; }
-        .disciplina-checkbox label { color: #555; cursor: pointer; font-size: 13px; }
-        
-        .btn-selecionar-todas {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        
-        .support-banner {
-            background: white;
-            border-radius: 12px;
-            padding: 12px 20px;
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        .support-banner span { color: #888; font-size: 12px; }
-        .support-banner a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(102,126,234,0.1);
-            padding: 5px 12px;
-            border-radius: 30px;
-            font-size: 13px;
-        }
-        
-        .error-card {
-            background: #fff3cd;
-            border-left: 5px solid #ffc107;
-            padding: 30px;
-            text-align: center;
-            border-radius: 16px;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px);
-            z-index: 100000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .modal.active { display: flex; }
-        
-        .modal-content {
-            background: white;
-            border-radius: 28px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-        .modal-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .modal-header h3 { color: #2c3e50; font-size: 18px; font-weight: 800; }
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #888;
-        }
-        .modal-body { padding: 24px; text-align: center; }
-        
-        .payment-details {
-            background: linear-gradient(135deg, #fef3c7, #fffbeb);
-            border-radius: 16px;
-            padding: 20px;
-            margin: 15px 0;
-            border: 1px solid #f59e0b;
-        }
-        .payment-details .name {
-            font-size: 18px;
-            font-weight: 800;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        .payment-details .phone {
-            font-size: 24px;
-            font-weight: 800;
-            color: #d97706;
-            letter-spacing: 2px;
-        }
-        .copy-btn-modal {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 30px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        
-        .saldo-info {
-            font-size: 14px;
-            color: #555;
-            margin: 10px 0;
-        }
-        .saldo-info strong { color: #f39c12; font-size: 18px; }
-        
-        .modal-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .modal-buttons button {
-            padding: 14px;
-            border-radius: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            border: none;
-            font-size: 14px;
+            font-size: 15px;
             transition: all 0.2s;
-        }
-        .modal-buttons button:hover { transform: scale(1.02); }
-        .modal-buttons button:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .btn-estrelas { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; }
-        .btn-comprar-modal { background: linear-gradient(135deg, #10b981, #059669); color: white; }
-        .btn-manual-modal { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; }
-        .btn-cancel-modal { background: #6c757d; color: white; }
-        
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 99999;
-            display: none;
-            justify-content: center;
+            display: flex;
             align-items: center;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #667eea;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-size: 14px;
-            z-index: 100001;
-            animation: fadeInOut 3s ease forwards;
-        }
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
-        @media (max-width: 550px) {
-            .global-actions { flex-direction: column; }
-            .btn { width: 100%; }
-            .stars-header { flex-direction: column; text-align: center; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-editar { background: #ffc107; color: #333; }
+        .btn-pdf { background: #dc3545; color: white; }
+        .btn-salvar { background: #28a745; color: white; }
+        .btn-cancelar { background: #6c757d; color: white; }
+        .btn-nova-consulta { background: #17a2b8; color: white; }
+        
+        @media print {
+            .filtros-card, .acoes, .disciplina-actions, .global-actions { display: none !important; }
+            body { background: white; padding: 0; }
+            .container { max-width: 100%; }
+        }
+
+        .campo-obrigatorio {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .campo-obrigatorio.hidden {
+            display: none;
+        }
+
+        .campo-duplo {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+        .campo-duplo .filtro-grupo {
+            flex: 1;
+        }
+        .campo-duplo .filtro-grupo:first-child {
+            flex: 0 0 30%;
+        }
+        .campo-duplo .filtro-grupo:last-child {
+            flex: 1;
         }
     </style>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <button class="back-btn" onclick="window.location.href='tela.html'">
-            <i class="fas fa-arrow-left"></i> Voltar
-        </button>
-        
-        <!-- Header com Estrelas -->
-        <div class="stars-header">
-            <div class="logo-area">
-                <h2><i class="fas fa-calendar-alt"></i> Plano Quinzenal</h2>
-                <p>Gere planos de aula quinzenais</p>
+    <div id="modalAviso" class="modal-overlay">
+        <div class="modal-aviso">
+            <h2>Atenção Professor!</h2>
+            <p><strong>2º Trimestre - 2026</strong></p>
+            
+            <div class="destaque" style="background: #d4edda; border-left-color: #28a745;">
+                <strong style="color: #155724;">✅ 1ª a 6ª Classe:</strong>
+                <p style="margin-top: 5px; color: #155724;">Todas as disciplinas estão disponíveis e actualizadas!</p>
             </div>
-            <div class="stars-balance" onclick="irParaLojaEstrelas()">
-                <i class="fas fa-star"></i>
-                <span class="value" id="starsBalance">0</span>
-                <span class="label">Estrelas</span>
-                <button class="btn-comprar" onclick="event.stopPropagation(); irParaLojaEstrelas()">
-                    <i class="fas fa-shopping-cart"></i> Comprar
-                </button>
+            
+            <div class="destaque" style="background: #fff3cd; border-left-color: #ffc107;">
+                <strong style="color: #856404;">⚠️ 7ª a 12ª Classe:</strong>
+                <p style="margin-top: 5px; color: #856404;">Selecione as disciplinas que pretende visualizar.</p>
             </div>
-            <div class="user-info" id="userInfo">
-                <i class="fas fa-user-circle"></i>
-                <span id="userName">Carregando...</span>
-            </div>
+            
+            <button class="btn-ok" onclick="fecharModal()">OK, ENTENDI</button>
         </div>
-        
-        <!-- Formulário -->
+    </div>
+
+    <div class="container">
         <div class="filtros-card" id="filtrosCard">
             <div class="filtros-header">
-                <h3><i class="fas fa-calendar-week"></i> Dados para gerar Plano Quinzenal</h3>
-                <p>Preencha as informações e selecione o conteúdo pedagógico</p>
-                <p style="font-size:12px; color:#f59e0b; margin-top:5px;">
-                    <i class="fas fa-star"></i> Cada disciplina baixada custa <strong>1 estrela</strong>
-                </p>
+                <h3>Dados para gerar Plano Quinzenal</h3>
+                <p>Preencha as informações locais e selecione o conteúdo pedagógico. Campos não preenchidos ficarão em branco no PDF.</p>
             </div>
             
             <div class="linha-localizacao">
                 <div class="filtro-grupo">
-                    <label><i class="fas fa-map-marker-alt"></i> Província</label>
+                    <label>Província</label>
                     <select id="provincia" onchange="carregarDistritos()">
-                        <option value="">Selecione</option>
+                        <option value="">Selecione a Província</option>
                         <option value="Niassa">Niassa</option>
                         <option value="Cabo Delgado">Cabo Delgado</option>
                         <option value="Nampula">Nampula</option>
@@ -599,28 +488,32 @@
                         <option value="Maputo Cidade">Maputo Cidade</option>
                     </select>
                 </div>
+                
                 <div class="filtro-grupo">
-                    <label><i class="fas fa-city"></i> Distrito</label>
-                    <select id="distrito"><option value="">Selecione a província</option></select>
+                    <label>Distrito</label>
+                    <select id="distrito">
+                        <option value="">Primeiro selecione a província</option>
+                    </select>
                 </div>
             </div>
             
             <div class="linha-localizacao">
                 <div class="filtro-grupo">
-                    <label><i class="fas fa-location-dot"></i> Localidade</label>
-                    <input type="text" id="zip" placeholder="Ex: Macharate">
+                    <label>ZIP (Localidade)</label>
+                    <input type="text" id="zip" placeholder="Ex: Macharate, Bairro Central">
                 </div>
+                
                 <div class="filtro-grupo">
-                    <label><i class="fas fa-hashtag"></i> Número</label>
-                    <input type="text" id="numero" placeholder="Nº da escola">
+                    <label>Número</label>
+                    <input type="text" id="numero" placeholder="Número da escola/processo">
                 </div>
             </div>
             
             <div class="filtros-grid">
                 <div class="filtro-grupo">
-                    <label><i class="fas fa-graduation-cap"></i> Classe</label>
+                    <label>Classe</label>
                     <select id="classe" onchange="carregarDisciplinas()">
-                        <option value="">Selecione</option>
+                        <option value="">Selecione a classe</option>
                         <option value="1ª Classe">1ª Classe</option>
                         <option value="2ª Classe">2ª Classe</option>
                         <option value="3ª Classe">3ª Classe</option>
@@ -635,120 +528,115 @@
                         <option value="12ª Classe">12ª Classe</option>
                     </select>
                 </div>
+                
                 <div class="filtro-grupo">
-                    <label><i class="fas fa-calendar-week"></i> Trimestre</label>
+                    <label>Trimestre</label>
                     <select id="trimestre" onchange="carregarDisciplinas()">
-                        <option value="">Selecione</option>
+                        <option value="">Selecione o trimestre</option>
                         <option value="1º Trimestre">1º Trimestre</option>
                         <option value="2º Trimestre">2º Trimestre</option>
                         <option value="3º Trimestre">3º Trimestre</option>
                     </select>
                 </div>
+
+                <div class="filtro-grupo">
+                    <label>Nome da Escola</label>
+                    <input type="text" id="nomeEscola" placeholder="Nome da escola (opcional)">
+                </div>
+                
                 <div class="filtro-grupo full-width">
-                    <label><i class="fas fa-clock"></i> Período (Máx. 3 semanas)</label>
+                    <label>Período de Vigência</label>
                     <div class="semana-range">
-                        <select id="semanaInicio" onchange="validarSemanas()"><option value="">Início</option></select>
+                        <select id="semanaInicio">
+                            <option value="">Semana inicial</option>
+                            <option value="1ª Semana">1ª Semana</option>
+                            <option value="2ª Semana">2ª Semana</option>
+                            <option value="3ª Semana">3ª Semana</option>
+                            <option value="4ª Semana">4ª Semana</option>
+                            <option value="5ª Semana">5ª Semana</option>
+                            <option value="6ª Semana">6ª Semana</option>
+                            <option value="7ª Semana">7ª Semana</option>
+                            <option value="8ª Semana">8ª Semana</option>
+                            <option value="9ª Semana">9ª Semana</option>
+                            <option value="10ª Semana">10ª Semana</option>
+                            <option value="11ª Semana">11ª Semana</option>
+                            <option value="12ª Semana">12ª Semana</option>
+                            <option value="13ª Semana">13ª Semana</option>
+                            <option value="14ª Semana">14ª Semana</option>
+                        </select>
                         <span>até</span>
-                        <select id="semanaFim" onchange="validarSemanas()"><option value="">Fim</option></select>
+                        <select id="semanaFim">
+                            <option value="">Semana final</option>
+                            <option value="1ª Semana">1ª Semana</option>
+                            <option value="2ª Semana">2ª Semana</option>
+                            <option value="3ª Semana">3ª Semana</option>
+                            <option value="4ª Semana">4ª Semana</option>
+                            <option value="5ª Semana">5ª Semana</option>
+                            <option value="6ª Semana">6ª Semana</option>
+                            <option value="7ª Semana">7ª Semana</option>
+                            <option value="8ª Semana">8ª Semana</option>
+                            <option value="9ª Semana">9ª Semana</option>
+                            <option value="10ª Semana">10ª Semana</option>
+                            <option value="11ª Semana">11ª Semana</option>
+                            <option value="12ª Semana">12ª Semana</option>
+                            <option value="13ª Semana">13ª Semana</option>
+                            <option value="14ª Semana">14ª Semana</option>
+                        </select>
                     </div>
-                    <div id="erroSemanas" style="color:#e74c3c; font-size:11px; display:none;">Máximo 3 semanas</div>
+                    <div id="erroSemanas" style="color: #dc3545; font-size: 12px; margin-top: 5px; display: none;">
+                        O período não pode ultrapassar 3 semanas
+                    </div>
                 </div>
             </div>
             
             <div class="filtro-grupo full-width">
-                <label><i class="fas fa-book"></i> Disciplina(s)</label>
+                <label>Disciplina(s)</label>
                 <div id="disciplinasContainer" class="disciplinas-container">
-                    <p style="color:#888;">Selecione classe e trimestre</p>
+                    <p style="color: #999;">Selecione a classe e o trimestre</p>
                 </div>
             </div>
             
             <div class="filtro-grupo">
-                <label><i class="fas fa-user-tie"></i> Delegado</label>
-                <input type="text" id="delegado" placeholder="Nome do Delegado">
-            </div>
-            <div class="filtro-grupo">
-                <label><i class="fas fa-user-check"></i> DAP</label>
-                <input type="text" id="dap" placeholder="Nome do DAP">
+                <label>Delegado da Disciplina</label>
+                <input type="text" id="delegado" placeholder="Nome completo do Delegado (opcional)">
             </div>
             
-            <button class="btn-pesquisar" id="btnGerar" onclick="buscarPlanos()">
-                <i class="fas fa-search"></i> BUSCAR PLANOS
+            <div class="filtro-grupo">
+                <label>Responsável pela Escola</label>
+                <div class="campo-duplo">
+                    <div class="filtro-grupo">
+                        <input type="text" id="cargoResponsavel" placeholder="Cargo (ex: DAP, Director)" value="DAP">
+                    </div>
+                    <div class="filtro-grupo">
+                        <input type="text" id="nomeResponsavel" placeholder="Nome completo do responsável (opcional)">
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn-pesquisar" id="btnGerar" onclick="gerarPlanoQuinzenal()">
+                GERAR PLANO QUINZENAL
             </button>
         </div>
         
         <div id="resultadoContainer"></div>
-        
-        <div class="support-banner">
-            <span><i class="fas fa-headset"></i> Precisa de ajuda?</span>
-            <a href="tel:+258876393961"><i class="fas fa-phone-alt"></i> 87 639 3961</a>
-            <a href="tel:+258834890828"><i class="fas fa-phone-alt"></i> 83 489 0828</a>
-            <a href="https://wa.me/258876393961"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-        </div>
     </div>
-    
-    <!-- Modal de Pagamento -->
-    <div class="modal" id="modalPagamento">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-download"></i> Baixar Plano</h3>
-                <button class="close-modal" onclick="fecharModalPagamento()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="payment-details">
-                    <div class="name">Edmilson Bartolomeu Nhanombe</div>
-                    <div class="phone" id="phoneNumber">87 639 3961</div>
-                    <button class="copy-btn-modal" onclick="copiarNumeroModal()"><i class="fas fa-copy"></i> Copiar Número</button>
-                </div>
-                
-                <div class="saldo-info">
-                    Saldo: <strong id="saldoAtualModal">0</strong> ⭐ estrelas
-                </div>
-                
-                <div id="modalMensagem" style="font-size:13px; color:#888; margin-bottom:10px;">
-                    Cada disciplina custa <strong>1 estrela</strong>
-                </div>
-                
-                <div class="modal-buttons">
-                    <button class="btn-estrelas" id="btnBaixarComEstrelas" onclick="baixarComEstrelas()">
-                        <i class="fas fa-star"></i> Baixar com Estrelas (1 ⭐)
-                    </button>
-                    <button class="btn-comprar-modal" onclick="comprarEstrelas()">
-                        <i class="fas fa-shopping-cart"></i> Comprar Estrelas
-                    </button>
-                    <button class="btn-manual-modal" onclick="pagamentoManual()">
-                        <i class="fas fa-exchange-alt"></i> Pagamento Manual
-                    </button>
-                    <button class="btn-cancel-modal" onclick="fecharModalPagamento()">
-                        Cancelar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Loading -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <p style="color:white;">Processando...</p>
-    </div>
-    
+
     <script>
-        // ============================================
-        // PROJETO 1: AUTENTICAÇÃO (login-actualizado)
-        // ============================================
-        const firebaseConfigAuth = {
-            apiKey: "AIzaSyDCBwanaFABmQNgT91vnhV3Xv1RJn9bYOI",
-            authDomain: "login-actualizado.firebaseapp.com",
-            projectId: "login-actualizado",
-            storageBucket: "login-actualizado.firebasestorage.app",
-            messagingSenderId: "666275920026",
-            appId: "1:666275920026:web:f7fe76327968619c2c4723"
-        };
-        
-        // ============================================
-        // PROJETO 2: DADOS (plano-de-aula-moz)
-        // ============================================
-        const firebaseConfigData = {
+        window.onload = function() {
+            if (!sessionStorage.getItem('avisoMostrado')) {
+                document.getElementById('modalAviso').style.display = 'flex';
+                sessionStorage.setItem('avisoMostrado', 'true');
+            } else {
+                document.getElementById('modalAviso').style.display = 'none';
+            }
+            carregarDistritos();
+        }
+
+        function fecharModal() {
+            document.getElementById('modalAviso').style.display = 'none';
+        }
+
+        const firebaseConfig = {
             apiKey: "AIzaSyClUaP2QpNFnCNwh449i0ztzzSnBj8CWG4",
             authDomain: "plano-de-aula-moz.firebaseapp.com",
             projectId: "plano-de-aula-moz",
@@ -756,164 +644,78 @@
             messagingSenderId: "710741933182",
             appId: "1:710741933182:web:f3599eb809e31fe3eeec2f"
         };
-        
-        // ============================================
-        // INICIALIZAR AMBOS OS PROJETOS
-        // ============================================
-        // App 1: Autenticação (login-actualizado)
-        let authApp;
-        if (!firebase.apps.some(app => app.name === 'authApp')) {
-            authApp = firebase.initializeApp(firebaseConfigAuth, 'authApp');
-        } else {
-            authApp = firebase.app('authApp');
-        }
-        const auth = firebase.auth(authApp);
-        
-        // App 2: Dados (plano-de-aula-moz)
-        let dataApp;
-        if (!firebase.apps.some(app => app.name === 'dataApp')) {
-            dataApp = firebase.initializeApp(firebaseConfigData, 'dataApp');
-        } else {
-            dataApp = firebase.app('dataApp');
-        }
-        const db = firebase.firestore(dataApp);
-        
-        console.log('✅ Projetos Firebase inicializados:');
-        console.log('🔐 Autenticação: login-actualizado');
-        console.log('📁 Dados: plano-de-aula-moz');
-        
-        // ============================================
-        // VARIÁVEIS
-        // ============================================
-        let currentUser = null;
-        let userData = null;
-        let planosEncontrados = {};
-        let disciplinaSelecionada = null;
-        let isBaixandoTodos = false;
-        let CUSTO_ESTRELA = 1;
-        
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let planosPorDisciplina = {};
+        let planosOriginaisPorDisciplina = {};
+
         const distritosPorProvincia = {
-            "Niassa": ["Cuamba","Lichinga","Mandimba","Marrupa","Mecanhelas","Sanga"],
-            "Cabo Delgado": ["Pemba","Montepuez","Mocímboa","Mueda","Ancuabe","Balama"],
-            "Nampula": ["Nampula","Nacala","Angoche","Moma","Monapo","Ribaué"],
-            "Zambezia": ["Quelimane","Mocuba","Gurué","Alto Molócue","Milange","Nicoadala"],
-            "Tete": ["Tete","Moatize","Changara","Angónia","Cahora Bassa"],
-            "Manica": ["Chimoio","Manica","Gondola","Sussundenga","Barué"],
-            "Sofala": ["Beira","Dondo","Nhamatanda","Caia","Gorongosa"],
-            "Inhambane": ["Inhambane","Maxixe","Massinga","Vilanculos","Zavala"],
-            "Gaza": ["Xai-Xai","Chókwè","Chibuto","Bilene","Manjacaze"],
-            "Maputo Província": ["Matola","Boane","Manhiça","Marracuene"],
-            "Maputo Cidade": ["KaMpfumo","KaMaxaquene","KaMavota","KaMubukwana"]
+            "Niassa": ["Cuamba", "Lago", "Lichinga", "Majune", "Mandimba", "Marrupa", "Maúa", "Mavago", "Mecanhelas", "Mecula", "Metarica", "Muembe", "N'gauma", "Nipepe", "Sanga"],
+            "Cabo Delgado": ["Ancuabe", "Balama", "Chiúre", "Ibo", "Macomia", "Mecúfi", "Meluco", "Metuge", "Mocímboa da Praia", "Montepuez", "Mueda", "Muidumbe", "Namuno", "Nangade", "Palma", "Pemba", "Quissanga"],
+            "Nampula": ["Angoche", "Eráti", "Ilha de Moçambique", "Lalaua", "Larde", "Liúpo", "Malema", "Meconta", "Mecubúri", "Memba", "Mogincual", "Mogovolas", "Moma", "Monapo", "Mossuril", "Muecate", "Murrupula", "Nacala-a-Velha", "Nacala Porto", "Nacarôa", "Nampula", "Rapale", "Ribaué"],
+            "Zambezia": ["Alto Molócue", "Chinde", "Derre", "Gilé", "Gurué", "Ile", "Inhassunge", "Luabo", "Lugela", "Maganja da Costa", "Milange", "Mocuba", "Mocubela", "Molumbo", "Mopeia", "Morrumbala", "Mulevala", "Namacurra", "Namarroi", "Nicoadala", "Pebane", "Quelimane"],
+            "Tete": ["Angónia", "Cahora-Bassa", "Changara", "Chifunde", "Chiuta", "Dôa", "Macanga", "Magoé", "Marara", "Marávia", "Moatize", "Mutarara", "Tete", "Tsangano", "Zumbo"],
+            "Manica": ["Bárue", "Chimoio", "Gondola", "Guro", "Macate", "Machaze", "Macossa", "Manica", "Mossurize", "Sussundenga", "Tambara", "Vanduzi"],
+            "Sofala": ["Beira", "Búzi", "Caia", "Chemba", "Cheringoma", "Chibabava", "Dondo", "Gorongosa", "Machanga", "Maringué", "Marromeu", "Muanza", "Nhamatanda"],
+            "Inhambane": ["Funhalouro", "Govuro", "Homoíne", "Inhambane", "Inharrime", "Inhassoro", "Jangamo", "Mabote", "Massinga", "Maxixe", "Morrumbene", "Panda", "Vilanculos", "Zavala"],
+            "Gaza": ["Bilene", "Chibuto", "Chicualacuala", "Chigubo", "Chókwè", "Chongoene", "Guijá", "Limpopo", "Mabalane", "Manjacaze", "Mapai", "Massangena", "Massingir", "Xai-Xai"],
+            "Maputo Província": ["Boane", "Magude", "Manhiça", "Marracuene", "Matola", "Matutuíne", "Moamba", "Namaacha"],
+            "Maputo Cidade": ["KaMpfumo", "Nlhamankulu", "KaMaxaquene", "KaMavota", "KaMubukwana", "KaTembe", "KaNyaka"]
         };
-        
-        const disciplinasPreDefinidas = {
-            "1ª Classe": ["Português","Matemática","Educação Física"],
-            "2ª Classe": ["Português","Matemática","Educação Física"],
-            "3ª Classe": ["Português","Matemática","Educação Física"],
-            "4ª Classe": ["Português","Matemática","Ciências Sociais","Ciências Naturais","Educação Física"],
-            "5ª Classe": ["Português","Matemática","Ciências Naturais","Ciências Sociais","Educação Física"],
-            "6ª Classe": ["Português","Matemática","Ciências Naturais","Ciências Sociais","Educação Física"]
-        };
-        
-        // ============================================
-        // FUNÇÕES DE USUÁRIO (Firestore do plano-de-aula-moz)
-        // ============================================
-        async function carregarDadosUsuario() {
-            if (!currentUser) return;
-            try {
-                // Usar o Firestore do projeto plano-de-aula-moz para usuários
-                const docRef = db.collection('usuarios').doc(currentUser.uid);
-                const doc = await docRef.get();
-                if (doc.exists) {
-                    userData = doc.data();
-                } else {
-                    const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}');
-                    userData = {
-                        uid: currentUser.uid,
-                        email: currentUser.email,
-                        nome: perfil.nome || currentUser.displayName || 'Usuário',
-                        estrelas: 0,
-                        telefone: perfil.telefone || '',
-                        escola: perfil.escola || ''
-                    };
-                    await docRef.set(userData);
-                }
-                atualizarDisplayEstrelas();
-                const nome = userData?.nome || userData?.email?.split('@')[0] || 'Professor';
-                document.getElementById('userName').textContent = nome;
-                if (userData?.nome) document.getElementById('delegado').value = userData.nome;
-            } catch(e) {
-                console.error('Erro ao carregar dados:', e);
-                const perfil = JSON.parse(localStorage.getItem('perfil_professor') || '{}');
-                document.getElementById('userName').textContent = perfil.nome || 'Professor';
-            }
-        }
-        
-        function atualizarDisplayEstrelas() {
-            document.getElementById('starsBalance').textContent = userData?.estrelas || 0;
-        }
-        
-        async function consumirEstrela() {
-            if (!currentUser) return false;
-            if ((userData?.estrelas || 0) < CUSTO_ESTRELA) return false;
-            try {
-                const novas = (userData?.estrelas || 0) - CUSTO_ESTRELA;
-                await db.collection('usuarios').doc(currentUser.uid).update({ estrelas: novas });
-                userData.estrelas = novas;
-                atualizarDisplayEstrelas();
-                return true;
-            } catch(e) { return false; }
-        }
-        
-        // ============================================
-        // FUNÇÕES DE DISTRITOS E SEMANAS
-        // ============================================
+
         function carregarDistritos() {
             const provincia = document.getElementById('provincia').value;
             const distritoSelect = document.getElementById('distrito');
-            distritoSelect.innerHTML = '<option value="">Selecione</option>';
-            if (!provincia) return;
-            (distritosPorProvincia[provincia] || []).sort().forEach(d => {
-                distritoSelect.innerHTML += `<option value="${d}">${d}</option>`;
+            distritoSelect.innerHTML = '';
+            if (!provincia) {
+                distritoSelect.innerHTML = '<option value="">Primeiro selecione a província</option>';
+                return;
+            }
+            const distritos = distritosPorProvincia[provincia] || [];
+            distritoSelect.innerHTML = '<option value="">Selecione o distrito</option>';
+            distritos.sort().forEach(distrito => {
+                const option = document.createElement('option');
+                option.value = distrito;
+                option.textContent = distrito;
+                distritoSelect.appendChild(option);
             });
         }
-        
-        function carregarSemanas() {
-            for (let i = 1; i <= 14; i++) {
-                document.getElementById('semanaInicio').innerHTML += `<option value="${i}ª Semana">${i}ª Semana</option>`;
-                document.getElementById('semanaFim').innerHTML += `<option value="${i}ª Semana">${i}ª Semana</option>`;
-            }
-        }
-        
-        function validarSemanas() {
-            const inicio = document.getElementById('semanaInicio').value;
-            const fim = document.getElementById('semanaFim').value;
-            const erro = document.getElementById('erroSemanas');
-            if (!inicio || !fim) { erro.style.display = 'none'; return true; }
-            const numI = parseInt(inicio);
-            const numF = parseInt(fim);
-            if (numF - numI > 2) { erro.style.display = 'block'; return false; }
-            erro.style.display = 'none'; return true;
-        }
-        
-        // ============================================
-        // FUNÇÕES DE DISCIPLINAS - BUSCA DO FIREBASE (plano-de-aula-moz)
-        // ============================================
+
+        const disciplinasPreDefinidas = {
+            "1ª Classe": ["Português", "Matemática", "Educação Física"],
+            "2ª Classe": ["Português", "Matemática", "Educação Física"],
+            "3ª Classe": ["Português", "Matemática", "Educação Física"],
+            "4ª Classe": ["Português", "Matemática", "Ciências Sociais", "Ciências Naturais", "Educação Física"],
+            "5ª Classe": ["Português", "Matemática", "Ciências Naturais", "Ciências Sociais", "Educação Visual", "Educação Física"],
+            "6ª Classe": ["Português", "Matemática", "Ciências Naturais", "Ciências Sociais", "Educação Visual", "Educação Física"]
+        };
+
         async function carregarDisciplinas() {
             const classe = document.getElementById('classe').value;
             const trimestre = document.getElementById('trimestre').value;
             const container = document.getElementById('disciplinasContainer');
             
             if (!classe) {
-                container.innerHTML = '<p style="color:#888;">Selecione a classe</p>';
+                container.innerHTML = '<p style="color: #999;">Selecione uma classe primeiro</p>';
                 return;
             }
             
             if (classe.match(/[1-6]ª Classe/)) {
                 const disciplinas = disciplinasPreDefinidas[classe] || [];
-                let html = '<div><button class="btn-selecionar-todas" onclick="selecionarTodas(true)">Selecionar Todas</button> <button class="btn-selecionar-todas" onclick="selecionarTodas(false)">Desmarcar</button></div><div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;">';
-                disciplinas.forEach(d => {
-                    html += `<label class="disciplina-checkbox"><input type="checkbox" class="disciplina-selecionada" value="${d}" checked> ${d}</label>`;
+                let html = '<div style="margin-bottom: 10px;">';
+                html += '<button type="button" class="btn-selecionar-todas" onclick="selecionarTodasDisciplinas(true)">Selecionar Todas</button> ';
+                html += '<button type="button" class="btn-selecionar-todas" onclick="selecionarTodasDisciplinas(false)">Desmarcar Todas</button>';
+                html += '</div><div style="display: flex; flex-wrap: wrap; gap: 15px;">';
+                
+                disciplinas.forEach(disp => {
+                    html += `
+                        <div class="disciplina-checkbox">
+                            <input type="checkbox" class="disciplina-selecionada" value="${disp}" checked id="chk_${disp.replace(/\s/g, '_')}">
+                            <label for="chk_${disp.replace(/\s/g, '_')}">${disp}</label>
+                        </div>
+                    `;
                 });
                 html += '</div>';
                 container.innerHTML = html;
@@ -921,191 +723,189 @@
             }
             
             if (!trimestre) {
-                container.innerHTML = '<p style="color:#888;">Selecione o trimestre</p>';
+                container.innerHTML = '<p style="color: #999;">Selecione o trimestre primeiro</p>';
                 return;
             }
             
-            container.innerHTML = '<p style="color:#888;">Carregando disciplinas...</p>';
+            container.innerHTML = '<p style="color: #999;">Carregando disciplinas...</p>';
             
             const classeFormatada = formatarClasse(classe);
             const trimestreNum = formatarTrimestre(trimestre);
             
             try {
-                console.log(`🔍 Buscando disciplinas: Classe=${classeFormatada}, Trimestre=${trimestreNum}, Ano=2026`);
-                console.log(`📁 Projeto: plano-de-aula-moz - Coleção: planos`);
-                
                 const snapshot = await db.collection('planos')
                     .where('Classe', '==', classeFormatada)
                     .where('Trimestre', '==', trimestreNum)
                     .where('Ano', '==', 2026)
                     .get();
                 
-                console.log(`📊 Encontrados ${snapshot.size} documentos`);
-                
                 const disciplinasSet = new Set();
                 snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const disciplina = data.Disciplina;
+                    const disciplina = doc.data().Disciplina;
                     if (disciplina) disciplinasSet.add(disciplina);
                 });
                 
                 const disciplinas = Array.from(disciplinasSet).sort();
                 
                 if (disciplinas.length === 0) {
-                    container.innerHTML = `
-                        <p style="color:#e74c3c;">❌ Nenhuma disciplina encontrada para ${classe} - ${trimestre}º Trimestre</p>
-                        <p style="color:#888; font-size:12px; margin-top:5px;">
-                            Verifique se os planos já foram carregados no sistema.
-                            <br>Execute o script de popular planos se necessário.
-                        </p>
-                    `;
+                    container.innerHTML = '<p style="color: #dc3545;">Nenhuma disciplina encontrada para esta classe/trimestre.</p>';
                     return;
                 }
                 
-                let html = '<div><button class="btn-selecionar-todas" onclick="selecionarTodas(true)">Selecionar Todas</button> <button class="btn-selecionar-todas" onclick="selecionarTodas(false)">Desmarcar</button></div><div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;">';
-                disciplinas.forEach(d => {
-                    html += `<label class="disciplina-checkbox"><input type="checkbox" class="disciplina-selecionada" value="${d}"> ${d}</label>`;
+                let html = '<div style="margin-bottom: 10px;">';
+                html += '<button type="button" class="btn-selecionar-todas" onclick="selecionarTodasDisciplinas(true)">Selecionar Todas</button> ';
+                html += '<button type="button" class="btn-selecionar-todas" onclick="selecionarTodasDisciplinas(false)">Desmarcar Todas</button>';
+                html += '</div><div style="display: flex; flex-wrap: wrap; gap: 15px;">';
+                
+                disciplinas.forEach(disp => {
+                    html += `
+                        <div class="disciplina-checkbox">
+                            <input type="checkbox" class="disciplina-selecionada" value="${disp.replace(/"/g, '&quot;')}" id="chk_${disp.replace(/\s/g, '_')}">
+                            <label for="chk_${disp.replace(/\s/g, '_')}">${disp}</label>
+                        </div>
+                    `;
                 });
                 html += '</div>';
                 container.innerHTML = html;
                 
             } catch (error) {
-                console.error('❌ Erro ao carregar disciplinas:', error);
-                container.innerHTML = `
-                    <p style="color:#e74c3c;">❌ Erro ao carregar disciplinas</p>
-                    <p style="color:#888; font-size:12px;">${error.message}</p>
-                `;
+                console.error(error);
+                container.innerHTML = '<p style="color: #dc3545;">Erro ao carregar disciplinas. Tente novamente.</p>';
             }
         }
-        
-        function selecionarTodas(selecionar) {
-            document.querySelectorAll('.disciplina-selecionada').forEach(cb => cb.checked = selecionar);
+
+        function selecionarTodasDisciplinas(selecionar) {
+            const checkboxes = document.querySelectorAll('.disciplina-selecionada');
+            checkboxes.forEach(cb => cb.checked = selecionar);
         }
-        
+
         function getDisciplinasSelecionadas() {
-            return [...document.querySelectorAll('.disciplina-selecionada:checked')].map(cb => cb.value);
+            const checkboxes = document.querySelectorAll('.disciplina-selecionada:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
         }
-        
-        // ============================================
-        // FUNÇÕES AUXILIARES
-        // ============================================
-        function formatarClasse(c) {
-            const mapa = {
-                "1ª Classe":"1a","2ª Classe":"2a","3ª Classe":"3a","4ª Classe":"4a",
-                "5ª Classe":"5a","6ª Classe":"6a","7ª Classe":"7a","8ª Classe":"8a",
-                "9ª Classe":"9a","10ª Classe":"10a","11ª Classe":"11a","12ª Classe":"12a"
-            };
-            return mapa[c] || c;
+
+        function validarSemanas() {
+            const inicio = document.getElementById('semanaInicio').value;
+            const fim = document.getElementById('semanaFim').value;
+            const erroDiv = document.getElementById('erroSemanas');
+            if (!inicio || !fim) {
+                erroDiv.style.display = 'none';
+                return true;
+            }
+            const numInicio = extrairNumeroSemana(inicio);
+            const numFim = extrairNumeroSemana(fim);
+            if (numFim - numInicio > 2) {
+                erroDiv.style.display = 'block';
+                return false;
+            } else {
+                erroDiv.style.display = 'none';
+                return true;
+            }
         }
-        
-        function formatarTrimestre(t) {
-            const match = t.match(/\d+/);
-            return match ? parseInt(match[1]) : null;
-        }
-        
-        function formatarComMarcadores(t) {
-            if (!t) return '-';
-            const partes = t.split(';').map(p => p.trim()).filter(p => p);
-            if (partes.length === 0) return '-';
-            if (partes.length === 1) return `- ${partes[0]}`;
-            return partes.map(p => `- ${p}`).join('\n');
-        }
-        
-        function extrairNumeroSemana(s) {
-            if (!s) return 0;
-            const match = s.match(/(\d+)/);
+
+        function extrairNumeroSemana(semana) {
+            if (!semana) return 0;
+            const match = semana.match(/(\d+)/);
             return match ? parseInt(match[1]) : 0;
         }
-        
-        function normalizarPlano(p) {
-            return {
-                semana: p.Semana || p.semana,
-                unidadeTematica: p.UnidadeTematica || p.unidadeTematica,
-                objetivos: p.Objectivos || p.objetivos,
-                conteudo: p.Conteudo || p.conteudo || p.Tema || p.tema,
-                temasTransversais: p.TemasTransversais || p.temasTransversais,
-                cargaHoraria: p.CargaHoraria || p.cargaHoraria,
-                data: p.Data || p.data || ''
-            };
-        }
-        
+
         function extrairTemasTransversais(planos) {
             const temasSet = new Set();
-            planos.forEach(p => {
-                const temas = p.temasTransversais;
+            planos.forEach(plano => {
+                const temas = plano.TemasTransversais || plano.temasTransversais;
                 if (temas && temas.trim() !== '') {
                     temas.split(',').map(t => t.trim()).forEach(t => { if (t) temasSet.add(t); });
                 }
             });
             return Array.from(temasSet);
         }
-        
+
+        function formatarComMarcadores(texto) {
+            if (!texto || texto.trim() === '') return '______________________________';
+            texto = String(texto);
+            const partes = texto.split(';').map(p => p.trim()).filter(p => p);
+            if (partes.length === 0) return '______________________________';
+            if (partes.length === 1) return `- ${partes[0]}`;
+            return partes.map(p => `- ${p}`).join('\n');
+        }
+
+        function formatarClasse(classe) {
+            if (!classe) return null;
+            const mapa = {
+                "1ª Classe": "1a", "2ª Classe": "2a", "3ª Classe": "3a", "4ª Classe": "4a",
+                "5ª Classe": "5a", "6ª Classe": "6a", "7ª Classe": "7a", "8ª Classe": "8a",
+                "9ª Classe": "9a", "10ª Classe": "10a", "11ª Classe": "11a", "12ª Classe": "12a"
+            };
+            return mapa[classe] || classe;
+        }
+
+        function formatarTrimestre(trimestre) {
+            if (!trimestre) return null;
+            const match = trimestre.match(/(\d+)/);
+            return match ? parseInt(match[1]) : null;
+        }
+
+        function normalizarPlano(plano) {
+            return {
+                semana: plano.Semana || plano.semana,
+                unidadeTematica: plano.UnidadeTematica || plano.unidadeTematica,
+                objetivos: plano.Objectivos || plano.objetivos,
+                conteudo: plano.Conteudo || plano.conteudo || plano.Tema || plano.tema,
+                temasTransversais: plano.TemasTransversais || plano.temasTransversais,
+                cargaHoraria: plano.CargaHoraria || plano.cargaHoraria,
+                data: plano.Data || plano.data || ''
+            };
+        }
+
         function validarFiltros() {
-            const provincia = document.getElementById('provincia').value;
-            const distrito = document.getElementById('distrito').value;
-            const zip = document.getElementById('zip').value.trim();
-            const numero = document.getElementById('numero').value.trim();
-            const classe = document.getElementById('classe').value;
-            const trimestre = document.getElementById('trimestre').value;
-            const inicio = document.getElementById('semanaInicio').value;
-            const fim = document.getElementById('semanaFim').value;
-            const delegado = document.getElementById('delegado').value.trim();
-            const dap = document.getElementById('dap').value.trim();
             const disciplinas = getDisciplinasSelecionadas();
             
-            if (!provincia) { mostrarToast('Selecione a Província.', 'error'); return false; }
-            if (!distrito) { mostrarToast('Selecione o Distrito.', 'error'); return false; }
-            if (!zip) { mostrarToast('Digite a Localidade.', 'error'); return false; }
-            if (!numero) { mostrarToast('Digite o Número.', 'error'); return false; }
-            if (!classe) { mostrarToast('Selecione a CLASSE.', 'error'); return false; }
-            if (!trimestre) { mostrarToast('Selecione o TRIMESTRE.', 'error'); return false; }
-            if (!inicio || !fim) { mostrarToast('Selecione o período de semanas.', 'error'); return false; }
-            if (!delegado) { mostrarToast('Digite o nome do Delegado.', 'error'); return false; }
-            if (!dap) { mostrarToast('Digite o nome do DAP.', 'error'); return false; }
-            if (disciplinas.length === 0) { mostrarToast('Selecione pelo menos uma disciplina.', 'error'); return false; }
-            if (!validarSemanas()) { mostrarToast('Máximo 3 semanas.', 'error'); return false; }
+            if (disciplinas.length === 0) { 
+                alert('Selecione pelo menos uma disciplina.'); 
+                return false; 
+            }
+            if (!validarSemanas()) { 
+                alert('O período não pode ultrapassar 3 semanas.'); 
+                return false; 
+            }
             return true;
         }
-        
-        function mostrarToast(m, tipo='success') {
-            const t = document.createElement('div');
-            t.className = 'toast';
-            t.style.background = tipo === 'error' ? '#e74c3c' : '#10b981';
-            t.innerHTML = `<i class="fas ${tipo === 'error' ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i> ${m}`;
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), 3000);
+
+        function mostrarLoadingCentralizado() {
+            const loader = document.createElement('div');
+            loader.id = 'loadingCentral';
+            loader.className = 'loading-centralizado';
+            loader.innerHTML = '<div class="loading-text"><span class="loading-spinner"></span>A processar dados...</div>';
+            document.body.appendChild(loader);
         }
-        
-        function showLoading() {
-            document.getElementById('loadingOverlay').style.display = 'flex';
+
+        function esconderLoadingCentralizado() {
+            const loader = document.getElementById('loadingCentral');
+            if (loader) loader.remove();
         }
-        
-        function hideLoading() {
-            document.getElementById('loadingOverlay').style.display = 'none';
+
+        function getValorOuLinha(valor) {
+            if (valor && valor.trim() !== '') return valor.trim();
+            return '________________________';
         }
-        
-        function irParaLojaEstrelas() {
-            window.location.href = 'estrela.html';
+
+        function getValorOuVazio(valor) {
+            if (valor && valor.trim() !== '') return valor.trim();
+            return '';
         }
-        
-        // ============================================
-        // BUSCAR PLANOS DO FIREBASE (plano-de-aula-moz)
-        // ============================================
-        async function buscarPlanos() {
-            if (!currentUser) {
-                mostrarToast('Faça login para continuar!', 'error');
-                setTimeout(() => window.location.href = 'index.html', 2000);
-                return;
-            }
-            
+
+        async function gerarPlanoQuinzenal() {
             if (!validarFiltros()) return;
             
             const btn = document.getElementById('btnGerar');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> A buscar planos...';
+            btn.innerHTML = '<div class="loading-text"><span class="loading-spinner"></span>A buscar dados...</div>';
             btn.disabled = true;
             
-            showLoading();
+            const disciplinas = getDisciplinasSelecionadas();
+            const resultadoContainer = document.getElementById('resultadoContainer');
+            mostrarLoadingCentralizado();
+            document.getElementById('filtrosCard').style.display = 'none';
             
             try {
                 const classeOriginal = document.getElementById('classe').value;
@@ -1119,30 +919,23 @@
                 const zip = document.getElementById('zip').value;
                 const numero = document.getElementById('numero').value;
                 const delegado = document.getElementById('delegado').value;
-                const dap = document.getElementById('dap').value;
-                const disciplinas = getDisciplinasSelecionadas();
+                const cargoResponsavel = document.getElementById('cargoResponsavel').value || 'DAP';
+                const nomeResponsavel = document.getElementById('nomeResponsavel').value;
+                const nomeEscola = document.getElementById('nomeEscola').value;
                 
-                planosEncontrados = {};
+                planosPorDisciplina = {};
+                
                 const numInicio = extrairNumeroSemana(semanaInicio);
                 const numFim = extrairNumeroSemana(semanaFim);
                 
-                console.log(`🔍 Buscando planos: Classe=${classeFormatada}, Trimestre=${trimestreNum}, Semanas=${numInicio}-${numFim}`);
-                console.log(`📁 Projeto: plano-de-aula-moz - Coleção: planos`);
-                
-                let totalEncontrados = 0;
-                
                 for (const disciplina of disciplinas) {
                     try {
-                        console.log(`🔍 Buscando disciplina: ${disciplina}`);
-                        
                         const snapshot = await db.collection('planos')
                             .where('Classe', '==', classeFormatada)
                             .where('Disciplina', '==', disciplina)
                             .where('Trimestre', '==', trimestreNum)
                             .where('Ano', '==', 2026)
                             .get();
-                        
-                        console.log(`📊 Encontrados ${snapshot.size} documentos para ${disciplina}`);
                         
                         const planos = [];
                         snapshot.forEach(doc => {
@@ -1155,128 +948,128 @@
                         });
                         
                         planos.sort((a, b) => extrairNumeroSemana(a.semana) - extrairNumeroSemana(b.semana));
-                        if (planos.length > 0) {
-                            planosEncontrados[disciplina] = planos;
-                            totalEncontrados += planos.length;
-                        }
+                        planosPorDisciplina[disciplina] = planos;
                     } catch (err) {
-                        console.error(`❌ Erro ao buscar ${disciplina}:`, err);
-                        mostrarToast(`Erro ao buscar ${disciplina}: ${err.message}`, 'error');
+                        console.error('Erro ao buscar disciplina:', disciplina, err);
+                        planosPorDisciplina[disciplina] = [];
                     }
                 }
                 
-                const temPlanos = Object.keys(planosEncontrados).length > 0;
-                hideLoading();
+                const temPlanos = Object.values(planosPorDisciplina).some(p => p && p.length > 0);
+                
+                esconderLoadingCentralizado();
                 
                 if (!temPlanos) {
-                    document.getElementById('resultadoContainer').innerHTML = `
-                        <div class="error-card">
-                            <i class="fas fa-search" style="font-size: 40px; color: #f59e0b;"></i>
+                    resultadoContainer.innerHTML = `
+                        <div class="erro-card" style="background:#fff3cd;border-left:5px solid #ffc107;padding:30px;text-align:center;">
                             <h3>Nenhum plano encontrado</h3>
-                            <p>Não existem registos para <strong>${classeOriginal}</strong> no período selecionado.</p>
-                            <p>Verifique se os planos já foram carregados para esta disciplina no sistema.</p>
-                            <p style="color:#888; font-size:12px; margin-top:10px;">
-                                💡 Dica: Execute o script de popular planos para adicionar dados de exemplo.
-                            </p>
+                            <p>Não existem registos para ${classeOriginal || 'a classe selecionada'} no período selecionado.</p>
+                            <p>Verifique se os planos já foram carregados para esta disciplina.</p>
                             <br>
-                            <button class="btn" onclick="mostrarFiltros()" style="margin:0 auto; background:#667eea; color:white;">VOLTAR</button>
+                            <button class="btn" onclick="mostrarFiltros()" style="margin: 0 auto; background: #0066cc; color: white;">VOLTAR</button>
                         </div>`;
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                     return;
                 }
+
+                planosOriginaisPorDisciplina = JSON.parse(JSON.stringify(planosPorDisciplina));
                 
-                mostrarResultadosPlanos(provincia, distrito, zip, numero, classeOriginal, trimestreOriginal, semanaInicio, semanaFim, delegado, dap);
-                mostrarToast(`✅ ${Object.keys(planosEncontrados).length} disciplina(s) encontrada(s) (${totalEncontrados} planos no total)!`);
-                
+                mostrarInterfacePlano(provincia, distrito, zip, numero, classeOriginal, trimestreOriginal, semanaInicio, semanaFim, delegado, cargoResponsavel, nomeResponsavel, nomeEscola, disciplinas);
+
             } catch (error) {
-                console.error('❌ Erro ao buscar planos:', error);
-                hideLoading();
-                document.getElementById('resultadoContainer').innerHTML = `
-                    <div class="error-card">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 40px; color: #e74c3c;"></i>
-                        <h3>Erro ao buscar planos</h3>
-                        <p>${error.message}</p>
-                        <p>Verifique sua conexão com a internet.</p>
-                        <br>
-                        <button class="btn" onclick="location.reload()" style="margin:0 auto; background:#667eea; color:white;">TENTAR NOVAMENTE</button>
-                    </div>`;
+                console.error(error);
+                esconderLoadingCentralizado();
+                resultadoContainer.innerHTML = `<div class="erro-card">Erro ao buscar dados: ${error.message}<br><br><button class="btn" onclick="mostrarFiltros()" style="margin: 0 auto; background: #0066cc; color: white;">VOLTAR</button></div>`;
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
         }
-        
-        function mostrarResultadosPlanos(provincia, distrito, zip, numero, classe, trimestre, semanaInicio, semanaFim, delegado, dap) {
+
+        function mostrarInterfacePlano(provincia, distrito, zip, numero, classe, trimestre, semanaInicio, semanaFim, delegado, cargoResponsavel, nomeResponsavel, nomeEscola, disciplinas) {
             const resultadoContainer = document.getElementById('resultadoContainer');
-            document.getElementById('filtrosCard').style.display = 'none';
             
-            const disciplinas = Object.keys(planosEncontrados);
             const disciplinasStr = disciplinas.join(', ');
             
             let todosTemas = [];
-            for (const disciplina in planosEncontrados) {
-                const temas = extrairTemasTransversais(planosEncontrados[disciplina]);
-                todosTemas = [...todosTemas, ...temas];
+            for (const disciplina in planosPorDisciplina) {
+                if (planosPorDisciplina[disciplina]) {
+                    const temas = extrairTemasTransversais(planosPorDisciplina[disciplina]);
+                    todosTemas = [...todosTemas, ...temas];
+                }
             }
             const temasUnicos = [...new Set(todosTemas)];
             
             let temasHTML = temasUnicos.length > 0 
                 ? `<div class="temas-transversais">
-                    <h4><i class="fas fa-handshake"></i> TEMAS TRANSVERSAIS</h4>
+                    <h4>TEMAS TRANSVERSAIS</h4>
                     <div class="temas-tags">${temasUnicos.map(t => `<span class="tema-tag">${t}</span>`).join('')}</div>
                    </div>`
-                : `<div class="temas-transversais">
-                    <h4 style="color:#856404;">INFORMAÇÃO</h4>
-                    <p style="text-align:center; color:#856404;">Nenhum tema transversal registado</p>
-                   </div>`;
+                : ``;
+            
+            const exibirValor = (valor) => {
+                if (valor && valor.trim() !== '') return `<span class="valor">${valor.trim()}</span>`;
+                return `<span class="linha-branco">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>`;
+            };
+
+            const exibirEscola = (valor) => {
+                if (valor && valor.trim() !== '') return `<span class="valor">${valor.trim()}</span>`;
+                return '';
+            };
+
+            const exibirResponsavel = (cargo, nome) => {
+                if (nome && nome.trim() !== '') {
+                    return `<span class="valor">${cargo}: ${nome.trim()}</span>`;
+                }
+                return `<span class="linha-branco">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>`;
+            };
             
             resultadoContainer.innerHTML = `
                 ${temasHTML}                
                 <div class="info-plano">
-                    <span class="info-item"><i class="fas fa-map-marker-alt"></i> <strong>Província:</strong> ${provincia}</span>
-                    <span class="info-item"><i class="fas fa-city"></i> <strong>Distrito:</strong> ${distrito}</span>
-                    <span class="info-item"><i class="fas fa-location-dot"></i> <strong>Localidade:</strong> ${zip}</span>
-                    <span class="info-item"><i class="fas fa-hashtag"></i> <strong>Nº:</strong> ${numero}</span>
-                    <span class="info-item"><i class="fas fa-graduation-cap"></i> <strong>Classe:</strong> ${classe}</span>
-                    <span class="info-item"><i class="fas fa-book"></i> <strong>Disciplinas:</strong> ${disciplinasStr}</span>
-                    <span class="info-item"><i class="fas fa-calendar-week"></i> <strong>Trimestre:</strong> ${trimestre}</span>
-                    <span class="info-item"><i class="fas fa-clock"></i> <strong>Vigência:</strong> ${semanaInicio} a ${semanaFim}</span>
+                    <span class="info-item"><strong>Província:</strong> ${exibirValor(provincia)}</span>
+                    <span class="info-item"><strong>Distrito:</strong> ${exibirValor(distrito)}</span>
+                    <span class="info-item"><strong>Localidade:</strong> ${exibirValor(zip)}</span>
+                    <span class="info-item"><strong>Nº:</strong> ${exibirValor(numero)}</span>
+                    <span class="info-item"><strong>Classe:</strong> ${exibirValor(classe)}</span>
+                    <span class="info-item"><strong>Disciplinas:</strong> <span class="valor">${disciplinasStr}</span></span>
+                    <span class="info-item"><strong>Trimestre:</strong> ${exibirValor(trimestre)}</span>
+                    <span class="info-item"><strong>Escola:</strong> ${exibirEscola(nomeEscola)}</span>
+                    <span class="info-item"><strong>Responsável:</strong> ${exibirResponsavel(cargoResponsavel || 'DAP', nomeResponsavel)}</span>
+                    <span class="info-item"><strong>Vigência:</strong> <span class="valor">${semanaInicio || '_________'} a ${semanaFim || '_________'}</span></span>
                 </div>
                 <div id="tabelasContainer"></div>
                 <div class="global-actions">
-                    <button class="btn btn-pdf" onclick="abrirModalPagamento(null, true)">
-                        <i class="fas fa-file-pdf"></i> BAIXAR TODOS (${disciplinas.length} ⭐)
-                    </button>
-                    <button class="btn btn-nova-consulta" onclick="mostrarFiltros()">
-                        <i class="fas fa-search"></i> NOVA PESQUISA
-                    </button>
+                    <button class="btn btn-editar" onclick="habilitarEdicaoGlobal()">EDITAR TODAS</button>
+                    <button class="btn btn-pdf" onclick="gerarPDF('${delegado || ''}', '${cargoResponsavel || 'DAP'}', '${nomeResponsavel || ''}', '${nomeEscola || ''}')">BAIXAR TODOS OS PDFs</button>
+                    <button class="btn btn-nova-consulta" onclick="mostrarFiltros()">NOVA PESQUISA</button>
                 </div>
             `;
             
-            window.delegadoNome = delegado;
-            window.dapNome = dap;
-            renderizarTabelas();
+            window.delegadoNome = delegado || '';
+            window.cargoResponsavel = cargoResponsavel || 'DAP';
+            window.nomeResponsavel = nomeResponsavel || '';
+            window.nomeEscola = nomeEscola || '';
+            
+            mostrarTodasTabelas(planosPorDisciplina, false);
         }
-        
-        function renderizarTabelas() {
+
+        function mostrarTodasTabelas(planosPorDisciplinaObj, modoEdicao = false) {
             const container = document.getElementById('tabelasContainer');
             container.innerHTML = '';
             
-            for (const [disciplina, planos] of Object.entries(planosEncontrados)) {
-                if (planos.length === 0) continue;
+            for (const [disciplina, planos] of Object.entries(planosPorDisciplinaObj)) {
+                if (!planos || planos.length === 0) continue;
                 
                 const card = document.createElement('div');
                 card.className = 'disciplina-card';
                 card.setAttribute('data-disciplina', disciplina);
                 
                 card.innerHTML = `
-                    <h3>
-                        <i class="fas fa-book-open"></i> ${disciplina}
-                        <span><i class="fas fa-star"></i> 1 estrela</span>
-                    </h3>
-                    <div style="padding: 12px; overflow-x: auto;">
-                        <table class="planos-tabela" style="min-width: 700px;">
+                    <h3>${disciplina}</h3>
+                    <div style="padding: 15px; overflow-x: auto;">
+                        <table class="planos-tabela ${modoEdicao ? 'modo-edicao' : ''}" id="tabela_${disciplina.replace(/\s/g, '_')}" style="min-width: 800px;">
                             <thead>
                                 <tr>
                                     <th style="width: 12%">Semana</th>
@@ -1288,207 +1081,386 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                ${planos.map(plano => `
+                                ${planos.map((plano, idx) => `
                                     <tr>
-                                        <td>${plano.semana || '-'}<br><small>${plano.data || ''}</small></td>
-                                        <td>${plano.unidadeTematica || '-'}</td>
-                                        <td style="white-space:pre-line;">${formatarComMarcadores(plano.objetivos)}</td>
-                                        <td style="white-space:pre-line;">${formatarComMarcadores(plano.conteudo)}</td>
-                                        <td style="white-space:pre-line;">${formatarComMarcadores(plano.temasTransversais)}</td>
-                                        <td style="text-align:center;">${plano.cargaHoraria || '-'}</td>
+                                        <td ${modoEdicao ? `contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="semana"` : ''}>
+                                            ${plano.semana || '__________'}<br>
+                                            <small style="color:#666;">${plano.data || ''}</small>
+                                        </td>
+                                        <td ${modoEdicao ? `contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="unidadeTematica"` : ''}>${plano.unidadeTematica || '__________'}</td>
+                                        <td ${modoEdicao ? `contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="objetivos"` : ''} style="white-space:pre-line;">${modoEdicao ? (plano.objetivos || '') : formatarComMarcadores(plano.objetivos)}</td>
+                                        <td ${modoEdicao ? `contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="conteudo"` : ''} style="white-space:pre-line;">${modoEdicao ? (plano.conteudo || '') : formatarComMarcadores(plano.conteudo)}</td>
+                                        <td ${modoEdicao ? `contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="temasTransversais"` : ''} style="white-space:pre-line;">${modoEdicao ? (plano.temasTransversais || '') : formatarComMarcadores(plano.temasTransversais)}</td>
+                                        <td ${modoEdicao ? `contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="cargaHoraria"` : ''} style="text-align:center;">${plano.cargaHoraria || '____'}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
                         </table>
                     </div>
                     <div class="disciplina-actions">
-                        <button class="btn btn-editar" onclick="editarDisciplina('${disciplina}')">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn btn-pdf" onclick="abrirModalPagamento('${disciplina}', false)">
-                            <i class="fas fa-file-pdf"></i> Baixar PDF (1 ⭐)
-                        </button>
+                        <button class="btn btn-editar" onclick="habilitarEdicaoDisciplina('${disciplina}')">Editar</button>
+                        <button class="btn btn-pdf" onclick="gerarPDFUnico('${disciplina}', '${window.delegadoNome || ''}', '${window.cargoResponsavel || 'DAP'}', '${window.nomeResponsavel || ''}', '${window.nomeEscola || ''}')">Baixar PDF</button>
                     </div>
                 `;
                 container.appendChild(card);
             }
+            
+            if (modoEdicao) {
+                const cells = document.querySelectorAll('[contenteditable="true"]');
+                cells.forEach(cell => {
+                    cell.addEventListener('blur', function() {
+                        const disciplina = this.getAttribute('data-disciplina');
+                        const index = parseInt(this.getAttribute('data-index'));
+                        const campo = this.getAttribute('data-campo');
+                        if (disciplina && !isNaN(index) && campo && planosPorDisciplina[disciplina] && planosPorDisciplina[disciplina][index]) {
+                            planosPorDisciplina[disciplina][index][campo] = this.innerText.trim();
+                        }
+                    });
+                });
+            }
         }
-        
-        function editarDisciplina(disciplina) {
-            mostrarToast(`✏️ Modo edição para ${disciplina} em desenvolvimento`, 'info');
+
+        function habilitarEdicaoGlobal() {
+            mostrarTodasTabelas(planosPorDisciplina, true);
+            
+            const globalActions = document.querySelector('.global-actions');
+            if (globalActions) {
+                globalActions.innerHTML = `
+                    <button class="btn btn-salvar" onclick="salvarEdicaoGlobal()">SALVAR TODAS</button>
+                    <button class="btn btn-cancelar" onclick="cancelarEdicaoGlobal()">CANCELAR</button>
+                    <button class="btn btn-nova-consulta" onclick="mostrarFiltros()">VOLTAR</button>
+                `;
+            }
         }
-        
+
+        function habilitarEdicaoDisciplina(disciplina) {
+            if (!window.planosOriginaisDisciplina) {
+                window.planosOriginaisDisciplina = {};
+            }
+            window.planosOriginaisDisciplina[disciplina] = JSON.parse(JSON.stringify(planosPorDisciplina[disciplina]));
+            
+            const card = document.querySelector(`.disciplina-card[data-disciplina="${disciplina}"]`);
+            const planos = planosPorDisciplina[disciplina];
+            
+            card.querySelector('div[style*="overflow-x: auto"]').innerHTML = `
+                <table class="planos-tabela modo-edicao" id="tabela_${disciplina.replace(/\s/g, '_')}" style="min-width: 800px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 12%">Semana</th>
+                            <th style="width: 18%">Unidade Temática</th>
+                            <th style="width: 25%">Objectivos Específicos</th>
+                            <th style="width: 25%">Conteúdos</th>
+                            <th style="width: 12%">Temas Transversais</th>
+                            <th style="width: 8%">C.H.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${planos.map((plano, idx) => `
+                            <tr>
+                                <td contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="semana">
+                                    ${plano.semana || '__________'}<br>
+                                    <small style="color:#666;">${plano.data || ''}</small>
+                                </td>
+                                <td contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="unidadeTematica">${plano.unidadeTematica || '__________'}</td>
+                                <td contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="objetivos" style="white-space:pre-line;">${plano.objetivos || ''}</td>
+                                <td contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="conteudo" style="white-space:pre-line;">${plano.conteudo || ''}</td>
+                                <td contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="temasTransversais" style="white-space:pre-line;">${plano.temasTransversais || ''}</td>
+                                <td contenteditable="true" data-disciplina="${disciplina}" data-index="${idx}" data-campo="cargaHoraria" style="text-align:center;">${plano.cargaHoraria || '____'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            const actionsDiv = card.querySelector('.disciplina-actions');
+            actionsDiv.innerHTML = `
+                <button class="btn btn-salvar" onclick="salvarEdicaoDisciplina('${disciplina}')">SALVAR</button>
+                <button class="btn btn-cancelar" onclick="cancelarEdicaoDisciplina('${disciplina}')">CANCELAR</button>
+            `;
+            
+            const cells = card.querySelectorAll('[contenteditable="true"]');
+            cells.forEach(cell => {
+                cell.addEventListener('blur', function() {
+                    const disciplinaNome = this.getAttribute('data-disciplina');
+                    const index = parseInt(this.getAttribute('data-index'));
+                    const campo = this.getAttribute('data-campo');
+                    if (disciplinaNome && !isNaN(index) && campo && planosPorDisciplina[disciplinaNome] && planosPorDisciplina[disciplinaNome][index]) {
+                        planosPorDisciplina[disciplinaNome][index][campo] = this.innerText.trim();
+                    }
+                });
+            });
+        }
+
+        function salvarEdicaoDisciplina(disciplina) {
+            delete window.planosOriginaisDisciplina?.[disciplina];
+            
+            const card = document.querySelector(`.disciplina-card[data-disciplina="${disciplina}"]`);
+            const planos = planosPorDisciplina[disciplina];
+            
+            card.querySelector('div[style*="overflow-x: auto"]').innerHTML = `
+                <table class="planos-tabela" id="tabela_${disciplina.replace(/\s/g, '_')}" style="min-width: 800px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 12%">Semana</th>
+                            <th style="width: 18%">Unidade Temática</th>
+                            <th style="width: 25%">Objectivos Específicos</th>
+                            <th style="width: 25%">Conteúdos</th>
+                            <th style="width: 12%">Temas Transversais</th>
+                            <th style="width: 8%">C.H.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${planos.map((plano, idx) => `
+                            <tr>
+                                <td>${plano.semana || '__________'}<br><small style="color:#666;">${plano.data || ''}</small></td>
+                                <td>${plano.unidadeTematica || '__________'}</td>
+                                <td style="white-space:pre-line;">${formatarComMarcadores(plano.objetivos)}</td>
+                                <td style="white-space:pre-line;">${formatarComMarcadores(plano.conteudo)}</td>
+                                <td style="white-space:pre-line;">${formatarComMarcadores(plano.temasTransversais)}</td>
+                                <td style="text-align:center;">${plano.cargaHoraria || '____'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            const actionsDiv = card.querySelector('.disciplina-actions');
+            actionsDiv.innerHTML = `
+                <button class="btn btn-editar" onclick="habilitarEdicaoDisciplina('${disciplina}')">Editar</button>
+                <button class="btn btn-pdf" onclick="gerarPDFUnico('${disciplina}', '${window.delegadoNome || ''}', '${window.cargoResponsavel || 'DAP'}', '${window.nomeResponsavel || ''}', '${window.nomeEscola || ''}')">Baixar PDF</button>
+            `;
+            
+            alert(`Alterações salvas para ${disciplina}!`);
+        }
+
+        function cancelarEdicaoDisciplina(disciplina) {
+            if (window.planosOriginaisDisciplina && window.planosOriginaisDisciplina[disciplina]) {
+                planosPorDisciplina[disciplina] = JSON.parse(JSON.stringify(window.planosOriginaisDisciplina[disciplina]));
+                delete window.planosOriginaisDisciplina[disciplina];
+            }
+            
+            const card = document.querySelector(`.disciplina-card[data-disciplina="${disciplina}"]`);
+            const planos = planosPorDisciplina[disciplina];
+            
+            card.querySelector('div[style*="overflow-x: auto"]').innerHTML = `
+                <table class="planos-tabela" id="tabela_${disciplina.replace(/\s/g, '_')}" style="min-width: 800px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 12%">Semana</th>
+                            <th style="width: 18%">Unidade Temática</th>
+                            <th style="width: 25%">Objectivos Específicos</th>
+                            <th style="width: 25%">Conteúdos</th>
+                            <th style="width: 12%">Temas Transversais</th>
+                            <th style="width: 8%">C.H.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${planos.map((plano, idx) => `
+                            <tr>
+                                <td>${plano.semana || '__________'}<br><small style="color:#666;">${plano.data || ''}</small></td>
+                                <td>${plano.unidadeTematica || '__________'}</td>
+                                <td style="white-space:pre-line;">${formatarComMarcadores(plano.objetivos)}</td>
+                                <td style="white-space:pre-line;">${formatarComMarcadores(plano.conteudo)}</td>
+                                <td style="white-space:pre-line;">${formatarComMarcadores(plano.temasTransversais)}</td>
+                                <td style="text-align:center;">${plano.cargaHoraria || '____'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            const actionsDiv = card.querySelector('.disciplina-actions');
+            actionsDiv.innerHTML = `
+                <button class="btn btn-editar" onclick="habilitarEdicaoDisciplina('${disciplina}')">Editar</button>
+                <button class="btn btn-pdf" onclick="gerarPDFUnico('${disciplina}', '${window.delegadoNome || ''}', '${window.cargoResponsavel || 'DAP'}', '${window.nomeResponsavel || ''}', '${window.nomeEscola || ''}')">Baixar PDF</button>
+            `;
+        }
+
+        function salvarEdicaoGlobal() {
+            planosOriginaisPorDisciplina = JSON.parse(JSON.stringify(planosPorDisciplina));
+            cancelarEdicaoGlobal();
+            alert("Todas as alterações foram salvas!");
+        }
+
+        function cancelarEdicaoGlobal() {
+            planosPorDisciplina = JSON.parse(JSON.stringify(planosOriginaisPorDisciplina));
+            mostrarTodasTabelas(planosPorDisciplina, false);
+            
+            const globalActions = document.querySelector('.global-actions');
+            if (globalActions) {
+                globalActions.innerHTML = `
+                    <button class="btn btn-editar" onclick="habilitarEdicaoGlobal()">EDITAR TODAS</button>
+                    <button class="btn btn-pdf" onclick="gerarPDF('${window.delegadoNome || ''}', '${window.cargoResponsavel || 'DAP'}', '${window.nomeResponsavel || ''}', '${window.nomeEscola || ''}')">BAIXAR TODOS OS PDFs</button>
+                    <button class="btn btn-nova-consulta" onclick="mostrarFiltros()">NOVA PESQUISA</button>
+                `;
+            }
+        }
+
         function mostrarFiltros() {
             document.getElementById('filtrosCard').style.display = 'block';
             document.getElementById('resultadoContainer').innerHTML = '';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-        
-        // ============================================
-        // MODAL DE PAGAMENTO
-        // ============================================
-        function abrirModalPagamento(disciplina, baixarTodos) {
-            disciplinaSelecionada = disciplina;
-            isBaixandoTodos = baixarTodos;
-            
-            const estrelas = userData?.estrelas || 0;
-            document.getElementById('saldoAtualModal').textContent = estrelas;
-            
-            const msg = document.getElementById('modalMensagem');
-            if (baixarTodos) {
-                const total = Object.keys(planosEncontrados).length;
-                msg.innerHTML = `Baixar <strong>${total} disciplina(s)</strong> custa <strong>1 estrela</strong> (total)`;
-            } else {
-                msg.innerHTML = `Baixar <strong>${disciplina}</strong> custa <strong>1 estrela</strong>`;
+
+        function desenharLinhaTracejadaComX(doc, x, y, largura) {
+            const inicio = x - largura/2;
+            const fim = x + largura/2;
+            const centro = x;
+            let curr = inicio;
+            doc.setDrawColor(0,0,0);
+            doc.setLineWidth(0.3);
+            while (curr + 3 < centro - 5) {
+                doc.line(curr, y, curr + 3, y);
+                curr += 5;
             }
-            
-            const btnEstrelas = document.getElementById('btnBaixarComEstrelas');
-            if (estrelas >= CUSTO_ESTRELA) {
-                btnEstrelas.disabled = false;
-                btnEstrelas.style.opacity = '1';
-                btnEstrelas.innerHTML = `<i class="fas fa-star"></i> Baixar com Estrelas (1 ⭐)`;
-            } else {
-                btnEstrelas.disabled = true;
-                btnEstrelas.style.opacity = '0.5';
-                btnEstrelas.innerHTML = `<i class="fas fa-star"></i> Estrelas insuficientes (${estrelas} ⭐)`;
+            doc.setFont('times', 'bold');
+            doc.setFontSize(12);
+            doc.text('X', centro, y + 1, { align: 'center' });
+            curr = centro + 5;
+            while (curr + 3 < fim) {
+                doc.line(curr, y, curr + 3, y);
+                curr += 5;
             }
-            
-            document.getElementById('modalPagamento').classList.add('active');
         }
-        
-        function fecharModalPagamento() {
-            document.getElementById('modalPagamento').classList.remove('active');
+
+        function getConfiguracaoTabelaPDF() {
+            return {
+                columnStyles: {
+                    0: { cellWidth: 24, halign: 'center' },
+                    1: { cellWidth: 42, halign: 'left' },
+                    2: { cellWidth: 72, halign: 'left' },
+                    3: { cellWidth: 72, halign: 'left' },
+                    4: { cellWidth: 42, halign: 'left' },
+                    5: { cellWidth: 16, halign: 'center' }
+                },
+                margin: { left: 16, right: 16 }
+            };
         }
-        
-        async function baixarComEstrelas() {
-            const estrelas = userData?.estrelas || 0;
-            if (estrelas < CUSTO_ESTRELA) {
-                mostrarToast('Estrelas insuficientes!', 'error');
+
+        function formatarComLinhas(texto) {
+            if (!texto || texto.trim() === '') return '________________________';
+            texto = String(texto);
+            const partes = texto.split(';').map(p => p.trim()).filter(p => p);
+            if (partes.length === 0) return '________________________';
+            if (partes.length === 1) return `- ${partes[0]}`;
+            return partes.map(p => `- ${p}`).join('\n');
+        }
+
+        function getValorPDF(valor) {
+            if (valor && valor.trim() !== '') return valor.trim();
+            return ''; // Vazio se não preenchido
+        }
+
+        // ================================================================
+        // GERAR PDF ÚNICO (UMA DISCIPLINA)
+        // ================================================================
+
+        async function gerarPDFUnico(disciplina, delegado, cargoResponsavel, nomeResponsavel, nomeEscola) {
+            const planos = planosPorDisciplina[disciplina];
+            if (!planos || planos.length === 0) {
+                alert('Nenhum plano disponível para esta disciplina');
                 return;
             }
+
+            const infoItems = document.querySelectorAll('.info-plano .info-item');
+            const provincia = infoItems[0]?.querySelector('.valor')?.textContent?.trim() || infoItems[0]?.innerText.replace(/^[^:]*:/, '').trim() || '';
+            const distrito = infoItems[1]?.querySelector('.valor')?.textContent?.trim() || infoItems[1]?.innerText.replace(/^[^:]*:/, '').trim() || '';
+            const zip = infoItems[2]?.querySelector('.valor')?.textContent?.trim() || infoItems[2]?.innerText.replace(/^[^:]*:/, '').trim() || '';
+            const numero = infoItems[3]?.querySelector('.valor')?.textContent?.trim() || infoItems[3]?.innerText.replace(/^[^:]*:/, '').trim() || '';
+            const classe = infoItems[4]?.querySelector('.valor')?.textContent?.trim() || infoItems[4]?.innerText.replace(/^[^:]*:/, '').trim() || '';
+            const trimestre = infoItems[6]?.querySelector('.valor')?.textContent?.trim() || infoItems[6]?.innerText.replace(/^[^:]*:/, '').trim() || '';
             
-            fecharModalPagamento();
-            showLoading();
-            
-            try {
-                const consumido = await consumirEstrela();
-                if (!consumido) throw new Error('Erro ao consumir estrela');
-                
-                if (isBaixandoTodos) {
-                    const disciplinas = Object.keys(planosEncontrados);
-                    for (const disc of disciplinas) {
-                        await gerarPDFUnico(disc, planosEncontrados[disc]);
-                        await new Promise(r => setTimeout(r, 500));
-                    }
-                    mostrarToast(`✅ ${disciplinas.length} PDF(s) gerados! 1 estrela consumida.`);
-                } else if (disciplinaSelecionada) {
-                    await gerarPDFUnico(disciplinaSelecionada, planosEncontrados[disciplinaSelecionada]);
-                    mostrarToast(`✅ PDF de ${disciplinaSelecionada} gerado! 1 estrela consumida.`);
-                }
-            } catch (e) {
-                mostrarToast('Erro: ' + e.message, 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-        
-        function comprarEstrelas() {
-            window.location.href = 'estrela.html';
-        }
-        
-        function pagamentoManual() {
-            window.location.href = 'estrela.html';
-        }
-        
-        function copiarNumeroModal() {
-            navigator.clipboard.writeText('876393961');
-            mostrarToast('✅ Número 87 639 3961 copiado!');
-        }
-        
-        // ============================================
-        // GERAR PDF
-        // ============================================
-        async function gerarPDFUnico(disciplina, planos) {
-            const info = document.querySelectorAll('.info-item');
-            const provincia = info[0]?.innerText.split(':')[1]?.trim() || '';
-            const distrito = info[1]?.innerText.split(':')[1]?.trim() || '';
-            const zip = info[2]?.innerText.split(':')[1]?.trim() || '';
-            const numero = info[3]?.innerText.split(':')[1]?.trim() || '';
-            const classe = info[4]?.innerText.split(':')[1]?.trim() || '';
-            const trimestre = info[6]?.innerText.split(':')[1]?.trim() || '';
-            const delegado = document.getElementById('delegado').value;
-            const dap = document.getElementById('dap').value;
             const ano = new Date().getFullYear();
             
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
             const pw = pdf.internal.pageSize.getWidth();
+            
             let y = 10;
             
             pdf.setFont('Times', 'Roman');
             
+            // ============================================================
+            // EMBLEMA - MAIS PARA CIMA (y = 3) COM 4mm DE ESPAÇAMENTO
+            // ============================================================
             try {
                 const imgUrl = 'https://raw.githubusercontent.com/nhanomb3/planodeaula/6143d599ba10a0f35fdf07a14baca1b76518bed3/1770417519977.png';
-                const resp = await fetch(imgUrl);
-                const blob = await resp.blob();
-                const imgData = await new Promise(r => {
-                    const fr = new FileReader();
-                    fr.onload = () => r(fr.result);
-                    fr.readAsDataURL(blob);
+                const response = await fetch(imgUrl);
+                const blob = await response.blob();
+                const imgData = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsDataURL(blob);
                 });
-                pdf.addImage(imgData, 'PNG', pw/2 - 8, y, 16, 16);
-                y += 19;
-            } catch(e) { y += 8; }
+                const iw = 16;
+                const yEmblema = 3; // Mais para cima
+                pdf.addImage(imgData, 'PNG', pw/2 - iw/2, yEmblema, iw, 16);
+                y = yEmblema + 16 + 4; // 4mm de espaçamento após o emblema
+            } catch (e) { 
+                console.log('Erro ao carregar imagem:', e); 
+                y = 10;
+            }
             
             pdf.setFontSize(12);
             pdf.setFont('times', 'bold');
-            pdf.text('REPÚBLICA DE MOÇAMBIQUE', pw/2, y, { align: 'center' }); y += 5;
-            pdf.text('MINISTÉRIO DA EDUCAÇÃO E CULTURA', pw/2, y, { align: 'center' }); y += 5;
-            pdf.text(`PROVÍNCIA DE ${provincia.toUpperCase()}`, pw/2, y, { align: 'center' }); y += 5;
-            pdf.text(`DISTRITO DE ${distrito.toUpperCase()}`, pw/2, y, { align: 'center' }); y += 5;
-            pdf.text('SERVIÇO DISTRITAL DE EDUCAÇÃO, JUVENTUDE E TECNOLOGIA', pw/2, y, { align: 'center' }); y += 7;
+            pdf.text('REPÚBLICA DE MOÇAMBIQUE', pw/2, y, { align: 'center' });
+            y += 5;
+            pdf.text('MINISTÉRIO DA EDUCAÇÃO E CULTURA', pw/2, y, { align: 'center' });
+            y += 5;
             
-            let curr = pw/2 - 85;
-            pdf.setDrawColor(0,0,0);
-            pdf.setLineWidth(0.3);
-            while (curr + 3 < pw/2 - 5) {
-                pdf.line(curr, y, curr + 3, y);
-                curr += 5;
-            }
-            pdf.setFont('times', 'bold');
-            pdf.setFontSize(12);
-            pdf.text('X', pw/2, y + 1, { align: 'center' });
-            curr = pw/2 + 5;
-            while (curr + 3 < pw/2 + 85) {
-                pdf.line(curr, y, curr + 3, y);
-                curr += 5;
-            }
+            const provinciaDisplay = provincia || '________________________';
+            pdf.text(`PROVÍNCIA DE ${provinciaDisplay.toUpperCase()}`, pw/2, y, { align: 'center' });
+            y += 5;
+            
+            const distritoDisplay = distrito || '________________________';
+            pdf.text(`DISTRITO DE ${distritoDisplay.toUpperCase()}`, pw/2, y, { align: 'center' });
+            y += 5;
+            pdf.text('SERVIÇO DISTRITAL DE EDUCAÇÃO, JUVENTUDE E TECNOLOGIA', pw/2, y, { align: 'center' });
             y += 7;
             
+            desenharLinhaTracejadaComX(pdf, pw/2, y, 170);
+            y += 7;
+            
+            const zipDisplay = zip || '________________________';
+            const numeroDisplay = numero || '________________________';
             pdf.setFont('times', 'bold');
-            pdf.text(`ZIP: ${zip}              Nº: ${numero}`, pw/2, y, { align: 'center' }); y += 8;
+            pdf.text(`ZIP: ${zipDisplay}              Nº: ${numeroDisplay}`, pw/2, y, { align: 'center' });
+            y += 8;
+            
+            // Escola - só mostra se preenchido
+            if (nomeEscola && nomeEscola.trim() !== '') {
+                pdf.setFont('times', 'bold');
+                pdf.text(`ESCOLA: ${nomeEscola.toUpperCase()}`, pw/2, y, { align: 'center' });
+                y += 8;
+            }
+            
+            const classeDisplay = classe || '______';
+            const trimestreDisplay = trimestre || '______';
             pdf.setFont('times', 'italic');
-            pdf.text(`DOSIFICAÇÃO QUINZENAL DE ${disciplina.toUpperCase()} – ${classe} – ${trimestre} / ${ano}`, pw/2, y, { align: 'center' }); y += 12;
+            pdf.text(`DOSIFICAÇÃO QUINZENAL DE ${disciplina.toUpperCase()} – ${classeDisplay} – ${trimestreDisplay} / ${ano}`, pw/2, y, { align: 'center' });
+            y += 12;
             
             const headers = [['Semana', 'Unidade Temática', 'Objectivos Específicos', 'Conteúdos', 'Temas Transversais', 'C.H.']];
-            const body = planos.map(p => [
-                { content: `${p.semana || '-'}\n${p.data || ''}`, styles: { halign: 'center', valign: 'middle', fontSize: 11 } },
-                { content: p.unidadeTematica || '-', styles: { fontSize: 11 } },
-                { content: formatarComMarcadores(p.objetivos), styles: { fontSize: 11 } },
-                { content: formatarComMarcadores(p.conteudo), styles: { fontSize: 11 } },
-                { content: formatarComMarcadores(p.temasTransversais), styles: { fontSize: 11 } },
-                { content: p.cargaHoraria || '-', styles: { halign: 'center', fontSize: 11 } }
+            const body = planos.map(plano => [
+                { content: `${plano.semana || '__________'}\n${plano.data || ''}`, styles: { halign: 'center', valign: 'middle', fontSize: 12, font: 'Times' } },
+                { content: plano.unidadeTematica || '________________________', styles: { fontSize: 12, font: 'Times' } },
+                { content: formatarComLinhas(plano.objetivos), styles: { fontSize: 12, font: 'Times' } },
+                { content: formatarComLinhas(plano.conteudo), styles: { fontSize: 12, font: 'Times' } },
+                { content: formatarComLinhas(plano.temasTransversais), styles: { fontSize: 12, font: 'Times' } },
+                { content: plano.cargaHoraria || '____', styles: { halign: 'center', fontSize: 12, font: 'Times' } }
             ]);
+            
+            const config = getConfiguracaoTabelaPDF();
             
             pdf.autoTable({
                 head: headers,
                 body: body,
                 startY: y,
                 theme: 'grid',
-                styles: { font: 'Times', fontSize: 11, cellPadding: 2, lineColor: [0,0,0], textColor: [0,0,0], overflow: 'linebreak', valign: 'top' },
-                headStyles: { fillColor: [158,158,158], textColor: [0,0,0], fontStyle: 'bold', halign: 'center', fontSize: 11, lineWidth: 0.5, cellPadding: 2 },
-                columnStyles: { 0: { cellWidth: 24 }, 1: { cellWidth: 42 }, 2: { cellWidth: 72 }, 3: { cellWidth: 72 }, 4: { cellWidth: 42 }, 5: { cellWidth: 16 } },
-                margin: { left: 16, right: 16 },
+                styles: { font: 'Times', fontSize: 12, cellPadding: 2, lineColor: [0,0,0], textColor: [0,0,0], overflow: 'linebreak', valign: 'top' },
+                headStyles: { fillColor: [158,158,158], textColor: [0,0,0], fontStyle: 'bold', halign: 'center', fontSize: 12, font: 'Times', lineWidth: 0.5, lineColor: [0,0,0], cellPadding: 2 },
+                columnStyles: config.columnStyles,
+                margin: config.margin,
                 showHead: 'firstPage'
             });
             
@@ -1498,61 +1470,235 @@
             pdf.setFont('times', 'normal');
             pdf.setFontSize(12);
             
+            // ============================================================
+            // LÓGICA DE ASSINATURAS
+            // ============================================================
+            
+            // Verifica se cabe na página atual (finalY + 25mm para as assinaturas)
             if (finalY + 25 <= pageHeight) {
+                // ✅ CABE - coloca no final da página
                 const esqX = pw / 4;
                 pdf.text('O Delegado da Disciplina', esqX, finalY + 10, { align: 'center' });
                 pdf.line(esqX - 40, finalY + 16, esqX + 40, finalY + 16);
-                pdf.text(delegado, esqX, finalY + 24, { align: 'center' });
-                
+                const delegadoDisplay = getValorPDF(delegado);
+                if (delegadoDisplay) {
+                    pdf.text(delegadoDisplay, esqX, finalY + 24, { align: 'center' });
+                }
+
                 const dirX = 3 * pw / 4;
-                pdf.text('O DAP', dirX, finalY + 10, { align: 'center' });
+                const cargoDisplay = cargoResponsavel || 'DAP';
+                pdf.text(`O ${cargoDisplay}`, dirX, finalY + 10, { align: 'center' });
                 pdf.line(dirX - 40, finalY + 16, dirX + 40, finalY + 16);
-                pdf.text(dap, dirX, finalY + 24, { align: 'center' });
+                const nomeDisplay = getValorPDF(nomeResponsavel);
+                if (nomeDisplay) {
+                    pdf.text(nomeDisplay, dirX, finalY + 24, { align: 'center' });
+                }
+            } else {
+                // ❌ NÃO CABE - cria nova página e coloca no TOPO (após cabeçalho)
+                pdf.addPage();
+                const yTopo = 75; // Posição após o cabeçalho da nova página
+                
+                const esqX = pw / 4;
+                pdf.text('O Delegado da Disciplina', esqX, yTopo, { align: 'center' });
+                pdf.line(esqX - 40, yTopo + 6, esqX + 40, yTopo + 6);
+                const delegadoDisplay = getValorPDF(delegado);
+                if (delegadoDisplay) {
+                    pdf.text(delegadoDisplay, esqX, yTopo + 14, { align: 'center' });
+                }
+
+                const dirX = 3 * pw / 4;
+                const cargoDisplay = cargoResponsavel || 'DAP';
+                pdf.text(`O ${cargoDisplay}`, dirX, yTopo, { align: 'center' });
+                pdf.line(dirX - 40, yTopo + 6, dirX + 40, yTopo + 6);
+                const nomeDisplay = getValorPDF(nomeResponsavel);
+                if (nomeDisplay) {
+                    pdf.text(nomeDisplay, dirX, yTopo + 14, { align: 'center' });
+                }
             }
             
-            const nomeArquivo = `Dosificacao_Quinzenal_${disciplina}_${classe}_${Date.now()}.pdf`;
+            const nomeArquivo = `Dosificacao_Quinzenal_${disciplina}_${classe || 'classe'}_${new Date().toISOString().slice(0,19)}.pdf`;
             pdf.save(nomeArquivo);
+            
+            alert(`PDF da disciplina ${disciplina} gerado com sucesso!`);
         }
-        
-        // ============================================
-        // INICIALIZAÇÃO
-        // ============================================
-        carregarSemanas();
-        
-        // Autenticação usando o app authApp (login-actualizado)
-        auth.onAuthStateChanged(async (user) => {
-            if (!user) {
-                mostrarToast('Faça login para continuar!', 'error');
-                setTimeout(() => window.location.href = 'index.html', 2000);
+
+        // ================================================================
+        // GERAR PDF TODAS AS DISCIPLINAS
+        // ================================================================
+
+        async function gerarPDF(delegado, cargoResponsavel, nomeResponsavel, nomeEscola) {
+            if (Object.keys(planosPorDisciplina).length === 0) {
+                alert('Nenhum plano disponível');
                 return;
             }
-            currentUser = user;
-            await carregarDadosUsuario();
+
+            const infoItems = document.querySelectorAll('.info-plano .info-item');
+            const provincia = infoItems[0]?.querySelector('.valor')?.textContent?.trim() || infoItems[0]?.innerText.replace(/^[^:]*:/, '').trim() || '';
+            const distrito = infoItems[1]?.querySelector('.valor')?.textContent?.trim() || infoItems[1]?.innerText.replace(/^[^:]*:/, '').trim() || '';
+            const zip = infoItems[2]?.querySelector('.valor')?.textContent?.trim() || infoItems[2]?.innerText.replace(/^[^:]*:/, '').trim() || '';
+            const numero = infoItems[3]?.querySelector('.valor')?.textContent?.trim() || infoItems[3]?.innerText.replace(/^[^:]*:/, '').trim() || '';
+            const classe = infoItems[4]?.querySelector('.valor')?.textContent?.trim() || infoItems[4]?.innerText.replace(/^[^:]*:/, '').trim() || '';
+            const trimestre = infoItems[6]?.querySelector('.valor')?.textContent?.trim() || infoItems[6]?.innerText.replace(/^[^:]*:/, '').trim() || '';
             
-            console.log('✅ Usuário autenticado:', user.uid);
-            console.log('🔐 Projeto: login-actualizado');
-            console.log('📁 Buscando dados do projeto: plano-de-aula-moz');
-        });
-        
-        // Exportar funções globais
-        window.carregarDistritos = carregarDistritos;
-        window.carregarDisciplinas = carregarDisciplinas;
-        window.selecionarTodas = selecionarTodas;
-        window.validarSemanas = validarSemanas;
-        window.buscarPlanos = buscarPlanos;
-        window.mostrarFiltros = mostrarFiltros;
-        window.editarDisciplina = editarDisciplina;
-        window.abrirModalPagamento = abrirModalPagamento;
-        window.fecharModalPagamento = fecharModalPagamento;
-        window.baixarComEstrelas = baixarComEstrelas;
-        window.comprarEstrelas = comprarEstrelas;
-        window.pagamentoManual = pagamentoManual;
-        window.copiarNumeroModal = copiarNumeroModal;
-        window.irParaLojaEstrelas = irParaLojaEstrelas;
-        
-        console.log('✅ quin.html carregado!');
-        console.log('🔐 Autenticação: login-actualizado');
-        console.log('📁 Dados: plano-de-aula-moz');
+            const ano = new Date().getFullYear();
+            
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+            const pw = pdf.internal.pageSize.getWidth();
+            
+            let primeiraPagina = true;
+            
+            const provinciaDisplay = provincia || '________________________';
+            const distritoDisplay = distrito || '________________________';
+            const zipDisplay = zip || '________________________';
+            const numeroDisplay = numero || '________________________';
+            const classeDisplay = classe || '______';
+            const trimestreDisplay = trimestre || '______';
+            
+            const delegadoDisplay = getValorPDF(delegado);
+            const nomeDisplay = getValorPDF(nomeResponsavel);
+            const cargoDisplay = cargoResponsavel || 'DAP';
+            
+            for (const [disciplina, planos] of Object.entries(planosPorDisciplina)) {
+                if (!planos || planos.length === 0) continue;
+                
+                if (!primeiraPagina) {
+                    pdf.addPage();
+                }
+                primeiraPagina = false;
+                
+                let y = 10;
+                
+                pdf.setFont('Times', 'Roman');
+                
+                // ============================================================
+                // EMBLEMA - MAIS PARA CIMA (y = 3) COM 4mm DE ESPAÇAMENTO
+                // ============================================================
+                try {
+                    const imgUrl = 'https://raw.githubusercontent.com/nhanomb3/planodeaula/6143d599ba10a0f35fdf07a14baca1b76518bed3/1770417519977.png';
+                    const response = await fetch(imgUrl);
+                    const blob = await response.blob();
+                    const imgData = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                    const iw = 16;
+                    const yEmblema = 3; // Mais para cima
+                    pdf.addImage(imgData, 'PNG', pw/2 - iw/2, yEmblema, iw, 16);
+                    y = yEmblema + 16 + 4; // 4mm de espaçamento após o emblema
+                } catch (e) { 
+                    console.log('Erro ao carregar imagem:', e); 
+                    y = 10;
+                }
+                
+                pdf.setFontSize(12);
+                pdf.setFont('times', 'bold');
+                pdf.text('REPÚBLICA DE MOÇAMBIQUE', pw/2, y, { align: 'center' });
+                y += 5;
+                pdf.text('MINISTÉRIO DA EDUCAÇÃO E CULTURA', pw/2, y, { align: 'center' });
+                y += 5;
+                pdf.text(`PROVÍNCIA DE ${provinciaDisplay.toUpperCase()}`, pw/2, y, { align: 'center' });
+                y += 5;
+                pdf.text(`DISTRITO DE ${distritoDisplay.toUpperCase()}`, pw/2, y, { align: 'center' });
+                y += 5;
+                pdf.text('SERVIÇO DISTRITAL DE EDUCAÇÃO, JUVENTUDE E TECNOLOGIA', pw/2, y, { align: 'center' });
+                y += 7;
+                
+                desenharLinhaTracejadaComX(pdf, pw/2, y, 170);
+                y += 7;
+                
+                pdf.setFont('times', 'bold');
+                pdf.text(`ZIP: ${zipDisplay}              Nº: ${numeroDisplay}`, pw/2, y, { align: 'center' });
+                y += 8;
+                
+                // Escola - só mostra se preenchido
+                if (nomeEscola && nomeEscola.trim() !== '') {
+                    pdf.setFont('times', 'bold');
+                    pdf.text(`ESCOLA: ${nomeEscola.toUpperCase()}`, pw/2, y, { align: 'center' });
+                    y += 8;
+                }
+                
+                pdf.setFont('times', 'italic');
+                pdf.text(`DOSIFICAÇÃO QUINZENAL DE ${disciplina.toUpperCase()} – ${classeDisplay} – ${trimestreDisplay} / ${ano}`, pw/2, y, { align: 'center' });
+                y += 12;
+                
+                const headers = [['Semana', 'Unidade Temática', 'Objectivos Específicos', 'Conteúdos', 'Temas Transversais', 'C.H.']];
+                const body = planos.map(plano => [
+                    { content: `${plano.semana || '__________'}\n${plano.data || ''}`, styles: { halign: 'center', valign: 'middle', fontSize: 12, font: 'Times' } },
+                    { content: plano.unidadeTematica || '________________________', styles: { fontSize: 12, font: 'Times' } },
+                    { content: formatarComLinhas(plano.objetivos), styles: { fontSize: 12, font: 'Times' } },
+                    { content: formatarComLinhas(plano.conteudo), styles: { fontSize: 12, font: 'Times' } },
+                    { content: formatarComLinhas(plano.temasTransversais), styles: { fontSize: 12, font: 'Times' } },
+                    { content: plano.cargaHoraria || '____', styles: { halign: 'center', fontSize: 12, font: 'Times' } }
+                ]);
+                
+                const config = getConfiguracaoTabelaPDF();
+                
+                pdf.autoTable({
+                    head: headers,
+                    body: body,
+                    startY: y,
+                    theme: 'grid',
+                    styles: { font: 'Times', fontSize: 12, cellPadding: 2, lineColor: [0,0,0], textColor: [0,0,0], overflow: 'linebreak', valign: 'top' },
+                    headStyles: { fillColor: [158,158,158], textColor: [0,0,0], fontStyle: 'bold', halign: 'center', fontSize: 12, font: 'Times', lineWidth: 0.5, lineColor: [0,0,0], cellPadding: 2 },
+                    columnStyles: config.columnStyles,
+                    margin: config.margin,
+                    showHead: 'firstPage'
+                });
+                
+                const finalY = pdf.lastAutoTable.finalY;
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                
+                pdf.setFont('times', 'normal');
+                pdf.setFontSize(12);
+                
+                // ============================================================
+                // LÓGICA DE ASSINATURAS
+                // ============================================================
+                
+                // Verifica se cabe na página atual (finalY + 25mm para as assinaturas)
+                if (finalY + 25 <= pageHeight) {
+                    // ✅ CABE - coloca no final da página
+                    const esqX = pw / 4;
+                    pdf.text('O Delegado da Disciplina', esqX, finalY + 10, { align: 'center' });
+                    pdf.line(esqX - 40, finalY + 16, esqX + 40, finalY + 16);
+                    if (delegadoDisplay) {
+                        pdf.text(delegadoDisplay, esqX, finalY + 24, { align: 'center' });
+                    }
+
+                    const dirX = 3 * pw / 4;
+                    pdf.text(`O ${cargoDisplay}`, dirX, finalY + 10, { align: 'center' });
+                    pdf.line(dirX - 40, finalY + 16, dirX + 40, finalY + 16);
+                    if (nomeDisplay) {
+                        pdf.text(nomeDisplay, dirX, finalY + 24, { align: 'center' });
+                    }
+                } else {
+                    // ❌ NÃO CABE - cria nova página e coloca no TOPO (após cabeçalho)
+                    pdf.addPage();
+                    const yTopo = 75; // Posição após o cabeçalho da nova página
+                    
+                    const esqX = pw / 4;
+                    pdf.text('O Delegado da Disciplina', esqX, yTopo, { align: 'center' });
+                    pdf.line(esqX - 40, yTopo + 6, esqX + 40, yTopo + 6);
+                    if (delegadoDisplay) {
+                        pdf.text(delegadoDisplay, esqX, yTopo + 14, { align: 'center' });
+                    }
+
+                    const dirX = 3 * pw / 4;
+                    pdf.text(`O ${cargoDisplay}`, dirX, yTopo, { align: 'center' });
+                    pdf.line(dirX - 40, yTopo + 6, dirX + 40, yTopo + 6);
+                    if (nomeDisplay) {
+                        pdf.text(nomeDisplay, dirX, yTopo + 14, { align: 'center' });
+                    }
+                }
+            }
+            
+            const nomeArquivo = `Dosificacao_Quinzenal_${classe || 'classe'}_${new Date().toISOString().slice(0,19)}.pdf`;
+            pdf.save(nomeArquivo);
+            
+            alert("Todos os PDFs foram gerados com sucesso!");
+        }
     </script>
 </body>
 </html>
